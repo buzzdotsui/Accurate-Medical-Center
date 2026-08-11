@@ -1,0 +1,73 @@
+# Accurate Medical Center — UI/UX Redesign Plan
+
+I have completed a thorough audit of the repository (`src/app`, `src/components`, `src/config`, `globals.css`) and drafted a comprehensive UI redesign plan centered around AMC's brand (Lemon/Black/Grey) and patient-focused vision. 
+
+The complete detailed plan has been saved to the repository at [docs/AMC-UI-REDESIGN-PLAN.md](file:///c:/Users/USER/Accurate%20Medical%20Center/docs/AMC-UI-REDESIGN-PLAN.md).
+
+## Key Audit Findings
+
+> [!WARNING]
+> **Blockers Found:**
+> - `DashboardLayout` has the user role hardcoded as `DOCTOR`. It needs to read the actual session.
+> - The `billing` module is currently using USD (`$`) instead of NGN (`₦`).
+> - The dashboards are currently displaying hardcoded fake patient data (e.g., "John Doe") instead of real data from the backend.
+> - The topbar has cosmetic search and fake notifications/user profiles.
+
+> [!NOTE]
+> **Design Deficiencies:**
+> - The UI feels like a generic SaaS template, lacking the premium hospital identity.
+> - Missing a robust library of UI components (currently only 5 exist: Button, Card, Input, Logo, Table).
+> - Missing consistent loading (Skeleton) and empty states.
+
+> [!TIP]
+> **What We Will Keep:**
+> - The `globals.css` color token system is a strong foundation (we will expand it).
+> - The `nav.ts` navigation configuration is comprehensive and correct.
+> - Existing API integrations (like the one in `reception/patients`) will be preserved.
+
+## Proposed Architecture & Design System
+
+We will build a professional, patient-centric interface that communicates Trust, Precision, and Modern Healthcare.
+
+### 1. Global Application Shell
+- **Sidebar:** Role-aware, grouped sections, collapsible, with a real user profile at the bottom.
+- **Topbar:** Real session context, breadcrumbs, and a CMD+K global search palette.
+- **Mobile:** The sidebar will transition into a touch-friendly drawer, supplemented by a bottom navigation bar for core tasks.
+
+### 2. Role-Specific Dashboards
+Instead of generic stat cards, dashboards will be operational workspaces:
+- **Reception:** Live waiting queues, quick patient registration.
+- **Doctor:** Clinical queue, patient summaries, and prioritized action items (abnormal labs).
+- **Billing:** Revenue in NGN (`₦`), active invoice queue.
+
+### 3. Patient Experience
+The patient profile will be a clinical workspace featuring a unified Patient Header (photo, allergies, alerts) and a comprehensive medical timeline.
+
+## Implementation Sequence (The First 5 Phases)
+
+We will execute this incrementally to ensure we don't break existing functionality.
+
+### Phase 1: Design System Foundation
+- Expand `globals.css` with semantic tokens.
+- Build missing core components: `Badge`, `StatusBadge`, `Skeleton`, `EmptyState`, `Avatar`, `Toast`.
+- Enhance existing components: `Button` (loading state), `Input` (icons, errors).
+
+### Phase 2: Application Shell
+- Update `DashboardLayout` to use the real session.
+- Rebuild the `Sidebar` (collapse, mobile drawer) and `Topbar` (breadcrumbs, user info).
+
+### Phase 3: Authentication Redesign
+- Redesign the `login` page to use the real AMC logo and proper hospital branding.
+
+### Phase 4: Operational Dashboards
+- Implement role-specific dashboards (Reception, Doctor, Billing) with real data and functional queues. Fix the currency to NGN.
+
+### Phase 5: Patient Management
+- Redesign the patient directory.
+- Build the comprehensive Patient Profile workspace.
+
+*(See the full 24-phase roadmap in the `docs` folder for details on all departments including Lab, Pharmacy, Radiology, etc.)*
+
+## User Review Required
+
+Please review the proposed design direction and implementation sequence. If this aligns with your vision for Accurate Medical Center, approve this plan so we can begin **Phase 1: Design System Foundation**.

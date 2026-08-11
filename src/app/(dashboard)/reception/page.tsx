@@ -1,100 +1,125 @@
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+"use client";
+
+import { useState } from "react";
+import { format } from "date-fns";
+import { UserPlus, CalendarPlus, Users, CheckCircle, Clock, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Users, CalendarCheck, Clock, UserPlus } from "lucide-react";
-import Link from "next/link";
+import { StatCard } from "@/components/ui/stat-card";
+import { DataTable } from "@/components/ui/data-table";
+
+// Mock data for the reception dashboard
+const mockAppointments = [
+  { id: "1", patientName: "Adebayo Johnson", time: "09:00 AM", doctor: "Dr. Sarah Smith", type: "Follow-up", status: "Checked In" },
+  { id: "2", patientName: "Ngozi Eze", time: "09:30 AM", doctor: "Dr. Ahmed Musa", type: "Consultation", status: "Scheduled" },
+  { id: "3", patientName: "Michael Okoye", time: "10:00 AM", doctor: "Dr. Sarah Smith", type: "Check-up", status: "Scheduled" },
+];
+
+const mockWaitingQueue = [
+  { id: "1", patientName: "Adebayo Johnson", token: "A-01", waitTime: "15 mins", destination: "Room 3 (Dr. Smith)" },
+  { id: "2", patientName: "Chioma Chukwu", token: "B-12", waitTime: "5 mins", destination: "Triage" },
+];
 
 export default function ReceptionDashboard() {
+  const [userName] = useState("Sarah");
+  const today = new Date();
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8">
+      {/* Welcome Banner */}
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Reception Portal</h1>
-          <p className="text-muted-foreground mt-1">Manage patient registrations and today's appointments.</p>
+          <h1 className="text-2xl font-heading font-bold text-foreground">
+            Good morning, {userName}.
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Today is {format(today, "EEEE, MMM d, yyyy")}. You have 42 appointments scheduled.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button asChild>
-            <Link href="/reception/patients/new">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Register Patient
-            </Link>
+        <div className="flex gap-3 shrink-0">
+          <Button className="gap-2">
+            <UserPlus className="w-4 h-4" />
+            Register Patient
+          </Button>
+          <Button variant="outline" className="gap-2 bg-background">
+            <CalendarPlus className="w-4 h-4" />
+            Book Appointment
           </Button>
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Today's Appointments</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <CalendarCheck className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground mt-1">12 arrived, 30 waiting</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">New Registrations</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Users className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground mt-1">Patients registered today</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Average Wait Time</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Clock className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">14m</div>
-            <p className="text-xs text-success mt-1">↓ 2m from yesterday</p>
-          </CardContent>
-        </Card>
+      {/* Stats Row */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Today's Appts"
+          value="42"
+          icon={Users}
+        />
+        <StatCard
+          title="Checked In"
+          value="18"
+          icon={CheckCircle}
+          trend={{ value: 4, isPositive: true }}
+        />
+        <StatCard
+          title="Waiting Queue"
+          value="8"
+          icon={Clock}
+        />
+        <StatCard
+          title="Avg Wait Time"
+          value="12m"
+          icon={Timer}
+          trend={{ value: 2, isPositive: false }}
+        />
       </div>
 
-      {/* Quick Actions / Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Appointments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-              <CalendarCheck className="w-12 h-12 mb-4 opacity-20" />
-              <p>Appointments will stream here dynamically.</p>
-              <Button variant="link" className="mt-2" asChild>
-                <Link href="/reception/appointments">View All Appointments</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+        {/* Waiting Queue */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-heading font-semibold text-foreground flex items-center justify-between">
+            Live Waiting Queue
+            <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-1 rounded-full">Updated just now</span>
+          </h2>
+          <div className="border rounded-xl bg-card overflow-hidden">
+            <DataTable 
+              columns={[
+                { header: "Token", accessorKey: "token" },
+                { header: "Patient", accessorKey: "patientName" },
+                { header: "Wait Time", accessorKey: "waitTime" },
+                { header: "Destination", accessorKey: "destination" },
+              ]}
+              data={mockWaitingQueue}
+            />
+          </div>
+        </div>
 
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Patient Directory</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-              <Users className="w-12 h-12 mb-4 opacity-20" />
-              <p>Quickly search or manage patient records.</p>
-              <Button variant="link" className="mt-2" asChild>
-                <Link href="/reception/patients">Browse Patients</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Today's Appointments */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-heading font-semibold text-foreground">
+            Upcoming Appointments
+          </h2>
+          <div className="border rounded-xl bg-card overflow-hidden">
+            <DataTable 
+              columns={[
+                { header: "Time", accessorKey: "time" },
+                { header: "Patient", accessorKey: "patientName" },
+                { header: "Doctor", accessorKey: "doctor" },
+                { 
+                  header: "Status", 
+                  accessorKey: "status",
+                  cell: (row) => (
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      row.status === 'Checked In' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {row.status}
+                    </span>
+                  )
+                },
+              ]}
+              data={mockAppointments}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

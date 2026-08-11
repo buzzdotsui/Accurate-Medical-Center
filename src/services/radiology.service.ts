@@ -36,8 +36,8 @@ export class RadiologyService {
       include: { visit: true }
     });
 
-    if (!request) throw new AppError('NOT_FOUND', 'Radiology Request not found', 404);
-    if (request.status === 'REPORTED') throw new AppError('VALIDATION_ERROR', 'Request is already reported', 400);
+    if (!request) throw new AppError('Radiology Request not found', 'NOT_FOUND', 404);
+    if (request.status === 'REPORTED') throw new AppError('Request is already reported', 'VALIDATION_ERROR', 400);
 
     return await prisma.$transaction(async (tx) => {
       // Create Report

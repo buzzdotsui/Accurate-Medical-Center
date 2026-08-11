@@ -22,7 +22,7 @@ export class HrService {
    */
   static async assignShift(data: AssignShiftInput, executorId: string) {
     const staff = await prisma.staff.findUnique({ where: { id: data.staffId } });
-    if (!staff) throw new AppError('NOT_FOUND', 'Staff member not found', 404);
+    if (!staff) throw new AppError('Staff member not found', 'NOT_FOUND', 404);
 
     const shiftDate = new Date(data.date);
 

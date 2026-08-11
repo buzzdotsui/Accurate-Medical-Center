@@ -1,24 +1,40 @@
 import { prisma } from '@/lib/db/client';
 import { CreateAppointmentInput, UpdateAppointmentStatusInput } from '@/lib/validations/appointment';
-import { generateAppointmentId } from '@/lib/utils/generate-id';
+import { generateAppointmentId, generateVisitId } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 
-export class AppointmentService {
-  /**
-   * Schedule a new appointment
-   */
-  static async createAppointment(data: CreateAppointmentInput, executorId: string) {
-    // Verify patient
-    const patient = await prisma.patient.findUnique({
-      where: { id: data.patientId },
-    });
-    
-    if (!patient) throw new AppError('NOT_FOUND', 'Patient not found', 404);
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  SCHEDULED: ['ARRIVED', 'CANCELLED', 'NO_SHOW', 'CHECKED_IN'],
+  CHECKED_IN: ['ARRIVED', 'CANCELLED'],
+  ARRIVED: ['IN_PROGRESS', 'CANCELLED'],
+  IN_PROGRESS: ['COMPLETED', 'CANCELLED'],
+  COMPLETED: [],
+  CANCELLED: [],
+  NO_SHOW: [],
+};
 
-    // Create the appointment
+export class AppointmentService {
+  static async createAppointment(data: CreateAppointmentInput, executorId: string) {
+    const patient = await prisma.patient.findUnique({ where: { id: data.patientId } });
+    if (!patient) throw new AppError('Patient not found', 'NOT_FOUND', 404);
+
+    if (data.doctorId && data.timeSlot) {
+      const dateObj = new Date(data.date);
+      const startOfDay = new Date(dateObj); startOfDay.setUTCHours(0,0,0,0);
+      const endOfDay = new Date(dateObj); endOfDay.setUTCHours(23,59,59,999);
+      const conflict = await prisma.appointment.findFirst({
+        where: {
+          doctorId: data.doctorId,
+          date: { gte: startOfDay, lte: endOfDay },
+          timeSlot: data.timeSlot,
+          status: { in: ['SCHEDULED', 'CHECKED_IN', 'ARRIVED', 'IN_PROGRESS'] },
+        }
+      });
+      if (conflict) throw new AppError('Doctor already has an appointment at this time slot', 'BAD_REQUEST', 400);
+    }
+
     const appointmentId = generateAppointmentId();
-    
     const appointment = await prisma.appointment.create({
       data: {
         appointmentId,
@@ -35,90 +51,202 @@ export class AppointmentService {
     });
 
     await AuditService.log({
-      userId: executorId,
-      userRole: 'SYSTEM', // Context-dependent in reality
-      action: 'CREATE_APPOINTMENT',
-      resource: 'APPOINTMENT',
-      resourceId: appointment.id,
-      branchId: data.branchId,
-      details: { patientId: data.patientId, date: data.date }
-    });
+      userId: executorId, userRole: 'SYSTEM', action: 'CREATE_APPOINTMENT',
+      resource: 'APPOINTMENT', resourceId: appointment.id, branchId: data.branchId,
+      details: { patientId: data.patientId, date: data.date, timeSlot: data.timeSlot }
+    }).catch(() => {});
 
     return appointment;
   }
 
-  /**
-   * Retrieve list of appointments (e.g. for a specific doctor, branch, or date)
-   */
+  static async createWalkIn(data: { patientId: string; branchId: string; doctorId?: string; reason?: string; type?: string }, executorId: string) {
+    const now = new Date();
+    return prisma.$transaction(async (tx) => {
+      const appointmentId = generateAppointmentId();
+      const appointment = await tx.appointment.create({
+        data: {
+          appointmentId,
+          patientId: data.patientId,
+          branchId: data.branchId,
+          doctorId: data.doctorId || null,
+          date: now,
+          type: data.type ?? 'IN_PERSON',
+          reason: data.reason || null,
+          status: 'CHECKED_IN',
+        }
+      });
+
+      const visit = await tx.visit.create({
+        data: {
+          visitId: generateVisitId(),
+          patientId: data.patientId,
+          doctorId: data.doctorId || null,
+          appointmentId: appointment.id,
+          status: 'IN_PROGRESS',
+          startedAt: now,
+          chiefComplaint: data.reason || null,
+        }
+      });
+
+      await AuditService.log({
+        userId: executorId, userRole: 'SYSTEM', action: 'CREATE_WALKIN',
+        resource: 'APPOINTMENT', resourceId: appointment.id, branchId: data.branchId,
+        details: { patientId: data.patientId, visitId: visit.id }
+      }).catch(() => {});
+
+      return { appointment, visit };
+    });
+  }
+
   static async listAppointments(params: {
     branchId?: string;
     doctorId?: string;
     date?: string;
     status?: string;
+    skip?: number;
+    take?: number;
+    patientId?: string;
   }) {
+    const { skip = 0, take = 50 } = params;
     const where: any = {};
     
     if (params.branchId) where.branchId = params.branchId;
     if (params.doctorId) where.doctorId = params.doctorId;
     if (params.status) where.status = params.status;
+    if (params.patientId) where.patientId = params.patientId;
     
     if (params.date) {
       const startOfDay = new Date(params.date);
       startOfDay.setUTCHours(0, 0, 0, 0);
       const endOfDay = new Date(params.date);
       endOfDay.setUTCHours(23, 59, 59, 999);
-      
-      where.date = {
-        gte: startOfDay,
-        lte: endOfDay,
-      };
+      where.date = { gte: startOfDay, lte: endOfDay };
     }
 
-    return await prisma.appointment.findMany({
-      where,
-      include: {
-        patient: { select: { id: true, firstName: true, lastName: true, patientId: true } },
-        staff: { select: { id: true, user: { select: { name: true } } } },
-      },
-      orderBy: { date: 'asc' },
-    });
+    const [total, appointments] = await Promise.all([
+      prisma.appointment.count({ where }),
+      prisma.appointment.findMany({
+        where, skip, take,
+        include: {
+          patient: { select: { id: true, firstName: true, lastName: true, patientId: true, phone: true } },
+          staff: { select: { id: true, department: true, user: { select: { name: true } } } },
+        },
+        orderBy: { date: 'asc' },
+      })
+    ]);
+
+    return { total, appointments };
   }
 
-  /**
-   * Update appointment status (e.g., SCHEDULED -> ARRIVED)
-   */
+  static async getAppointment(id: string) {
+    const apt = await prisma.appointment.findUnique({
+      where: { id },
+      include: {
+        patient: true,
+        staff: { include: { user: { select: { name: true } } } },
+      }
+    });
+    if (!apt) throw new AppError('Appointment not found', 'NOT_FOUND', 404);
+    return apt;
+  }
+
   static async updateStatus(id: string, data: UpdateAppointmentStatusInput, executorId: string) {
     const appointment = await prisma.appointment.findUnique({ where: { id } });
-    if (!appointment) throw new AppError('NOT_FOUND', 'Appointment not found', 404);
+    if (!appointment) throw new AppError('Appointment not found', 'NOT_FOUND', 404);
 
-    const updated = await prisma.appointment.update({
-      where: { id },
-      data: { status: data.status },
+    const allowed = VALID_TRANSITIONS[appointment.status] ?? [];
+    if (!allowed.includes(data.status) && appointment.status !== data.status) {
+      throw new AppError(`Invalid status transition from ${appointment.status} to ${data.status}`, 'BAD_REQUEST', 400);
+    }
+
+    const updateData: any = { status: data.status };
+    const now = new Date();
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const result = await tx.appointment.update({ where: { id }, data: updateData });
+
+      if (data.status === 'ARRIVED') {
+        const existingVisit = await tx.visit.findFirst({ where: { appointmentId: id } });
+        if (!existingVisit) {
+          await tx.visit.create({
+            data: {
+              patientId: appointment.patientId,
+              doctorId: appointment.doctorId,
+              status: 'IN_PROGRESS',
+              startedAt: now,
+              visitId: generateVisitId(),
+              appointmentId: appointment.id,
+              chiefComplaint: appointment.reason ?? undefined,
+            }
+          });
+        }
+      }
+      return result;
     });
 
     await AuditService.log({
-      userId: executorId,
-      userRole: 'SYSTEM',
-      action: 'UPDATE_APPOINTMENT_STATUS',
-      resource: 'APPOINTMENT',
-      resourceId: updated.id,
+      userId: executorId, userRole: 'SYSTEM', action: 'UPDATE_APPOINTMENT_STATUS',
+      resource: 'APPOINTMENT', resourceId: updated.id, branchId: appointment.branchId,
       details: { oldStatus: appointment.status, newStatus: data.status }
+    }).catch(() => {});
+
+    return updated;
+  }
+
+  static async reschedule(id: string, newDate: string, newTimeSlot?: string, executorId?: string) {
+    const appointment = await prisma.appointment.findUnique({ where: { id } });
+    if (!appointment) throw new AppError('Appointment not found', 'NOT_FOUND', 404);
+    if (['COMPLETED', 'CANCELLED'].includes(appointment.status)) {
+      throw new AppError('Cannot reschedule a completed or cancelled appointment', 'BAD_REQUEST', 400);
+    }
+
+    const updated = await prisma.appointment.update({
+      where: { id },
+      data: {
+        date: new Date(newDate),
+        timeSlot: newTimeSlot ?? appointment.timeSlot,
+        status: 'SCHEDULED',
+      }
     });
 
-    // Automated workflow: Add to Clinical Queue if the patient arrived
-    if (data.status === 'ARRIVED') {
-      await prisma.visit.create({
-        data: {
-          patientId: appointment.patientId,
-          doctorId: appointment.doctorId,
-          status: 'IN_PROGRESS',
-          startedAt: new Date(),
-          visitId: "VST-" + Date.now(),
-          appointmentId: appointment.id,
-        }
-      });
+    if (executorId) {
+      await AuditService.log({
+        userId: executorId, userRole: 'SYSTEM', action: 'RESCHEDULE_APPOINTMENT',
+        resource: 'APPOINTMENT', resourceId: id, branchId: appointment.branchId,
+        details: { newDate, newTimeSlot }
+      }).catch(() => {});
     }
 
     return updated;
+  }
+
+  static async getDashboardStats(branchId?: string) {
+    const today = new Date();
+    const startOfDay = new Date(today); startOfDay.setUTCHours(0,0,0,0);
+    const endOfDay = new Date(today); endOfDay.setUTCHours(23,59,59,999);
+
+    const whereToday: any = { date: { gte: startOfDay, lte: endOfDay } };
+    if (branchId) whereToday.branchId = branchId;
+
+    const [totalToday, checkedIn, waiting, arrived, noShow] = await Promise.all([
+      prisma.appointment.count({ where: whereToday }),
+      prisma.appointment.count({ where: { ...whereToday, status: { in: ['CHECKED_IN', 'ARRIVED'] } } }),
+      prisma.visit.count({
+        where: {
+          status: 'IN_PROGRESS',
+          ...(branchId ? { patient: { branchId } } : {}),
+        }
+      }),
+      prisma.appointment.count({ where: { ...whereToday, status: { notIn: ['SCHEDULED', 'CANCELLED', 'NO_SHOW'] } } }),
+      prisma.appointment.count({ where: { ...whereToday, status: 'NO_SHOW' } }),
+    ]);
+
+    return {
+      todayTotal: totalToday,
+      todayCheckedIn: checkedIn,
+      inQueue: waiting,
+      arrivedCount: arrived,
+      noShowCount: noShow,
+    };
   }
 }

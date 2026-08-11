@@ -33,7 +33,7 @@ export class InventoryService {
    */
   static async adjustStock(medicineId: string, data: AdjustStockInput, executorId: string) {
     const item = await prisma.medicine.findUnique({ where: { id: medicineId } });
-    if (!item) throw new AppError('NOT_FOUND', 'Item not found', 404);
+    if (!item) throw new AppError('Item not found', 'NOT_FOUND', 404);
 
     let newStockLevel = item.stockQuantity;
     
@@ -42,7 +42,7 @@ export class InventoryService {
     } else {
       // OUT, ADJUSTMENT (down), EXPIRED
       if (item.stockQuantity < data.quantity) {
-        throw new AppError('VALIDATION_ERROR', 'Insufficient stock for this operation', 400);
+        throw new AppError('Insufficient stock for this operation', 'VALIDATION_ERROR', 400);
       }
       newStockLevel -= data.quantity;
     }

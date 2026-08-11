@@ -1,119 +1,83 @@
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { StatCard } from "@/components/ui/stat-card";
+import { Users, CalendarCheck, Stethoscope, ClipboardList, Plus } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Users, Activity, Stethoscope, Clock } from "lucide-react";
-import Link from "next/link";
+
+const myPatients = [
+  { id: "P-10421", name: "Adaeze Nwosu", age: 34, diagnosis: "Hypertension", lastVisit: "Aug 10", status: "Follow-up" },
+  { id: "P-10422", name: "Emeka Obi", age: 52, diagnosis: "Type 2 Diabetes", lastVisit: "Aug 8", status: "Admitted" },
+  { id: "P-10319", name: "Grace Adeleke", age: 28, diagnosis: "Anaemia", lastVisit: "Aug 5", status: "Stable" },
+  { id: "P-10301", name: "Ibrahim Sule", age: 61, diagnosis: "CHF", lastVisit: "Aug 3", status: "Admitted" },
+];
+
+const todayAppointments = [
+  { time: "09:00 AM", patient: "Adaeze Nwosu", type: "Follow-up", room: "Room 3" },
+  { time: "10:30 AM", patient: "Bassey Etim", type: "Consultation", room: "Room 3" },
+  { time: "12:00 PM", patient: "Chisom Ike", type: "Review", room: "Room 3" },
+  { time: "02:00 PM", patient: "David Okafor", type: "First Visit", room: "Room 3" },
+];
 
 export default function DoctorDashboard() {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Doctor Portal</h1>
-          <p className="text-muted-foreground mt-1">Manage your active clinical queue and patient encounters.</p>
+          <h1 className="text-3xl font-heading font-bold text-foreground">My Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Good morning, Dr. Chidi. You have 8 appointments today.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button asChild>
-            <Link href="/doctor/queue">
-              <Activity className="w-4 h-4 mr-2" />
-              View Active Queue
-            </Link>
+        <div className="flex gap-3">
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" /> New Consultation
           </Button>
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Patients Waiting</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Users className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-destructive">12</div>
-            <p className="text-xs text-muted-foreground mt-1">Currently in triage/queue</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Completed Today</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Stethoscope className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-success">8</div>
-            <p className="text-xs text-muted-foreground mt-1">Encounters closed</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Lab Results</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Activity className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-warning">3</div>
-            <p className="text-xs text-muted-foreground mt-1">Requires review</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Consult Time</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Clock className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">18m</div>
-            <p className="text-xs text-success mt-1">Efficient workflow</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="My Patients" value="38" icon={Users} trend={{ value: 3, isPositive: true }} />
+        <StatCard title="Today's Appts" value="8" icon={CalendarCheck} />
+        <StatCard title="Pending Lab Results" value="5" icon={ClipboardList} />
+        <StatCard title="Consultations Done" value="3" icon={Stethoscope} trend={{ value: 10, isPositive: true }} />
       </div>
 
-      {/* Main Action Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Next Patient</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-10 text-center border rounded-lg bg-muted/20">
-              <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-                <span className="text-2xl font-bold text-primary">JD</span>
-              </div>
-              <h3 className="text-xl font-bold text-foreground">John Doe</h3>
-              <p className="text-muted-foreground mt-1">Wait time: 24 mins • Follow-up</p>
-              
-              <Button size="lg" className="mt-6" asChild>
-                <Link href="/doctor/consultation/DEMO-VISIT-ID">
-                  Start Consultation
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-3">
+          <h2 className="text-lg font-heading font-semibold">Today's Appointments</h2>
+          <div className="border rounded-xl bg-card overflow-hidden">
+            <DataTable
+              columns={[
+                { header: "Time", accessorKey: "time" },
+                { header: "Patient", accessorKey: "patient" },
+                { header: "Type", accessorKey: "type" },
+                { header: "Room", accessorKey: "room" },
+              ]}
+              data={todayAppointments}
+            />
+          </div>
+        </div>
 
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Action Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-              <Activity className="w-12 h-12 mb-4 opacity-20" />
-              <p>You have 3 unread lab reports to review.</p>
-              <Button variant="link" className="mt-2" asChild>
-                <Link href="/doctor/labs">Review Lab Results</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <h2 className="text-lg font-heading font-semibold">My Patients</h2>
+          <div className="border rounded-xl bg-card overflow-hidden">
+            <DataTable
+              columns={[
+                { header: "ID", accessorKey: "id" },
+                { header: "Name", accessorKey: "name" },
+                { header: "Diagnosis", accessorKey: "diagnosis" },
+                {
+                  header: "Status", accessorKey: "status",
+                  cell: (row) => (
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                      row.status === "Admitted" ? "bg-red-100 text-red-700" :
+                      row.status === "Stable" ? "bg-green-100 text-green-700" :
+                      "bg-blue-100 text-blue-700"
+                    }`}>{row.status}</span>
+                  ),
+                },
+              ]}
+              data={myPatients}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

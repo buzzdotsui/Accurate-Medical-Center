@@ -1,90 +1,72 @@
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { StatCard } from "@/components/ui/stat-card";
+import { Scan, Clock, CheckCircle, FileText, Plus } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Search, Bone, Activity, Radiation, Image as ImageIcon } from "lucide-react";
-import Link from "next/link";
+
+const scanRequests = [
+  { reqId: "RD-1041", patient: "Ibrahim Sule", doctor: "Dr. Musa", scan: "Chest X-Ray", urgency: "Urgent", status: "Scheduled" },
+  { reqId: "RD-1040", patient: "Adaeze Nwosu", doctor: "Dr. Smith", scan: "Abdominal USS", urgency: "Routine", status: "In Progress" },
+  { reqId: "RD-1039", patient: "Emeka Obi", doctor: "Dr. Chidi", scan: "Brain CT Scan", urgency: "Emergency", status: "Awaiting Patient" },
+  { reqId: "RD-1038", patient: "Grace Adeleke", doctor: "Dr. Iheaka", scan: "Pelvic MRI", urgency: "Routine", status: "Report Ready" },
+];
 
 export default function RadiologyDashboard() {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Radiology Portal</h1>
-          <p className="text-muted-foreground mt-1">Manage scan requests, upload DICOM images, and publish diagnostic reports.</p>
+          <h1 className="text-3xl font-heading font-bold text-foreground">Radiology</h1>
+          <p className="text-sm text-muted-foreground mt-1">Scan requests, imaging, and reporting queue.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button asChild>
-            <Link href="/radiology/requests">
-              <Radiation className="w-4 h-4 mr-2" />
-              Active Imaging Queue
-            </Link>
-          </Button>
-        </div>
+        <Button className="gap-2">
+          <Plus className="w-4 h-4" /> New Report
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Scans</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Activity className="w-4 h-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground">18</div>
-            <p className="text-xs text-muted-foreground mt-1">Awaiting acquisition</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Unreported Scans</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <ImageIcon className="w-4 h-4 text-warning" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-warning">5</div>
-            <p className="text-xs text-muted-foreground mt-1">Images acquired, needs report</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">STAT / Urgent</CardTitle>
-            <div className="p-2 bg-primary/10 rounded-full">
-              <Bone className="w-4 h-4 text-destructive" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-destructive">2</div>
-            <p className="text-xs text-muted-foreground mt-1">High priority requests</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Pending Scans" value="9" icon={Clock} />
+        <StatCard title="In Progress" value="2" icon={Scan} />
+        <StatCard title="Reports Done" value="18" icon={CheckCircle} trend={{ value: 15, isPositive: true }} />
+        <StatCard title="Draft Reports" value="4" icon={FileText} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Next Priority Request</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-10 text-center border rounded-lg bg-destructive/5 border-destructive/20">
-              <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
-                <Radiation className="w-8 h-8 text-destructive" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground">CT Scan (Chest)</h3>
-              <p className="text-destructive font-semibold mt-1">STAT Priority • Waiting 12 mins</p>
-              <p className="text-sm text-muted-foreground mt-1">Patient: Mary Smith (AMC-2026-0004)</p>
-              
-              <Button size="lg" variant="destructive" className="mt-6" asChild>
-                <Link href="/radiology/requests/DEMO-RAD-ID">
-                  Begin Diagnostic Report
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-heading font-semibold">Scan Requests</h2>
+          <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">1 Emergency</span>
+        </div>
+        <div className="border rounded-xl bg-card overflow-hidden">
+          <DataTable
+            columns={[
+              { header: "Req ID", accessorKey: "reqId" },
+              { header: "Patient", accessorKey: "patient" },
+              { header: "Scan", accessorKey: "scan" },
+              { header: "Referring Doctor", accessorKey: "doctor" },
+              {
+                header: "Urgency", accessorKey: "urgency",
+                cell: (row) => (
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                    row.urgency === "Emergency" ? "bg-red-100 text-red-700" :
+                    row.urgency === "Urgent" ? "bg-orange-100 text-orange-700" :
+                    "bg-blue-100 text-blue-700"
+                  }`}>{row.urgency}</span>
+                ),
+              },
+              {
+                header: "Status", accessorKey: "status",
+                cell: (row) => (
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                    row.status === "Report Ready" ? "bg-green-100 text-green-700" :
+                    row.status === "In Progress" ? "bg-blue-100 text-blue-700" :
+                    row.status === "Awaiting Patient" ? "bg-red-100 text-red-700" :
+                    "bg-yellow-100 text-yellow-700"
+                  }`}>{row.status}</span>
+                ),
+              },
+            ]}
+            data={scanRequests}
+          />
+        </div>
       </div>
     </div>
   );

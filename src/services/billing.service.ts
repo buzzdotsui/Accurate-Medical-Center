@@ -6,12 +6,28 @@ import { AuditService } from './audit.service';
 export class BillingService {
   /**
    * Get active invoices (unpaid or partially paid)
+   * Optionally filtered by branchId
    */
-  static async getActiveInvoices() {
+  static async getActiveInvoices(branchId?: string) {
     return await prisma.invoice.findMany({
       where: {
-        status: { in: ['DRAFT', 'ISSUED', 'PARTIAL'] }
+        status: { in: ['DRAFT', 'ISSUED', 'PARTIAL'] },
+        ...(branchId ? { branchId } : {}),
       },
+      include: {
+        patient: true,
+        _count: { select: { items: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  /**
+   * Get invoices for a specific patient
+   */
+  static async getInvoicesByPatient(patientId: string) {
+    return await prisma.invoice.findMany({
+      where: { patientId },
       include: {
         patient: true,
         _count: { select: { items: true } }
@@ -29,15 +45,15 @@ export class BillingService {
       include: { payments: true }
     });
 
-    if (!invoice) throw new AppError('NOT_FOUND', 'Invoice not found', 404);
-    if (invoice.status === 'PAID') throw new AppError('VALIDATION_ERROR', 'Invoice is already fully paid', 400);
-    if (invoice.status === 'CANCELLED') throw new AppError('VALIDATION_ERROR', 'Invoice is cancelled', 400);
+    if (!invoice) throw new AppError('Invoice not found', 'NOT_FOUND', 404);
+    if (invoice.status === 'PAID') throw new AppError('Invoice is already fully paid', 'VALIDATION_ERROR', 400);
+    if (invoice.status === 'CANCELLED') throw new AppError('Invoice is cancelled', 'VALIDATION_ERROR', 400);
 
     const amountPaidSoFar = invoice.payments.reduce((sum, p) => sum + Number(p.amount), 0);
     const balance = Number(invoice.totalAmount) - amountPaidSoFar;
 
     if (data.amount > balance) {
-      throw new AppError('VALIDATION_ERROR', `Payment amount exceeds outstanding balance of ${balance}`, 400);
+      throw new AppError(`Payment amount exceeds outstanding balance of ${balance}`, 'VALIDATION_ERROR', 400);
     }
 
     return await prisma.$transaction(async (tx) => {

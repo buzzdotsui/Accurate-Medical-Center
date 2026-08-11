@@ -16,7 +16,7 @@ export class StaffService {
     });
     
     if (!branch) {
-      throw new AppError('BAD_REQUEST', 'Invalid branch ID provided.', 400);
+      throw new AppError('Invalid branch ID provided.', 'BAD_REQUEST', 400);
     }
 
     // 2. Check if user already exists
@@ -25,7 +25,7 @@ export class StaffService {
     });
     
     if (existingUser) {
-      throw new AppError('CONFLICT', 'A user with this email already exists.', 409);
+      throw new AppError('A user with this email already exists.', 'CONFLICT', 409);
     }
 
     // 3. Register user via Better Auth (Server-side API)
@@ -41,7 +41,7 @@ export class StaffService {
     });
 
     if (!authResponse?.user) {
-      throw new AppError('INTERNAL_SERVER_ERROR', 'Failed to create user authentication record.', 500);
+      throw new AppError('Failed to create user authentication record.', 'INTERNAL_SERVER_ERROR', 500);
     }
 
     // 4. Wrap the remaining profile creation in a transaction

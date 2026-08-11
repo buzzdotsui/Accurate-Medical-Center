@@ -18,8 +18,8 @@ export class PaymentService {
 
     // Verify invoice
     const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
-    if (!invoice) throw new AppError('NOT_FOUND', 'Invoice not found', 404);
-    if (invoice.status === 'PAID') throw new AppError('BAD_REQUEST', 'Invoice already paid', 400);
+    if (!invoice) throw new AppError('Invoice not found', 'NOT_FOUND', 404);
+    if (invoice.status === 'PAID') throw new AppError('Invoice already paid', 'BAD_REQUEST', 400);
 
     const reference = `REF-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
@@ -63,7 +63,7 @@ export class PaymentService {
         include: { invoice: true },
       });
 
-      if (!payment) throw new AppError('NOT_FOUND', 'Payment reference not found', 404);
+      if (!payment) throw new AppError('Payment reference not found', 'NOT_FOUND', 404);
       if (payment.status !== 'PENDING') return payment; // Already processed
 
       if (gatewayStatus === 'SUCCESS') {

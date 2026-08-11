@@ -19,7 +19,7 @@ export class AIService {
       
       return `[AI Summary Generated for internal review]${this.DISCLAIMER}`;
     } catch (error) {
-      throw new AppError('INTERNAL_SERVER_ERROR', 'AI summarization failed.', 500);
+      throw new AppError('AI summarization failed.', 'INTERNAL_SERVER_ERROR', 500);
     }
   }
 

@@ -71,10 +71,10 @@
 ### 2.2 Color Application Rules
 
 ```
-LEMON (#D4E157)  → Primary CTAs, active nav, highlights, selected states, brand moments
-BLACK (#000000)  → Strong headings, critical information, sidebar base, primary text
+LEMON (#03161A)  → Primary CTAs, active nav, highlights, selected states, brand moments
+BLACK (#0A1414)  → Strong headings, critical information, sidebar base, primary text
 GREY palette     → Surfaces, borders, secondary text, muted information
-WHITE            → Card backgrounds, form fields, clean content areas
+WHITE (#E9F2F3)  → Card backgrounds, form fields, clean content areas
 
 Status colours (semantic only — never decorative):
   Success → #16a34a (green)   — completed, paid, normal result

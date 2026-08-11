@@ -1,89 +1,67 @@
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { StatCard } from "@/components/ui/stat-card";
+import { TrendingUp, Receipt, CreditCard, TrendingDown, Plus } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { CreditCard, DollarSign, Wallet, FileText, ArrowRight } from "lucide-react";
-import Link from "next/link";
+
+const recentInvoices = [
+  { invId: "INV-8041", patient: "Adaeze Nwosu", service: "Consultation + Labs", amount: "₦35,000", date: "Aug 11", status: "Paid" },
+  { invId: "INV-8040", patient: "Emeka Obi", service: "Admission (3 days)", amount: "₦180,000", date: "Aug 10", status: "Pending" },
+  { invId: "INV-8039", patient: "James Adeleke", service: "Surgery + Anaesthesia", amount: "₦450,000", date: "Aug 10", status: "Part-Paid" },
+  { invId: "INV-8038", patient: "Grace Adeleke", service: "Pharmacy + Consultation", amount: "₦28,500", date: "Aug 9", status: "Paid" },
+];
 
 export default function BillingDashboard() {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Billing & Cashier</h1>
-          <p className="text-muted-foreground mt-1">Manage patient invoices, process payments, and track revenue.</p>
+          <h1 className="text-3xl font-heading font-bold text-foreground">Finance & Billing</h1>
+          <p className="text-sm text-muted-foreground mt-1">Invoices, payments, and financial overview for today.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button asChild>
-            <Link href="/billing/invoices">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Active Invoices
-            </Link>
+        <div className="flex gap-3">
+          <Button variant="outline" className="gap-2 bg-background">
+            <TrendingUp className="w-4 h-4" /> Financial Report
+          </Button>
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" /> New Invoice
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Today's Revenue</CardTitle>
-            <div className="p-2 bg-success/10 rounded-full">
-              <DollarSign className="w-4 h-4 text-success" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground">$12,450</div>
-            <p className="text-xs text-muted-foreground mt-1">+14% from yesterday</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Unpaid Invoices</CardTitle>
-            <div className="p-2 bg-warning/10 rounded-full">
-              <FileText className="w-4 h-4 text-warning" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-warning">34</div>
-            <p className="text-xs text-muted-foreground mt-1">Pending collection</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Insurance Claims</CardTitle>
-            <div className="p-2 bg-info/10 rounded-full">
-              <Wallet className="w-4 h-4 text-info" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-info">18</div>
-            <p className="text-xs text-muted-foreground mt-1">Pending HMO approval</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Revenue Today" value="₦840,500" icon={TrendingUp} trend={{ value: 8, isPositive: true }} />
+        <StatCard title="Outstanding" value="₦1.2M" icon={Receipt} trend={{ value: 3, isPositive: false }} />
+        <StatCard title="Payments Today" value="32" icon={CreditCard} trend={{ value: 5, isPositive: true }} />
+        <StatCard title="Expenses Today" value="₦125,000" icon={TrendingDown} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-none shadow-sm ring-1 ring-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Process Payment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-10 text-center border rounded-lg bg-muted/20">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <CreditCard className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground">Next in Queue: Mary Smith</h3>
-              <p className="text-muted-foreground mt-1">Invoice: INV-2026-092 • Total: $145.00</p>
-              
-              <Button size="lg" className="mt-6" asChild>
-                <Link href="/billing/invoices/DEMO-INV-ID">
-                  Accept Payment <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-heading font-semibold">Recent Invoices</h2>
+          <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">2 Pending</span>
+        </div>
+        <div className="border rounded-xl bg-card overflow-hidden">
+          <DataTable
+            columns={[
+              { header: "Invoice ID", accessorKey: "invId" },
+              { header: "Patient", accessorKey: "patient" },
+              { header: "Service", accessorKey: "service" },
+              { header: "Amount", accessorKey: "amount" },
+              { header: "Date", accessorKey: "date" },
+              {
+                header: "Status", accessorKey: "status",
+                cell: (row) => (
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                    row.status === "Paid" ? "bg-green-100 text-green-700" :
+                    row.status === "Part-Paid" ? "bg-yellow-100 text-yellow-700" :
+                    "bg-red-100 text-red-700"
+                  }`}>{row.status}</span>
+                ),
+              },
+            ]}
+            data={recentInvoices}
+          />
+        </div>
       </div>
     </div>
   );

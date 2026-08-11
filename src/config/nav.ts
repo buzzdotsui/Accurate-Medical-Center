@@ -53,26 +53,26 @@ export const navConfig: Record<Role, NavItem[]> = {
   ],
 
   [ROLES.RECEPTIONIST]: [
-    { title: 'Dashboard', href: '/receptionist', icon: 'layout-dashboard' },
-    { title: 'Register Patient', href: '/receptionist/register', icon: 'user-plus' },
-    { title: 'Appointments', href: '/receptionist/appointments', icon: 'calendar-check' },
-    { title: 'Queue Management', href: '/receptionist/queue', icon: 'list-ordered' },
-    { title: 'Billing', href: '/receptionist/billing', icon: 'receipt' },
+    { title: 'Dashboard', href: '/reception', icon: 'layout-dashboard' },
+    { title: 'Register Patient', href: '/reception/register', icon: 'user-plus' },
+    { title: 'Appointments', href: '/reception/appointments', icon: 'calendar-check' },
+    { title: 'Queue Management', href: '/reception/queue', icon: 'list-ordered' },
+    { title: 'Billing', href: '/reception/billing', icon: 'receipt' },
   ],
 
   [ROLES.PHARMACIST]: [
-    { title: 'Dashboard', href: '/pharmacist', icon: 'layout-dashboard' },
-    { title: 'Prescriptions', href: '/pharmacist/prescriptions', icon: 'pill' },
-    { title: 'Dispense', href: '/pharmacist/dispense', icon: 'package-check' },
-    { title: 'Inventory', href: '/pharmacist/inventory', icon: 'package' },
-    { title: 'Purchase Orders', href: '/pharmacist/orders', icon: 'truck' },
+    { title: 'Dashboard', href: '/pharmacy', icon: 'layout-dashboard' },
+    { title: 'Prescriptions', href: '/pharmacy/prescriptions', icon: 'pill' },
+    { title: 'Dispense', href: '/pharmacy/dispense', icon: 'package-check' },
+    { title: 'Inventory', href: '/pharmacy/inventory', icon: 'package' },
+    { title: 'Purchase Orders', href: '/pharmacy/orders', icon: 'truck' },
   ],
 
   [ROLES.LAB_SCIENTIST]: [
-    { title: 'Dashboard', href: '/lab', icon: 'layout-dashboard' },
-    { title: 'Pending Requests', href: '/lab/requests', icon: 'clipboard-list' },
-    { title: 'Samples', href: '/lab/samples', icon: 'droplets' },
-    { title: 'Enter Results', href: '/lab/results', icon: 'flask-conical' },
+    { title: 'Dashboard', href: '/laboratory', icon: 'layout-dashboard' },
+    { title: 'Pending Requests', href: '/laboratory/requests', icon: 'clipboard-list' },
+    { title: 'Samples', href: '/laboratory/samples', icon: 'droplets' },
+    { title: 'Enter Results', href: '/laboratory/results', icon: 'flask-conical' },
   ],
 
   [ROLES.RADIOGRAPHER]: [
@@ -83,11 +83,11 @@ export const navConfig: Record<Role, NavItem[]> = {
   ],
 
   [ROLES.ACCOUNTANT]: [
-    { title: 'Dashboard', href: '/finance', icon: 'layout-dashboard' },
-    { title: 'Invoices', href: '/finance/invoices', icon: 'receipt' },
-    { title: 'Payments', href: '/finance/payments', icon: 'credit-card' },
-    { title: 'Expenses', href: '/finance/expenses', icon: 'trending-down' },
-    { title: 'Financial Reports', href: '/finance/reports', icon: 'bar-chart-3' },
+    { title: 'Dashboard', href: '/billing', icon: 'layout-dashboard' },
+    { title: 'Invoices', href: '/billing/invoices', icon: 'receipt' },
+    { title: 'Payments', href: '/billing/payments', icon: 'credit-card' },
+    { title: 'Expenses', href: '/billing/expenses', icon: 'trending-down' },
+    { title: 'Financial Reports', href: '/billing/reports', icon: 'bar-chart-3' },
   ],
 
   [ROLES.THEATRE_STAFF]: [
@@ -136,11 +136,11 @@ export const ROLE_DASHBOARD_ROOTS: Record<Role, string> = {
   ADMIN: '/admin',
   DOCTOR: '/doctor',
   NURSE: '/nurse',
-  RECEPTIONIST: '/receptionist',
-  PHARMACIST: '/pharmacist',
-  LAB_SCIENTIST: '/lab',
+  RECEPTIONIST: '/reception',
+  PHARMACIST: '/pharmacy',
+  LAB_SCIENTIST: '/laboratory',
   RADIOGRAPHER: '/radiology',
-  ACCOUNTANT: '/finance',
+  ACCOUNTANT: '/billing',
   THEATRE_STAFF: '/theatre',
   MATERNAL_STAFF: '/maternal',
   MENTAL_HEALTH: '/psych',

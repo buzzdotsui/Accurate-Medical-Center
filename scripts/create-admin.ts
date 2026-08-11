@@ -46,8 +46,8 @@ async function main() {
   const pool = new Pool({
     host: 'localhost',
     port: 5432,
-    user: 'user',
-    password: 'password',
+    user: 'postgres',
+    password: 'postgres',
     database: 'accurate_medical',
   });
 

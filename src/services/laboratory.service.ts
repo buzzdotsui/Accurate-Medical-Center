@@ -6,11 +6,13 @@ import { AuditService } from './audit.service';
 export class LaboratoryService {
   /**
    * Get all active lab requests (not completed)
+   * Optionally filtered by branchId
    */
-  static async getActiveRequests() {
+  static async getActiveRequests(branchId?: string) {
     return await prisma.labRequest.findMany({
       where: {
-        status: { in: ['REQUESTED', 'SAMPLED', 'ANALYZING'] }
+        status: { in: ['REQUESTED', 'SAMPLED', 'ANALYZING'] },
+        ...(branchId ? { branchId } : {}),
       },
       include: {
         visit: {
@@ -22,7 +24,7 @@ export class LaboratoryService {
         category: true
       },
       orderBy: [
-        { priority: 'desc' }, // STAT, URGENT, ROUTINE (assuming simple text sort isn't perfect but works for demo)
+        { priority: 'desc' },
         { createdAt: 'asc' }
       ]
     });
@@ -37,8 +39,8 @@ export class LaboratoryService {
       include: { visit: true }
     });
 
-    if (!request) throw new AppError('NOT_FOUND', 'Lab Request not found', 404);
-    if (request.status === 'COMPLETED') throw new AppError('VALIDATION_ERROR', 'Lab Request is already completed', 400);
+    if (!request) throw new AppError('Lab Request not found', 'NOT_FOUND', 404);
+    if (request.status === 'COMPLETED') throw new AppError('Lab Request is already completed', 'VALIDATION_ERROR', 400);
 
     return await prisma.$transaction(async (tx) => {
       // Create the result

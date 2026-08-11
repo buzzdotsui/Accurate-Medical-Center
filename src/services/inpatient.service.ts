@@ -46,8 +46,8 @@ export class InpatientService {
    */
   static async admitPatient(data: AdmitPatientInput, executorId: string) {
     const bed = await prisma.bed.findUnique({ where: { id: data.bedId } });
-    if (!bed) throw new AppError('NOT_FOUND', 'Bed not found', 404);
-    if (bed.status !== 'AVAILABLE') throw new AppError('VALIDATION_ERROR', 'Bed is not available', 400);
+    if (!bed) throw new AppError('Bed not found', 'NOT_FOUND', 404);
+    if (bed.status !== 'AVAILABLE') throw new AppError('Bed is not available', 'VALIDATION_ERROR', 400);
 
     return await prisma.$transaction(async (tx) => {
       // Create admission

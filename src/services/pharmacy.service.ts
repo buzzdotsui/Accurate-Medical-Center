@@ -6,11 +6,13 @@ import { AuditService } from './audit.service';
 export class PharmacyService {
   /**
    * Get all pending prescriptions
+   * Optionally filtered by branchId
    */
-  static async getPendingPrescriptions() {
+  static async getPendingPrescriptions(branchId?: string) {
     return await prisma.prescription.findMany({
       where: {
-        status: { in: ['PENDING', 'PARTIAL'] }
+        status: { in: ['PENDING', 'PARTIAL'] },
+        ...(branchId ? { branchId } : {}),
       },
       include: {
         visit: {
@@ -36,8 +38,8 @@ export class PharmacyService {
       include: { visit: true }
     });
 
-    if (!prescription) throw new AppError('NOT_FOUND', 'Prescription not found', 404);
-    if (prescription.status === 'DISPENSED') throw new AppError('VALIDATION_ERROR', 'Prescription already dispensed', 400);
+    if (!prescription) throw new AppError('Prescription not found', 'NOT_FOUND', 404);
+    if (prescription.status === 'DISPENSED') throw new AppError('Prescription already dispensed', 'VALIDATION_ERROR', 400);
 
     const updated = await prisma.prescription.update({
       where: { id },

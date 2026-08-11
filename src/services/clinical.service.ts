@@ -48,7 +48,7 @@ export class ClinicalService {
    */
   static async recordVitals(visitId: string, vitals: z.infer<typeof RecordVitalsSchema>, executorId: string) {
     const visit = await prisma.visit.findUnique({ where: { id: visitId } });
-    if (!visit) throw new AppError('NOT_FOUND', 'Visit not found', 404);
+    if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
 
     const updated = await prisma.visit.update({
       where: { id: visitId },
@@ -71,7 +71,7 @@ export class ClinicalService {
    */
   static async addDiagnosis(visitId: string, data: z.infer<typeof AddDiagnosisSchema>, executorId: string) {
     const visit = await prisma.visit.findUnique({ where: { id: visitId } });
-    if (!visit) throw new AppError('NOT_FOUND', 'Visit not found', 404);
+    if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
 
     const diagnosis = await prisma.diagnosis.create({
       data: {
@@ -102,7 +102,13 @@ export class ClinicalService {
     const visit = await prisma.visit.findUnique({
       where: { id: visitId },
       include: {
-        patient: { select: { id: true, firstName: true, lastName: true, patientId: true } },
+        patient: {
+          select: {
+            id: true, firstName: true, lastName: true, patientId: true,
+            phone: true, email: true, gender: true, dateOfBirth: true,
+            bloodGroup: true, genotype: true, allergies: true, chronicConditions: true,
+          }
+        },
         doctor: { select: { id: true, user: { select: { name: true } } } },
         diagnoses: true,
         notes: true,
@@ -112,8 +118,54 @@ export class ClinicalService {
       }
     });
     
-    if (!visit) throw new AppError('NOT_FOUND', 'Visit not found', 404);
+    if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
     
     return visit;
+  }
+
+  /**
+   * List visits with optional filters for queue views (triage, doctor, etc.)
+   */
+  static async listVisits(params: {
+    skip?: number;
+    take?: number;
+    status?: string;
+    doctorId?: string;
+    branchId?: string;
+    hasVitals?: boolean;
+    patientId?: string;
+  }) {
+    const { skip = 0, take = 50, status, doctorId, branchId, hasVitals, patientId } = params;
+
+    const where: any = {};
+    if (status) where.status = status;
+    if (doctorId) where.doctorId = doctorId;
+    if (patientId) where.patientId = patientId;
+    if (branchId) where.patient = { branchId };
+
+    const visits = await prisma.visit.findMany({
+      where,
+      orderBy: { startedAt: 'asc' },
+      include: {
+        patient: {
+          select: {
+            id: true, firstName: true, lastName: true, patientId: true,
+            gender: true, dateOfBirth: true,
+          }
+        },
+        doctor: { include: { user: { select: { name: true } } } },
+        appointment: { select: { timeSlot: true, reason: true } },
+        diagnoses: { take: 1 },
+      }
+    });
+
+    const filtered = hasVitals === undefined
+      ? visits
+      : visits.filter((visit) => hasVitals ? Boolean(visit.vitals) : !visit.vitals);
+
+    return {
+      total: filtered.length,
+      visits: filtered.slice(skip, skip + take),
+    };
   }
 }

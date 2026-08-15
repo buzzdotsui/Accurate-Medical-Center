@@ -6,9 +6,6 @@ import {
   fadeUp,
   fadeUpSmall,
   staggerContainerSlow,
-  EASE_OUT,
-  EASE,
-  fadeIn,
 } from "./animations";
 
 const MISSION_ITEMS: readonly string[] = [
@@ -46,94 +43,7 @@ function OrnamentalCorner({ position }: { position: "tl" | "tr" | "bl" | "br" })
   );
 }
 
-function OrnamentalDivider() {
-  return (
-    <div className="flex items-center justify-center gap-3 my-9 sm:my-11" aria-hidden>
-      <div
-        className="h-px flex-1 max-w-[84px]"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(244,242,245,0.18), transparent)",
-        }}
-      />
-      <motion.svg
-        custom={0}
-        animate="animate"
-        variants={{
-          animate: (i: number) => ({
-            opacity: [0.35, 0.7, 0.35],
-            scale: [1, 1.12, 1],
-            transition: {
-              duration: 5 + (i % 2),
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "mirror" as const,
-              delay: i * 0.3,
-            },
-          }),
-        }}
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        style={{ color: "#f4f2f5", flexShrink: 0 }}
-      >
-        <path
-          d="M12 2 L13.8 10.2 L22 12 L13.8 13.8 L12 22 L10.2 13.8 L2 12 L10.2 10.2 Z"
-          fill="currentColor"
-        />
-      </motion.svg>
-      <div
-        className="h-px flex-1 max-w-[84px]"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(244,242,245,0.18), transparent)",
-        }}
-      />
-    </div>
-  );
-}
-
-function BottomDecoration() {
-  return (
-    <div className="flex items-center justify-center gap-3 mt-12 sm:mt-15" aria-hidden>
-      <div
-        className="h-px w-13"
-        style={{ backgroundColor: "rgba(244,242,245,0.09)" }}
-      />
-      <motion.svg
-        custom={1}
-        animate="animate"
-        variants={{
-          animate: (i: number) => ({
-            opacity: [0.2, 0.45, 0.2],
-            scale: [1, 1.15, 1],
-            transition: {
-              duration: 6 + (i % 2),
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "mirror" as const,
-              delay: i * 0.4,
-            },
-          }),
-        }}
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        style={{ color: "rgba(244,242,245,0.28)", flexShrink: 0 }}
-      >
-        <path
-          d="M12 2 L13.8 10.2 L22 12 L13.8 13.8 L12 22 L10.2 13.8 L2 12 L10.2 10.2 Z"
-          fill="currentColor"
-        />
-      </motion.svg>
-      <div
-        className="h-px w-13"
-        style={{ backgroundColor: "rgba(244,242,245,0.09)" }}
-      />
-    </div>
-  );
-}
+// Ornamental dividers removed
 
 function VisionPanel() {
   return (
@@ -203,7 +113,7 @@ function VisionPanel() {
       <motion.h3
         variants={fadeUp}
         id="vision-heading"
-        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight"
+        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight mb-10"
         style={{
           fontFamily: "var(--font-playfair-display)",
           color: "#f4f2f5",
@@ -212,8 +122,6 @@ function VisionPanel() {
       >
         Our Vision
       </motion.h3>
-
-      <OrnamentalDivider />
 
       <motion.p
         variants={fadeUp}
@@ -225,8 +133,6 @@ function VisionPanel() {
       >
         {siteConfig.vision}
       </motion.p>
-
-      <BottomDecoration />
     </motion.article>
   );
 }
@@ -299,7 +205,7 @@ function MissionPanel() {
       <motion.h3
         variants={fadeUp}
         id="mission-heading"
-        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight"
+        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight mb-10"
         style={{
           fontFamily: "var(--font-playfair-display)",
           color: "#f4f2f5",
@@ -308,8 +214,6 @@ function MissionPanel() {
       >
         Our Mission
       </motion.h3>
-
-      <OrnamentalDivider />
 
       <motion.ol
         variants={staggerContainerSlow}
@@ -340,8 +244,6 @@ function MissionPanel() {
           </motion.li>
         ))}
       </motion.ol>
-
-      <BottomDecoration />
     </motion.article>
   );
 }
@@ -385,7 +287,7 @@ export function VisionMission() {
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.85, ease: EASE_OUT }}
+          transition={{ duration: 0.85 }}
           className="text-center mb-17 sm:mb-[76px] lg:mb-[92px]"
         >
           <span

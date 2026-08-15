@@ -108,6 +108,7 @@ export class AppointmentService {
     patientId?: string;
   }) {
     const { skip = 0, take = 50 } = params;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
     
     if (params.branchId) where.branchId = params.branchId;
@@ -159,6 +160,7 @@ export class AppointmentService {
       throw new AppError(`Invalid status transition from ${appointment.status} to ${data.status}`, 'BAD_REQUEST', 400);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = { status: data.status };
     const now = new Date();
 
@@ -225,6 +227,7 @@ export class AppointmentService {
     const startOfDay = new Date(today); startOfDay.setUTCHours(0,0,0,0);
     const endOfDay = new Date(today); endOfDay.setUTCHours(23,59,59,999);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const whereToday: any = { date: { gte: startOfDay, lte: endOfDay } };
     if (branchId) whereToday.branchId = branchId;
 

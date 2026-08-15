@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Calendar, ArrowRight, ChevronDown } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { EASE, heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide } from "./animations";
@@ -9,6 +9,7 @@ const HERO_VIDEO = "/marketing/videos/hero/hero.mp4";
 
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoReady, setIsVideoReady] = useState(false);
   const { scrollY } = useScroll();
   const yBg = useTransform(scrollY, [0, 800], [0, 140]);
   const yContent = useTransform(scrollY, [0, 600], [0, 70]);
@@ -18,11 +19,25 @@ export default function Hero() {
     const v = videoRef.current;
     if (!v) return;
     v.playbackRate = 0.75;
+    
+    if (v.readyState >= 3) {
+      setIsVideoReady(true);
+    }
+    
     const onMeta = () => {
       v.playbackRate = 0.75;
     };
+    const onReady = () => setIsVideoReady(true);
+    
     v.addEventListener("loadedmetadata", onMeta);
-    return () => v.removeEventListener("loadedmetadata", onMeta);
+    v.addEventListener("canplay", onReady);
+    v.addEventListener("playing", onReady);
+    
+    return () => {
+      v.removeEventListener("loadedmetadata", onMeta);
+      v.removeEventListener("canplay", onReady);
+      v.removeEventListener("playing", onReady);
+    };
   }, []);
 
   const scrollToNext = () => {
@@ -43,16 +58,22 @@ export default function Hero() {
         className="absolute inset-0 w-full h-[118%] -top-[9%]"
         aria-hidden
       >
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-[800ms]"
+          style={{ 
+            backgroundImage: 'url(/marketing/images/logo.jpeg)',
+            opacity: isVideoReady ? 0 : 1
+          }}
+        />
         <video
           ref={videoRef}
-          className="w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[800ms] ease-out ${isVideoReady ? 'opacity-100' : 'opacity-0'}`}
           src={HERO_VIDEO}
-          poster="/marketing/images/logo.jpeg"
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
           tabIndex={-1}
         />
       </motion.div>

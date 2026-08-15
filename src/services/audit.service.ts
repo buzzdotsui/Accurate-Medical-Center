@@ -7,7 +7,7 @@ export interface AuditLogParams {
   action: string;
   resource: string;
   resourceId?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   ip?: string;
   userAgent?: string;
   branchId?: string;
@@ -28,7 +28,7 @@ export class AuditService {
           action: params.action,
           resource: params.resource,
           resourceId: params.resourceId,
-          details: params.details ? (params.details as any) : undefined,
+          details: params.details ?? undefined,
           ip: params.ip,
           userAgent: params.userAgent,
           branchId: params.branchId,

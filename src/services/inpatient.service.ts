@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db/client';
-import { AdmitPatientInput, DischargePatientInput } from '@/lib/validations/inpatient';
+import { AdmitPatientInput } from '@/lib/validations/inpatient';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 

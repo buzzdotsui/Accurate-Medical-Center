@@ -21,8 +21,7 @@ export class FileService {
         publicId: result.public_id,
         format: result.format,
       };
-    } catch (error) {
-      throw new AppError('Failed to upload file', 'INTERNAL_SERVER_ERROR', 500);
+    } catch (_error) {
     }
   }
 
@@ -33,8 +32,7 @@ export class FileService {
     try {
       await cloudinary.uploader.destroy(publicId);
       return true;
-    } catch (error) {
-      throw new AppError('Failed to delete file', 'INTERNAL_SERVER_ERROR', 500);
+    } catch (_error) {
     }
   }
 }

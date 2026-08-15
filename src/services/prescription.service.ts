@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db/client';
 import { generatePrescriptionId } from '@/lib/utils/generate-id';
-import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 
 export class PrescriptionService {

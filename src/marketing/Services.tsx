@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import {
   fadeUp,
-  fadeUpSmall,
   fadeUpFast,
   staggerContainerSlow,
   staggerContainerFast,
@@ -346,39 +345,7 @@ export function Services() {
           variants={staggerContainerFast}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10"
         >
-          <motion.div
-            variants={fadeUpSmall}
-            className="flex items-center gap-4 order-2 sm:order-1"
-            aria-hidden
-          >
-            <span
-              className="h-px w-14 sm:w-24"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(3,22,26,0.18))",
-              }}
-            />
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-              style={{ color: ACCENT, opacity: 0.95 }}
-            >
-              <path
-                d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
-                fill="currentColor"
-              />
-            </svg>
-            <span
-              className="h-px w-14 sm:w-24"
-              style={{
-                background:
-                  "linear-gradient(90deg, rgba(3,22,26,0.18), transparent)",
-              }}
-            />
-          </motion.div>
+
 
           <motion.a
             href="#contact"

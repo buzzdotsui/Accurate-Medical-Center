@@ -10,7 +10,7 @@ export class AIService {
   /**
    * Summarize a clinical report
    */
-  static async summarizeReport(reportText: string): Promise<string> {
+  static async summarizeReport(_reportText: string): Promise<string> {
     try {
       // MOCK IMPLEMENTATION
       // const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
@@ -18,7 +18,7 @@ export class AIService {
       // return result.response.text() + this.DISCLAIMER;
       
       return `[AI Summary Generated for internal review]${this.DISCLAIMER}`;
-    } catch (error) {
+    } catch (_error) {
       throw new AppError('AI summarization failed.', 'INTERNAL_SERVER_ERROR', 500);
     }
   }
@@ -35,7 +35,7 @@ export class AIService {
    * AI Patient Search (NLP -> SQL/Query translation)
    * E.g. "Find all diabetic patients seen last month"
    */
-  static async translateSearchQuery(nlpQuery: string): Promise<any> {
+  static async translateSearchQuery(_nlpQuery: string): Promise<Record<string, unknown>> {
     // Return structured filter object
     return {
       condition: 'diabetes',

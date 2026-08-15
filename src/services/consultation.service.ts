@@ -45,7 +45,7 @@ export class ConsultationService {
       if (data.prescriptions && data.prescriptions.length > 0) {
         const prescriptionCount = await tx.prescription.count();
         const prescId = generatePrescriptionId(prescriptionCount + 1);
-        const prescription = await tx.prescription.create({
+        const _prescription = await tx.prescription.create({
           data: {
             prescriptionId: prescId,
             visitId: data.visitId,

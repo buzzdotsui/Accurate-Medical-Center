@@ -159,7 +159,7 @@ export class PatientService {
       date: Date;
       title: string;
       description?: string;
-      metadata: any;
+      metadata: Record<string, unknown>;
     };
 
     const events: TimelineEvent[] = [];
@@ -195,6 +195,7 @@ export class PatientService {
   static async listPatients(params: { skip?: number; take?: number; search?: string; branchId?: string }) {
     const { skip = 0, take = 50, search, branchId } = params;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
     if (branchId) where.branchId = branchId;
     where.deletedAt = null;

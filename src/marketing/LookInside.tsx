@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { EASE_OUT, EASE_IN_OUT } from "./animations";
+import { EASE_OUT } from "./animations";
 
 const BG = "#0b0f11";
 const TEXT = "#f4f2f5";
@@ -75,45 +75,83 @@ function pad(n: number) {
 // ── SlideVideo — defined outside LookInside to avoid "component during render" lint error ──
 function SlideVideo({
   src,
+  poster,
+  shouldLoad,
+  isActive,
+  isTarget,
+  onReady,
   sectionInView,
 }: {
   src: string;
+  poster: string;
+  shouldLoad: boolean;
+  isActive: boolean;
+  isTarget: boolean;
+  onReady: () => void;
   sectionInView: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const [isReady, setIsReady] = useState(false);
+  const onReadyRef = useRef(onReady);
+
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  }, [onReady]);
 
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
-    if (sectionInView) {
-      v.currentTime = 0;
+    
+    if (v.readyState >= 3) {
+      setIsReady(true);
+      if (isTarget) onReadyRef.current();
+    } else {
+      const handleCanPlay = () => {
+        setIsReady(true);
+        if (isTarget) onReadyRef.current();
+      };
+      v.addEventListener("canplay", handleCanPlay);
+      v.addEventListener("playing", handleCanPlay);
+      return () => {
+        v.removeEventListener("canplay", handleCanPlay);
+        v.removeEventListener("playing", handleCanPlay);
+      };
+    }
+  }, [isTarget, shouldLoad]);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (isActive && sectionInView && isReady) {
       const p = v.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
     } else {
       v.pause();
-      v.currentTime = 0;
+      if (!isActive) v.currentTime = 0;
     }
-  }, [sectionInView]);
+  }, [isActive, sectionInView, isReady]);
 
   return (
-    <video
-      ref={ref}
-      src={src}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      tabIndex={-1}
-      className="absolute inset-0 w-full h-full object-cover"
-      onError={(e) => {
-        const v = e.currentTarget;
-        console.error("[LookInside] video error", {
-          src: v.src,
-          networkState: v.networkState,
-          error: v.error?.message,
-        });
-      }}
-    />
+    <div 
+      className={`absolute inset-0 transition-opacity duration-[800ms] ease-out ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+    >
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center"
+        style={{ backgroundImage: `url(${poster})` }}
+      />
+      {shouldLoad && (
+        <video
+          ref={ref}
+          src={src}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          tabIndex={-1}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isReady ? 'opacity-100' : 'opacity-0'}`}
+        />
+      )}
+    </div>
   );
 }
 
@@ -171,12 +209,13 @@ export function LookInside() {
   const sectionRef = useRef<HTMLElement>(null);
   const sectionInView = useInView(sectionRef, { once: false, amount: 0.2 });
 
-  const [index, setIndex] = useState(0);
+  const [targetIndex, setTargetIndex] = useState(0);
+  const [visibleIndex, setVisibleIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const slide = SLIDES[index];
+  const slide = SLIDES[visibleIndex];
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
@@ -188,14 +227,14 @@ export function LookInside() {
   const goTo = useCallback(
     (next: number, dir: "forward" | "back" = "forward") => {
       setDirection(dir);
-      setIndex(((next % SLIDE_COUNT) + SLIDE_COUNT) % SLIDE_COUNT);
+      setTargetIndex(((next % SLIDE_COUNT) + SLIDE_COUNT) % SLIDE_COUNT);
       setProgress(0);
     },
     []
   );
 
-  const goNext = useCallback(() => goTo(index + 1, "forward"), [goTo, index]);
-  const goPrev = useCallback(() => goTo(index - 1, "back"), [goTo, index]);
+  const goNext = useCallback(() => goTo(targetIndex + 1, "forward"), [goTo, targetIndex]);
+  const goPrev = useCallback(() => goTo(targetIndex - 1, "back"), [goTo, targetIndex]);
 
   useEffect(() => {
     if (!sectionInView) {
@@ -205,10 +244,12 @@ export function LookInside() {
     clearTimer();
     timerRef.current = setInterval(() => {
       setProgress((p) => {
+        if (targetIndex !== visibleIndex) return p;
+
         const step = (TICK_MS / AUTOPLAY_MS) * 100;
         const n = p + step;
         if (n >= 100) {
-          setIndex((i) => {
+          setTargetIndex((i) => {
             setDirection("forward");
             return (i + 1) % SLIDE_COUNT;
           });
@@ -218,24 +259,12 @@ export function LookInside() {
       });
     }, TICK_MS);
     return clearTimer;
-  }, [sectionInView, clearTimer]);
+  }, [sectionInView, clearTimer, targetIndex, visibleIndex]);
 
-  const current = pad(index + 1);
+  const current = pad(visibleIndex + 1);
   const total = pad(SLIDE_COUNT);
 
-  const videoVariants = {
-    enter: { opacity: 0, scale: 0.97 as number },
-    center: {
-      opacity: 1,
-      scale: 1 as number,
-      transition: { duration: 0.65, ease: EASE_OUT },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.97 as number,
-      transition: { duration: 0.45, ease: EASE_IN_OUT },
-    },
-  };
+
 
   const titleVariants = {
     enter: { opacity: 0, x: direction === "forward" ? 14 : -14 },
@@ -278,18 +307,30 @@ export function LookInside() {
             "radial-gradient(ellipse 90% 80% at 50% 20%, transparent 0%, rgba(8,9,10,0.18) 80%, rgba(8,9,10,0.55) 100%)",
         }}
       />
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={slide.id}
-          variants={videoVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          className="absolute inset-0"
-        >
-          <SlideVideo src={slide.video} sectionInView={sectionInView} />
-        </motion.div>
-      </AnimatePresence>
+      <div className="absolute inset-0">
+        {SLIDES.map((s, i) => {
+          const isTarget = i === targetIndex;
+          const isVisible = i === visibleIndex;
+          const shouldLoad = isTarget || isVisible || i === (visibleIndex + 1) % SLIDE_COUNT;
+
+          return (
+            <SlideVideo
+              key={s.id}
+              src={s.video}
+              poster="/marketing/images/logo.jpeg"
+              shouldLoad={shouldLoad}
+              isActive={isVisible}
+              isTarget={isTarget}
+              onReady={() => {
+                if (isTarget && targetIndex !== visibleIndex) {
+                  setVisibleIndex(targetIndex);
+                }
+              }}
+              sectionInView={sectionInView}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 
@@ -375,10 +416,9 @@ export function LookInside() {
               </span>
             </div>
 
-            {/* Slide title */}
             <AnimatePresence mode="wait">
               <motion.h3
-                key={`title-${index}`}
+                key={`title-${visibleIndex}`}
                 variants={titleVariants}
                 initial="enter"
                 animate="center"
@@ -390,10 +430,9 @@ export function LookInside() {
               </motion.h3>
             </AnimatePresence>
 
-            {/* Slide description */}
             <AnimatePresence mode="wait">
               <motion.p
-                key={`desc-${index}`}
+                key={`desc-${visibleIndex}`}
                 variants={descVariants}
                 initial="enter"
                 animate="center"
@@ -448,7 +487,7 @@ export function LookInside() {
 
             {/* Dot indicators */}
             <SlideIndicators
-              index={index}
+              index={visibleIndex}
               progress={progress}
               goTo={goTo}
               prefix="desktop"
@@ -469,7 +508,7 @@ export function LookInside() {
 
             {/* Lemon accent line */}
             <motion.div
-              key={`lemon-${index}`}
+              key={`lemon-${visibleIndex}`}
               aria-hidden
               className="absolute -bottom-3 left-1/2 -translate-x-1/2 h-[2px] rounded-full"
               style={{ backgroundColor: LEMON, width: 48 }}
@@ -523,18 +562,30 @@ export function LookInside() {
                   "radial-gradient(ellipse 90% 80% at 50% 20%, transparent 0%, rgba(8,9,10,0.15) 80%, rgba(8,9,10,0.5) 100%)",
               }}
             />
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`m-${slide.id}`}
-                variants={videoVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="absolute inset-0"
-              >
-                <SlideVideo src={slide.video} sectionInView={sectionInView} />
-              </motion.div>
-            </AnimatePresence>
+            <div className="absolute inset-0">
+              {SLIDES.map((s, i) => {
+                const isTarget = i === targetIndex;
+                const isVisible = i === visibleIndex;
+                const shouldLoad = isTarget || isVisible || i === (visibleIndex + 1) % SLIDE_COUNT;
+
+                return (
+                  <SlideVideo
+                    key={`m-${s.id}`}
+                    src={s.video}
+                    poster="/marketing/images/logo.jpeg"
+                    shouldLoad={shouldLoad}
+                    isActive={isVisible}
+                    isTarget={isTarget}
+                    onReady={() => {
+                      if (isTarget && targetIndex !== visibleIndex) {
+                        setVisibleIndex(targetIndex);
+                      }
+                    }}
+                    sectionInView={sectionInView}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -558,10 +609,9 @@ export function LookInside() {
           </span>
         </div>
 
-        {/* Slide title */}
         <AnimatePresence mode="wait">
           <motion.h3
-            key={`m-title-${index}`}
+            key={`m-title-${visibleIndex}`}
             variants={titleVariants}
             initial="enter"
             animate="center"
@@ -573,10 +623,9 @@ export function LookInside() {
           </motion.h3>
         </AnimatePresence>
 
-        {/* Slide description */}
         <AnimatePresence mode="wait">
           <motion.p
-            key={`m-desc-${index}`}
+            key={`m-desc-${visibleIndex}`}
             variants={descVariants}
             initial="enter"
             animate="center"
@@ -627,7 +676,7 @@ export function LookInside() {
 
         {/* Dot indicators */}
         <SlideIndicators
-          index={index}
+          index={visibleIndex}
           progress={progress}
           goTo={goTo}
           prefix="mobile"

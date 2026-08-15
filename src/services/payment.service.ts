@@ -14,7 +14,7 @@ export class PaymentService {
    * Initialize a payment session with a gateway (Paystack/Flutterwave)
    */
   static async initializePayment(params: InitializePaymentParams) {
-    const { invoiceId, amount, email, gateway } = params;
+    const { invoiceId, amount, email: _email, gateway } = params;
 
     // Verify invoice
     const invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });

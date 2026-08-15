@@ -9,7 +9,7 @@ export class SettingsService {
   static async getSettings() {
     const settings = await prisma.systemSetting.findMany();
     const config: Record<string, string> = {};
-    settings.forEach((s: any) => { config[s.key] = String(s.value); });
+    settings.forEach((s) => { config[s.key] = String(s.value); });
     return config;
   }
 
@@ -21,10 +21,11 @@ export class SettingsService {
       const keys = Object.keys(data) as Array<keyof UpdateSettingsInput>;
       
       for (const key of keys) {
+        const val = String(data[key] ?? "");
         await tx.systemSetting.upsert({
           where: { key },
-          update: { value: data[key] as any },
-          create: { key, value: data[key] as any }
+          update: { value: val },
+          create: { key, value: val }
         });
       }
 

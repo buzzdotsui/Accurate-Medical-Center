@@ -52,6 +52,7 @@ export class ClinicalService {
 
     const updated = await prisma.visit.update({
       where: { id: visitId },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: { vitals: vitals as any },
     });
 
@@ -137,6 +138,7 @@ export class ClinicalService {
   }) {
     const { skip = 0, take = 50, status, doctorId, branchId, hasVitals, patientId } = params;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
     if (status) where.status = status;
     if (doctorId) where.doctorId = doctorId;

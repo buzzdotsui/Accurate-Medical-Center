@@ -27,9 +27,9 @@ export class HrService {
     const shiftDate = new Date(data.date);
 
     // Upsert the schedule for that specific date and staff (Mocked as there's no Schedule model)
-    const schedule = null;
+    const _schedule = null;
 
-    let result = { id: 'mock', staffId: data.staffId, date: shiftDate, shift: data.shift, notes: data.notes };
+    const result = { id: 'mock', staffId: data.staffId, date: shiftDate, shift: data.shift, notes: data.notes };
 
     // Audit Log
     await AuditService.log({

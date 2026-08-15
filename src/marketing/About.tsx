@@ -43,7 +43,7 @@ const TRUST_ITEMS = [
   },
 ] as const;
 
-function useCountUp(target: number, duration = 1500, suffix = "") {
+function CountUp({ target, duration = 1500, suffix = "" }: { target: number, duration?: number, suffix?: string }) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
   const [display, setDisplay] = useState(0);
@@ -62,7 +62,18 @@ function useCountUp(target: number, duration = 1500, suffix = "") {
     return () => cancelAnimationFrame(frame);
   }, [inView, target, duration]);
 
-  return { ref, display: `${display}${suffix}` };
+  return (
+    <span
+      ref={ref}
+      className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
+      style={{
+        fontFamily: "var(--font-playfair-display)",
+        color: INK,
+      }}
+    >
+      {display}{suffix}
+    </span>
+  );
 }
 
 function CountUp247() {
@@ -170,8 +181,6 @@ function TrustIndicator({
 }
 
 export function About() {
-  const c11 = useCountUp(11, 1600, "+");
-  const c100 = useCountUp(100, 1700, "%");
 
   return (
     <section
@@ -321,16 +330,7 @@ export function About() {
                 className="grid grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10"
               >
                 <motion.div variants={fadeUp} className="flex flex-col items-start">
-                  <span
-                    ref={c11.ref}
-                    className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
-                    style={{
-                      fontFamily: "var(--font-playfair-display)",
-                      color: INK,
-                    }}
-                  >
-                    {c11.display}
-                  </span>
+                  <CountUp target={11} duration={1600} suffix="+" />
                   <span
                     className="mt-2.5 text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.18em] leading-tight"
                     style={{ color: INK_SOFT }}
@@ -350,16 +350,7 @@ export function About() {
                 </motion.div>
 
                 <motion.div variants={fadeUp} className="flex flex-col items-start">
-                  <span
-                    ref={c100.ref}
-                    className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
-                    style={{
-                      fontFamily: "var(--font-playfair-display)",
-                      color: INK,
-                    }}
-                  >
-                    {c100.display}
-                  </span>
+                  <CountUp target={100} duration={1700} suffix="%" />
                   <span
                     className="mt-2.5 text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.18em] leading-tight"
                     style={{ color: INK_SOFT }}

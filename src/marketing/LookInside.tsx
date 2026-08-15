@@ -397,7 +397,7 @@ export function LookInside() {
             <div className="flex items-baseline gap-2 mb-5">
               <AnimatePresence mode="wait">
                 <motion.span
-                  key={`counter-${index}`}
+                  key={`counter-${visibleIndex}`}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
@@ -593,7 +593,7 @@ export function LookInside() {
         <div className="flex items-baseline gap-3 mb-3">
           <AnimatePresence mode="wait">
             <motion.span
-              key={`m-counter-${index}`}
+              key={`m-counter-${visibleIndex}`}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}

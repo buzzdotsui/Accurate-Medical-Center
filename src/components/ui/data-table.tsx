@@ -43,8 +43,8 @@ export function DataTable<TData extends Record<string, unknown>>({
   const [search, setSearch] = React.useState("")
   const [page, setPage] = React.useState(0)
 
-  const getColKey = (col: Column<TData>) =>
-    (col.accessorKey ?? col.key ?? "") as string
+  const getColKey = React.useCallback((col: Column<TData>) =>
+    (col.accessorKey ?? col.key ?? "") as string, [])
 
   const filtered = React.useMemo(() => {
     if (!search) return data
@@ -63,7 +63,7 @@ export function DataTable<TData extends Record<string, unknown>>({
       )
     }
     return data
-  }, [data, search, searchKey, searchable, columns])
+  }, [data, search, searchKey, searchable, columns, getColKey])
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
   const paginated = filtered.slice(page * pageSize, (page + 1) * pageSize)

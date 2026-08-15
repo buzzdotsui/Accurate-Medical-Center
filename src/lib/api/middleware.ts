@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { isAppError, getErrorMessage, AppError } from './errors';
+import { isAppError, AppError } from './errors';
 import { error as errorResponse, serverError, validationError } from './response';
 import { logger } from '@/lib/utils/logger';
 import { getSessionUser, type SessionUser } from '@/lib/auth/session';
@@ -11,13 +11,13 @@ type RouteContext = { params: Promise<Record<string, string>> };
 type ApiHandler = (
   req: NextRequest,
   context: RouteContext,
-) => Promise<NextResponse<any>> | NextResponse<any>;
+) => Promise<NextResponse<unknown>> | NextResponse<unknown>;
 
 type AuthApiHandler = (
   req: NextRequest,
   session: { user: SessionUser },
   context: RouteContext,
-) => Promise<NextResponse<any>> | NextResponse<any>;
+) => Promise<NextResponse<unknown>> | NextResponse<unknown>;
 
 /**
  * Base API handler that catches all errors (AppError, Zod, generic)

@@ -100,6 +100,7 @@ export function VitalsChart({ data, title, type }: VitalsChartProps) {
                 stroke="var(--color-muted-foreground)"
               />
               <YAxis 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 domain={config.domain as any} 
                 fontSize={12} 
                 tickLine={false}

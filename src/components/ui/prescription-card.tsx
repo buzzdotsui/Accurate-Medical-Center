@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Pill, AlertTriangle } from "lucide-react"
+import { Pill } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 

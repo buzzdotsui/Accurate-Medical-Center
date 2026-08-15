@@ -4,7 +4,7 @@ import { GenerateReportSchema } from '@/lib/validations/reporting';
 import { ReportingService } from '@/services/reporting.service';
 import { ok } from '@/lib/api/response';
 
-export const POST = withAuth(async (req, session) => {
+export const POST = withAuth(async (req, _session) => {
   const body = await parseBody(req, GenerateReportSchema);
   const result = await ReportingService.generateReportData(body);
   

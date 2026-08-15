@@ -52,6 +52,7 @@ export function MobileNav({ role, user }: MobileNavProps) {
           </div>
           
           {items.map((item, index) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const Icon = (Icons as any)[item.icon.replace(/-./g, (x: string) => x[1].toUpperCase()).replace(/^./, (x: string) => x.toUpperCase())] || Icons.Circle
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
             

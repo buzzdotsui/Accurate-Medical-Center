@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { AppError } from '@/lib/api/errors';
+
 
 // Note: Ensure CLOUDINARY_URL is set in .env
 cloudinary.config({

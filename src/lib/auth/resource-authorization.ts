@@ -21,7 +21,7 @@ import { ROLES } from '@/config/roles';
 export async function verifyPatientAccess(
   user: SessionUser,
   patientId: string,
-  action: 'READ' | 'UPDATE' | 'DELETE' = 'READ'
+  __action: 'READ' | 'UPDATE' | 'DELETE' = 'READ'
 ): Promise<{ id: string; branchId: string }> {
   // SUPER_ADMIN can access any patient
   if (user.role === ROLES.SUPER_ADMIN) {
@@ -72,7 +72,7 @@ export async function verifyPatientAccess(
 export async function verifyAppointmentAccess(
   user: SessionUser,
   appointmentId: string,
-  action: 'READ' | 'UPDATE' | 'DELETE' = 'READ'
+  __action: 'READ' | 'UPDATE' | 'DELETE' = 'READ'
 ): Promise<{ id: string; branchId: string; patientId: string; doctorId: string | null }> {
   // SUPER_ADMIN can access any appointment
   if (user.role === ROLES.SUPER_ADMIN) {
@@ -133,7 +133,7 @@ export async function verifyAppointmentAccess(
 export async function verifyVisitAccess(
   user: SessionUser,
   visitId: string,
-  action: 'READ' | 'UPDATE' = 'READ'
+  _action: 'READ' | 'UPDATE' = 'READ'
 ): Promise<{ id: string; patientId: string; doctorId: string | null }> {
   if (user.role === ROLES.SUPER_ADMIN) {
     const visit = await prisma.visit.findUnique({
@@ -189,7 +189,7 @@ export async function verifyVisitAccess(
 export async function verifyInvoiceAccess(
   user: SessionUser,
   invoiceId: string,
-  action: 'READ' | 'UPDATE' = 'READ'
+  _action: 'READ' | 'UPDATE' = 'READ'
 ): Promise<{ id: string; branchId: string; patientId: string }> {
   if (user.role === ROLES.SUPER_ADMIN) {
     const invoice = await prisma.invoice.findUnique({
@@ -245,7 +245,7 @@ export async function verifyInvoiceAccess(
 export async function verifyPrescriptionAccess(
   user: SessionUser,
   prescriptionId: string,
-  action: 'READ' | 'UPDATE' = 'READ'
+  _action: 'READ' | 'UPDATE' = 'READ'
 ): Promise<{ id: string; visitId: string; doctorId: string }> {
   if (user.role === ROLES.SUPER_ADMIN) {
     const prescription = await prisma.prescription.findUnique({
@@ -301,7 +301,7 @@ export async function verifyPrescriptionAccess(
 export async function verifyLabRequestAccess(
   user: SessionUser,
   requestId: string,
-  action: 'READ' | 'UPDATE' = 'READ'
+  _action: 'READ' | 'UPDATE' = 'READ'
 ): Promise<{ id: string; visitId: string }> {
   if (user.role === ROLES.SUPER_ADMIN) {
     const request = await prisma.labRequest.findUnique({
@@ -379,7 +379,7 @@ export function buildBranchFilter(user: SessionUser): { branchId?: string } {
 export async function verifyStaffAccess(
   user: SessionUser,
   staffId: string,
-  action: 'READ' | 'UPDATE' = 'READ'
+  _action: 'READ' | 'UPDATE' = 'READ'
 ): Promise<{ id: string; branchId: string }> {
   if (user.role === ROLES.SUPER_ADMIN) {
     const staff = await prisma.staff.findUnique({

@@ -1,7 +1,13 @@
 import * as React from "react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User, Phone, MapPin, CalendarDays, Activity } from "lucide-react"
+import { User, Phone, MapPin, Activity } from "lucide-react"
+
+const calculateAge = (dob: Date | string) => {
+  const diff_ms = Date.now() - new Date(dob).getTime()
+  const age_dt = new Date(diff_ms)
+  return Math.abs(age_dt.getUTCFullYear() - 1970)
+}
 
 export interface PatientHeaderProps {
   patient: {
@@ -29,11 +35,7 @@ export function PatientHeader({ patient }: PatientHeaderProps) {
       .substring(0, 2)
   }
 
-  const calculateAge = (dob: Date | string) => {
-    const diff_ms = Date.now() - new Date(dob).getTime()
-    const age_dt = new Date(diff_ms)
-    return Math.abs(age_dt.getUTCFullYear() - 1970)
-  }
+
 
   return (
     <div className="flex flex-col md:flex-row gap-6 p-6 border rounded-lg bg-card text-card-foreground">

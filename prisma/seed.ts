@@ -16,7 +16,7 @@ async function main() {
   console.log('Starting DB seed...');
 
   // 1. Create Default Branch (HQ)
-  const branch = await prisma.branch.upsert({
+  const _branch = await prisma.branch.upsert({
     where: { code: 'HQ' },
     update: {},
     create: {

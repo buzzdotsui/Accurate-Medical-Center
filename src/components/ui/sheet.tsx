@@ -39,7 +39,7 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
->(({ side = "left", className, children, ...props }: any, ref) => (
+>(({ className, children, ...props }: SheetContentProps, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <DialogPrimitive.Content

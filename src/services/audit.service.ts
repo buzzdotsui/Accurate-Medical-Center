@@ -28,7 +28,8 @@ export class AuditService {
           action: params.action,
           resource: params.resource,
           resourceId: params.resourceId,
-          details: params.details ?? undefined,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          details: params.details ? (params.details as any) : undefined,
           ip: params.ip,
           userAgent: params.userAgent,
           branchId: params.branchId,

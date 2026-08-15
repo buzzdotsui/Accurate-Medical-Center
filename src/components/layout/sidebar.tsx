@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { siteConfig } from "@/config/site";
 import { type Role } from "@/config/roles";
-import { navConfig, type NavItem } from "@/config/nav";
+import { navConfig } from "@/config/nav";
 import * as Icons from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { User } from "better-auth";
-import { LogOut, Settings, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
@@ -70,6 +70,7 @@ export function Sidebar({ role, user }: SidebarProps) {
         
         <TooltipProvider delayDuration={0}>
           {items.map((item, index) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const Icon = (Icons as any)[item.icon.replace(/-./g, (x: string) => x[1].toUpperCase()).replace(/^./, (x: string) => x.toUpperCase())] || Icons.Circle;
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             

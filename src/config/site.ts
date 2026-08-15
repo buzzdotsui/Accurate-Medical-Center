@@ -23,9 +23,10 @@ export const siteConfig = {
       full: '109 Irowo Street, Opposite Mega School, Hospital Road, Akure, Ondo State, Nigeria',
     },
     phone: {
-      primary: '+234-000-000-0000',
-      emergency: '+234-000-000-0001',
-      whatsapp: '+234-000-000-0000',
+      primary: '+2347039092836',
+      emergency: '+2347039092836',
+      whatsapp: '2347039092836',
+      displayPrimary: '0703 909 2836',
     },
     email: {
       general: 'info@accuratemedicalcenter.com',
@@ -33,9 +34,9 @@ export const siteConfig = {
       emergency: 'emergency@accuratemedicalcenter.com',
     },
     hours: {
-      weekdays: '8:00 AM – 8:00 PM',
-      saturday: '8:00 AM – 6:00 PM',
-      sunday: '10:00 AM – 4:00 PM',
+      weekdays: '8:00 AM to 8:00 PM',
+      saturday: '8:00 AM to 6:00 PM',
+      sunday: '10:00 AM to 4:00 PM',
       emergency: '24/7 Emergency Services',
     },
   },

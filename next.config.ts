@@ -9,7 +9,7 @@ const securityHeaders = [
   { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://res.cloudinary.com; font-src 'self'; connect-src 'self' wss: https:;"
+    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://res.cloudinary.com; font-src 'self'; connect-src 'self' wss: https:; media-src 'self' blob:; frame-src https://maps.google.com https://www.google.com;"
   }
 ];
 

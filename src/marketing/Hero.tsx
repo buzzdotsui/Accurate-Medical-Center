@@ -1,0 +1,180 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { Calendar, ChevronDown, ArrowRight } from "lucide-react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { EASE, heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide } from "./animations";
+
+export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { scrollY } = useScroll();
+  const yBg = useTransform(scrollY, [0, 800], [0, 180]);
+  const yContent = useTransform(scrollY, [0, 600], [0, 80]);
+  const opacityContent = useTransform(scrollY, [0, 350], [1, 0.15]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.playbackRate = 0.65;
+    const onMeta = () => { v.playbackRate = 0.65; };
+    v.addEventListener("loadedmetadata", onMeta);
+    return () => v.removeEventListener("loadedmetadata", onMeta);
+  }, []);
+
+  const scrollToAbout = () => {
+    document.querySelector("#about")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <section
+      id="home"
+      className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden"
+      style={{ backgroundColor: "#03161a" }}
+      aria-label="Hero, Accurate Medical Center"
+    >
+      <motion.div
+        style={{ y: yBg }}
+        className="absolute inset-0 w-full h-[118%] -top-[9%]"
+        aria-hidden
+      >
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          src="/marketing/videos/clip-3.mp4"
+          poster="/images/hero-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          tabIndex={-1}
+        />
+      </motion.div>
+
+      <motion.div
+        variants={fadeInSlow}
+        initial="hidden"
+        animate="visible"
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden
+        style={{
+          background: `
+            radial-gradient(ellipse at 50% 12%, transparent 0%, rgba(3,22,26,0.18) 50%, rgba(3,22,26,0.55) 82%, rgba(3,22,26,0.82) 100%),
+            radial-gradient(ellipse at 50% 100%, rgba(3,22,26,0.7) 0%, transparent 60%),
+            linear-gradient(90deg, rgba(3,22,26,0.55) 0%, transparent 22%, transparent 78%, rgba(3,22,26,0.55) 100%)
+          `,
+        }}
+      />
+
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 50%, transparent 55%, rgba(3,22,26,0.6) 100%)",
+        }}
+      />
+
+      <motion.div
+        style={{ y: yContent, opacity: opacityContent }}
+        variants={heroStagger}
+        initial="hidden"
+        animate="visible"
+        className="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-8 text-center pt-[84px] flex flex-col items-center"
+      >
+        <motion.h1
+          variants={fadeUp}
+          className="text-4xl sm:text-[3.75rem] lg:text-[5.5rem] xl:text-[6.5rem] font-bold italic leading-[1.03] tracking-tight mb-9 sm:mb-12"
+          style={{
+            fontFamily: "var(--font-playfair-display)",
+            color: "#f4f2f5",
+            textShadow: "0 10px 50px rgba(3,22,26,0.6), 0 2px 10px rgba(3,22,26,0.45)",
+          }}
+        >
+          Healing Minds, Restoring Lives.
+        </motion.h1>
+
+        <motion.p
+          variants={fadeUp}
+          className="text-[15px] sm:text-[17px] lg:text-lg text-[#f4f2f5]/75 max-w-2xl mx-auto mb-14 sm:mb-18 leading-[1.8] font-light"
+        >
+          Accurate Medical Center provides accessible, affordable, and quality healthcare through modern medical services and compassionate professionals in Akure and across Ondo State.
+        </motion.p>
+
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center w-full max-w-sm sm:max-w-none">
+          <motion.a
+            href="#contact"
+            onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            variants={ctaLift}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
+            className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-[18px] rounded-full text-sm sm:text-[15px] font-semibold"
+            style={{ backgroundColor: "#f4f2f5", color: "#03161a" }}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, transparent 55%)",
+              }}
+            />
+            <Calendar className="relative z-10 w-[18px] h-[18px] sm:w-5 sm:h-5 shrink-0 transition-transform duration-400 ease-out group-hover:scale-110 group-hover:-rotate-6" aria-hidden />
+            <span className="relative z-10 tracking-wide">Book an Appointment</span>
+          </motion.a>
+
+          <motion.a
+            href="#about"
+            onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#about")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            variants={ctaLift}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
+            className="group inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-[18px] rounded-full text-sm sm:text-[15px] font-semibold"
+            style={{
+              color: "#f4f2f5",
+              backgroundColor: "rgba(244,242,245,0.07)",
+              border: "1px solid rgba(244,242,245,0.22)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+            }}
+          >
+            <span className="tracking-wide">Explore Our Services</span>
+            <motion.div variants={arrowSlide} initial="rest" whileHover="hover" className="shrink-0">
+              <ArrowRight className="w-[18px] h-[18px] sm:w-5 sm:h-5" aria-hidden />
+            </motion.div>
+          </motion.a>
+        </motion.div>
+      </motion.div>
+
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.4, duration: 0.8, ease: EASE }}
+        onClick={scrollToAbout}
+        className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#f4f2f5]/30 hover:text-[#f4f2f5]/65 transition-colors duration-300 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40 rounded-lg px-3 py-2"
+        aria-label="Scroll down to learn more"
+      >
+        <span className="text-[10px] tracking-[0.32em] uppercase font-semibold">Scroll</span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{
+            duration: 2.2,
+            ease: "easeInOut",
+            repeat: Infinity,
+            repeatType: "loop" as const,
+            delay: 3,
+          }}
+        >
+          <ChevronDown className="w-5 h-5" aria-hidden />
+        </motion.div>
+      </motion.button>
+    </section>
+  );
+}

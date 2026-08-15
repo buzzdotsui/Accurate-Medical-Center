@@ -15,8 +15,8 @@ import {
 } from "./animations";
 
 const NAV_LINKS = [
-  { label: "About",      href: "#about" },
-  { label: "Services",   href: "#about" },
+  { label: "About",      href: "#vision-mission" },
+  { label: "Services",   href: "#services" },
   { label: "Experience", href: "#experience" },
   { label: "Contact",    href: "#contact" },
 ] as const;
@@ -80,17 +80,38 @@ export function Header() {
 
             <button
               onClick={() => scrollTo("#home")}
-              className="flex items-center shrink-0 rounded-xl overflow-hidden group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+              className="flex items-center shrink-0 gap-3.5 sm:gap-4 group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
               aria-label="Accurate Medical Center, scroll to top"
             >
-              <Image
-                src="/marketing/images/logo.jpeg"
-                alt="Accurate Medical Center logo"
-                width={58}
-                height={58}
-                className="object-contain transition-transform duration-500 group-hover:scale-[1.05]"
-                priority
-              />
+              <div className="rounded-xl overflow-hidden">
+                <Image
+                  src="/marketing/images/logo.jpeg"
+                  alt="Accurate Medical Center logo"
+                  width={58}
+                  height={58}
+                  className="object-contain transition-transform duration-500 group-hover:scale-[1.05]"
+                  priority
+                />
+              </div>
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span
+                  className="text-[15px] sm:text-[16px] font-bold tracking-[0.04em] uppercase"
+                  style={{
+                    fontFamily: "var(--font-playfair-display)",
+                    fontStyle: "italic",
+                    color: "#f4f2f5",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Accurate
+                </span>
+                <span
+                  className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em]"
+                  style={{ color: "rgba(244,242,245,0.55)" }}
+                >
+                  Medical Center
+                </span>
+              </div>
             </button>
 
             <nav className="hidden lg:flex items-center gap-11" aria-label="Main navigation">
@@ -101,7 +122,7 @@ export function Header() {
                   className="group relative text-[13px] font-medium tracking-[0.08em] uppercase text-[#f4f2f5]/65 hover:text-[#f4f2f5] transition-colors duration-300 focus-visible:outline-none"
                 >
                   {link.label}
-                  <span className="absolute -bottom-1.5 left-0 w-0 h-[1.5px] bg-[#f4f2f5]/35 transition-all duration-400 ease-out group-hover:w-full rounded-full" />
+                  <span className="absolute -bottom-1.5 left-0 w-0 h-[1.5px] bg-[#f4f2f5] transition-all duration-400 ease-out group-hover:w-full rounded-full" style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
                 </button>
               ))}
             </nav>
@@ -118,18 +139,18 @@ export function Header() {
                 whileHover="hover"
                 whileTap="tap"
                 className="relative inline-flex items-center gap-2.5 px-[26px] py-[11px] rounded-full text-[13px] font-semibold tracking-wide overflow-hidden group"
-                style={{ backgroundColor: "#f4f2f5", color: "#03161a" }}
+                style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 28px rgba(3,22,26,0.25)" }}
               >
                 <span
                   aria-hidden
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   style={{
                     background:
-                      "linear-gradient(135deg, rgba(3,22,26,0.07) 0%, rgba(3,22,26,0.02) 100%)",
+                      "linear-gradient(135deg, rgba(255,255,255,0.45) 0%, transparent 55%)",
                   }}
                 />
                 <Calendar className="relative z-10 w-4 h-4 shrink-0 transition-transform duration-400 ease-out group-hover:scale-110 group-hover:-rotate-6" aria-hidden="true" />
-                <span className="relative z-10">Book Appointment</span>
+                <span className="relative z-10">Book an Appointment</span>
               </motion.a>
             </div>
 
@@ -243,7 +264,7 @@ export function Header() {
                     scrollTo("#contact");
                   }}
                   className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl text-sm font-semibold transition-transform active:scale-[0.98] hover:brightness-[0.98]"
-                  style={{ backgroundColor: "#f4f2f5", color: "#03161a" }}
+                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 10px 32px rgba(3,22,26,0.2)" }}
                 >
                   <Calendar className="w-5 h-5" aria-hidden="true" />
                   Book an Appointment

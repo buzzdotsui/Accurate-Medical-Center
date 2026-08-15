@@ -5,38 +5,43 @@ import { motion, useInView } from "framer-motion";
 import {
   fadeUp,
   fadeUpSmall,
-  fadeIn,
   staggerContainerSlow,
   staggerContainerFast,
-  EASE,
-  EASE_OUT,
+  staggerContainer,
 } from "./animations";
 
-const LEMON = "#D4E157";
-const LEMON_DARK = "#bccb3c";
+const LEMON = "#03161a";
 const INK = "#03161a";
 const INK_SOFT = "rgba(3,22,26,0.65)";
 const INK_MUTED = "rgba(3,22,26,0.48)";
 
-function OrnamentalStar({ className = "", size = 10 }: { className?: string; size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className={className}
-    >
-      <path
-        d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
-        stroke="currentColor"
-        strokeWidth="1"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+const TRUST_ITEMS = [
+  {
+    num: "01",
+    title: "24/7 Emergency Care",
+    desc: "Round-the-clock emergency response with dedicated staff and critical care readiness at all hours.",
+  },
+  {
+    num: "02",
+    title: "Comprehensive Medical Services",
+    desc: "From outpatient consultations to advanced diagnostics, surgery, and specialist care under one roof.",
+  },
+  {
+    num: "03",
+    title: "Experienced Healthcare Professionals",
+    desc: "A team of seasoned doctors, surgeons, nurses, and therapists delivering evidence-based care.",
+  },
+  {
+    num: "04",
+    title: "Online Consultations",
+    desc: "Convenient virtual consultations that bring quality healthcare directly to you, wherever you are.",
+  },
+  {
+    num: "05",
+    title: "Multiple Locations Across Ondo State",
+    desc: "Expanding access to quality care with strategic presence and partnerships across the state.",
+  },
+] as const;
 
 function useCountUp(target: number, duration = 1500, suffix = "") {
   const ref = useRef<HTMLSpanElement | null>(null);
@@ -81,122 +86,97 @@ function CountUp247() {
   }, [inView]);
 
   return (
-    <span ref={ref} className="tabular-nums">
+    <span
+      ref={ref}
+      className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
+      style={{
+        fontFamily: "var(--font-playfair-display)",
+        color: LEMON,
+        textShadow: "0 6px 24px rgba(3,22,26,0.22)",
+      }}
+    >
       {n24}/7
     </span>
   );
 }
 
-function Metric({
-  number,
-  label,
-  accent,
-  variant,
+function TrustIndicator({
+  num,
+  title,
+  desc,
+  index,
 }: {
-  number: React.ReactNode;
-  label: string;
-  accent: boolean;
-  variant: "first" | "middle" | "last";
+  num: string;
+  title: string;
+  desc: string;
+  index: number;
 }) {
-  const showLeft = variant !== "first";
-  const showRight = variant !== "last";
-
   return (
-    <motion.div variants={fadeUp} className="relative flex flex-col items-center text-center">
+    <motion.div
+      variants={fadeUpSmall}
+      className="group relative flex gap-5 sm:gap-6 py-5 sm:py-[22px]"
+    >
       <div
         aria-hidden
-        className="pointer-events-none absolute top-0 left-1/2 hidden lg:block"
-        style={{ transform: "translate(-50%, -8px)" }}
-      >
-        {accent ? (
-          <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ delay: 0.1, duration: 0.7, ease: EASE_OUT }}
-            className="rounded-full"
-            style={{
-              width: 14,
-              height: 14,
-              background: `radial-gradient(circle, ${LEMON} 0%, rgba(212,225,87,0.0) 70%)`,
-              filter: "blur(0.3px)",
-            }}
-          />
-        ) : (
-          <span
-            className="rounded-full inline-block"
-            style={{ width: 6, height: 6, backgroundColor: "rgba(3,22,26,0.18)" }}
-          />
-        )}
+        className="absolute left-0 right-0 top-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(3,22,26,0.08), transparent)",
+        }}
+      />
+      {index === TRUST_ITEMS.length - 1 && (
+        <div
+          aria-hidden
+          className="absolute left-0 right-0 bottom-0 h-px"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(3,22,26,0.08), transparent)",
+          }}
+        />
+      )}
+
+      <div className="shrink-0 flex flex-col items-center pt-1">
+        <span
+          className="font-mono text-[13px] font-semibold tracking-[0.18em] transition-colors duration-300 group-hover:text-[color:var(--marketing-lemon)]"
+          style={{ color: INK_MUTED }}
+        >
+          {num}
+        </span>
+        <div
+          aria-hidden
+          className="mt-3 w-px flex-1 min-h-[36px]"
+          style={{
+            background: `linear-gradient(180deg, ${LEMON}35 0%, transparent 100%)`,
+          }}
+        />
       </div>
 
-      {showLeft && (
-        <div
-          aria-hidden
-          className="hidden lg:block absolute top-1/2 -left-[1px] -translate-y-1/2 h-24 w-px"
-          style={{
-            background: `linear-gradient(180deg, transparent 0%, rgba(3,22,26,0.12) 50%, transparent 100%)`,
-          }}
-        />
-      )}
-      {showRight && (
-        <div
-          aria-hidden
-          className="hidden lg:block absolute top-1/2 -right-[1px] -translate-y-1/2 h-24 w-px"
-          style={{
-            background: `linear-gradient(180deg, transparent 0%, rgba(3,22,26,0.12) 50%, transparent 100%)`,
-          }}
-        />
-      )}
-
-      <motion.div
-        variants={fadeIn}
-        className="text-[3.5rem] sm:text-[4.75rem] lg:text-[5.75rem] font-bold tracking-tight leading-[0.95]"
-        style={{
-          fontFamily: "var(--font-playfair-display)",
-          color: accent ? LEMON : INK,
-          fontStyle: "italic",
-          WebkitTextStroke: accent ? "0" : undefined,
-          textShadow: accent
-            ? "0 8px 30px rgba(212,225,87,0.22)"
-            : "0 1px 0 rgba(255,255,255,0.55)",
-        }}
-      >
-        {number}
-      </motion.div>
-
-      <motion.div
-        variants={fadeUpSmall}
-        className="mt-4 sm:mt-5 flex flex-col items-center gap-2"
-      >
-        <span
-          aria-hidden
-          className="h-[1.5px] w-10 sm:w-12 rounded-full"
-          style={{
-            background: accent
-              ? `linear-gradient(90deg, transparent, ${LEMON}, transparent)`
-              : `linear-gradient(90deg, transparent, rgba(3,22,26,0.22), transparent)`,
-          }}
-        />
-        <span
-          className="text-[12px] sm:text-[13px] lg:text-sm font-semibold uppercase tracking-[0.22em] leading-tight"
+      <div className="flex-1 min-w-0">
+        <h4
+          className="text-[17px] sm:text-[18px] font-semibold tracking-tight mb-1.5 sm:mb-2 transition-colors duration-300 group-hover:text-INK"
+          style={{ color: INK }}
+        >
+          {title}
+        </h4>
+        <p
+          className="text-[14px] sm:text-[14.5px] leading-[1.72] sm:leading-[1.78]"
           style={{ color: INK_SOFT }}
         >
-          {label}
-        </span>
-      </motion.div>
+          {desc}
+        </p>
+      </div>
     </motion.div>
   );
 }
 
 export function About() {
-  const c11 = useCountUp(11, 1500, "+");
-  const c100 = useCountUp(100, 1600, "%");
+  const c11 = useCountUp(11, 1600, "+");
+  const c100 = useCountUp(100, 1700, "%");
 
   return (
     <section
       id="about"
-      className="relative py-[120px] sm:py-[152px] lg:py-[184px] overflow-hidden"
+      className="relative py-[96px] sm:py-[120px] lg:py-[144px] overflow-hidden"
       style={{ backgroundColor: "#F7F6F1" }}
       aria-labelledby="about-heading"
     >
@@ -220,64 +200,40 @@ export function About() {
 
       <div
         aria-hidden
-        className="absolute top-28 left-[6%] pointer-events-none"
-        style={{ color: LEMON, opacity: 0.4 }}
+        className="absolute top-[8%] left-[5%] pointer-events-none opacity-25"
+        style={{ color: LEMON }}
       >
-        <motion.div
-          custom={1}
-          animate="animate"
-          variants={{
-            animate: (i: number) => ({
-              opacity: [0.25, 0.55, 0.25],
-              scale: [1, 1.12, 1],
-              rotate: [0, 7, 0],
-              transition: {
-                duration: 5.5 + (i % 2),
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatType: "mirror" as const,
-                delay: i * 0.4,
-              },
-            }),
-          }}
-        >
-          <OrnamentalStar size={26} />
-        </motion.div>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
       <div
         aria-hidden
-        className="absolute bottom-40 right-[8%] pointer-events-none"
-        style={{ color: INK, opacity: 0.08 }}
+        className="absolute bottom-[12%] right-[6%] pointer-events-none opacity-[0.07]"
+        style={{ color: INK }}
       >
-        <motion.div
-          custom={2}
-          animate="animate"
-          variants={{
-            animate: (i: number) => ({
-              opacity: [0.07, 0.16, 0.07],
-              scale: [1, 1.14, 1],
-              rotate: [0, -9, 0],
-              transition: {
-                duration: 6.5 + (i % 2),
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatType: "mirror" as const,
-                delay: i * 0.5,
-              },
-            }),
-          }}
-        >
-          <OrnamentalStar size={42} />
-        </motion.div>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
 
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-10 relative">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative">
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.22 }}
+          viewport={{ once: true, amount: 0.2 }}
           variants={staggerContainerSlow}
-          className="text-center mb-[72px] sm:mb-[96px] lg:mb-[120px]"
+          className="text-center mb-[60px] sm:mb-[80px] lg:mb-[96px]"
         >
           <motion.p
             variants={fadeUpSmall}
@@ -290,7 +246,7 @@ export function About() {
           <motion.h2
             variants={fadeUp}
             id="about-heading"
-            className="text-[2.5rem] sm:text-5xl lg:text-[4.75rem] font-bold italic leading-[1.05] tracking-tight mb-10 lg:mb-12"
+            className="text-[2.5rem] sm:text-5xl lg:text-[4.75rem] font-bold italic leading-[1.05] tracking-tight"
             style={{
               fontFamily: "var(--font-playfair-display)",
               color: INK,
@@ -300,91 +256,147 @@ export function About() {
             <br />
             Compassionate Care.
           </motion.h2>
-
-          <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 mb-10">
-            <span
-              aria-hidden
-              className="h-px w-14 sm:w-20"
-              style={{ background: `linear-gradient(90deg, transparent, rgba(3,22,26,0.22))` }}
-            />
-            <span
-              aria-hidden
-              className="inline-block rounded-full"
-              style={{ width: 8, height: 8, backgroundColor: LEMON }}
-            />
-            <span
-              aria-hidden
-              className="h-px w-14 sm:w-20"
-              style={{ background: `linear-gradient(90deg, rgba(3,22,26,0.22), transparent)` }}
-            />
-          </motion.div>
-
-          <motion.p
-            variants={fadeUp}
-            className="text-[15.5px] sm:text-[17px] lg:text-lg leading-[1.92] max-w-2xl mx-auto mb-7"
-            style={{ color: INK_SOFT }}
-          >
-            Accurate Medical Center is a modern, multi-service hospital in Akure, Ondo State,
-            providing accessible, affordable, and quality healthcare for individuals and
-            families.
-          </motion.p>
-
-          <motion.p
-            variants={fadeUp}
-            className="text-[15.5px] sm:text-[17px] lg:text-lg leading-[1.92] max-w-2xl mx-auto"
-            style={{ color: INK_SOFT }}
-          >
-            From{" "}
-            <strong className="font-semibold" style={{ color: INK }}>
-              outpatient care and diagnostics to maternity, surgery, specialist consultations,
-              and psychological therapy
-            </strong>
-            , our experienced professionals combine modern medicine with compassionate,
-            patient-first care.
-          </motion.p>
         </motion.div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.25 }}
-          variants={staggerContainerFast}
-          className="relative"
-        >
+        <div className="grid lg:grid-cols-[1.05fr_1fr] gap-12 sm:gap-16 lg:gap-20 xl:gap-24 items-start">
           <motion.div
-            variants={fadeUpSmall}
-            className="flex items-center justify-center gap-4 mb-[56px] sm:mb-[68px] lg:mb-[76px]"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={staggerContainer}
+            className="relative"
           >
-            <span
-              aria-hidden
-              className="h-px w-10 sm:w-16"
-              style={{ background: `linear-gradient(90deg, transparent, rgba(3,22,26,0.16))` }}
-            />
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-              style={{ color: LEMON }}
-            >
-              <path
-                d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
-                fill="currentColor"
+            <motion.div variants={fadeUp} className="mb-8 sm:mb-10 flex items-center gap-4">
+              <span
+                aria-hidden
+                className="h-px w-14 sm:w-20"
+                style={{ background: `linear-gradient(90deg, ${LEMON}65, rgba(3,22,26,0.2))` }}
               />
-            </svg>
-            <span
-              aria-hidden
-              className="h-px w-10 sm:w-16"
-              style={{ background: `linear-gradient(90deg, rgba(3,22,26,0.16), transparent)` }}
-            />
+              <span
+                aria-hidden
+                className="inline-block rounded-full"
+                style={{ width: 7, height: 7, backgroundColor: LEMON }}
+              />
+            </motion.div>
+
+            <motion.p
+              variants={fadeUp}
+              className="text-[16px] sm:text-[18px] lg:text-[19px] leading-[1.88] mb-7 sm:mb-9"
+              style={{ color: INK }}
+            >
+              Accurate Medical Center is a modern, multi-service hospital in Akure, Ondo State,
+              providing accessible, affordable, and quality healthcare for individuals and
+              families.
+            </motion.p>
+
+            <motion.p
+              variants={fadeUp}
+              className="text-[16px] sm:text-[18px] lg:text-[19px] leading-[1.88] mb-7 sm:mb-9"
+              style={{ color: INK_SOFT }}
+            >
+              From{" "}
+              <strong className="font-semibold" style={{ color: INK }}>
+                outpatient care and diagnostics to maternity, surgery, specialist consultations,
+                and psychological therapy
+              </strong>
+              , our experienced professionals combine modern medicine with compassionate,
+              patient-first care.
+            </motion.p>
+
+            <motion.div variants={fadeUpSmall} className="mb-8 sm:mb-10">
+              <h3
+                className="text-[10.5px] font-semibold uppercase tracking-[0.36em] mb-8 sm:mb-10 flex items-center gap-3"
+                style={{ color: INK_MUTED }}
+              >
+                <span className="h-px flex-1 max-w-[52px]" style={{ background: "rgba(3,22,26,0.15)" }} />
+                Why Accurate
+                <span className="h-px flex-1 max-w-[52px]" style={{ background: "rgba(3,22,26,0.15)" }} />
+              </h3>
+
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.4 }}
+                className="grid grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10"
+              >
+                <motion.div variants={fadeUp} className="flex flex-col items-start">
+                  <span
+                    ref={c11.ref}
+                    className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
+                    style={{
+                      fontFamily: "var(--font-playfair-display)",
+                      color: INK,
+                    }}
+                  >
+                    {c11.display}
+                  </span>
+                  <span
+                    className="mt-2.5 text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.18em] leading-tight"
+                    style={{ color: INK_SOFT }}
+                  >
+                    Medical Services
+                  </span>
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="flex flex-col items-start">
+                  <CountUp247 />
+                  <span
+                    className="mt-2.5 text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.18em] leading-tight"
+                    style={{ color: INK_SOFT }}
+                  >
+                    Emergency Care
+                  </span>
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="flex flex-col items-start">
+                  <span
+                    ref={c100.ref}
+                    className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
+                    style={{
+                      fontFamily: "var(--font-playfair-display)",
+                      color: INK,
+                    }}
+                  >
+                    {c100.display}
+                  </span>
+                  <span
+                    className="mt-2.5 text-[11px] sm:text-[11.5px] font-semibold uppercase tracking-[0.18em] leading-tight"
+                    style={{ color: INK_SOFT }}
+                  >
+                    Patient-First Care
+                  </span>
+                </motion.div>
+              </motion.div>
+
+              <motion.div
+                variants={fadeUpSmall}
+                className="flex items-center gap-3"
+              >
+                <span
+                  aria-hidden
+                  className="h-px w-12 sm:w-16"
+                  style={{ background: `linear-gradient(90deg, ${LEMON}70, rgba(3,22,26,0.14))` }}
+                />
+                <span
+                  className="text-[10.5px] font-semibold uppercase tracking-[0.28em]"
+                  style={{ color: INK_MUTED }}
+                >
+                  Delivering on every promise
+                </span>
+              </motion.div>
+            </motion.div>
           </motion.div>
 
-          <div
-            className="relative rounded-[2rem] px-6 py-[64px] sm:px-10 sm:py-[80px] lg:px-16 lg:py-[96px]"
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.22 }}
+            variants={staggerContainerFast}
+            className="relative rounded-[1.65rem] sm:rounded-[1.85rem] px-5 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-10"
             style={{
               background:
-                "linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.35) 100%)",
+                "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.4) 100%)",
               border: "1px solid rgba(3,22,26,0.06)",
               boxShadow:
                 "0 1px 0 rgba(255,255,255,0.92) inset, 0 30px 80px rgba(3,22,26,0.05)",
@@ -394,65 +406,28 @@ export function About() {
           >
             <div
               aria-hidden
-              className="absolute top-5 left-5 sm:top-7 sm:left-7 rounded-full"
-              style={{ width: 10, height: 10, backgroundColor: LEMON, opacity: 0.9 }}
+              className="absolute top-5 left-5 sm:top-6 sm:left-6 rounded-full"
+              style={{ width: 9, height: 9, backgroundColor: LEMON, opacity: 0.9 }}
             />
             <div
               aria-hidden
-              className="absolute bottom-5 right-5 sm:bottom-7 sm:right-7 rounded-sm rotate-45"
-              style={{ width: 10, height: 10, backgroundColor: INK, opacity: 0.1 }}
+              className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 rounded-sm rotate-45"
+              style={{ width: 8, height: 8, backgroundColor: INK, opacity: 0.1 }}
             />
 
-            <motion.div
-              variants={staggerContainerSlow}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.35 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-[68px] sm:gap-10 lg:gap-14 max-w-5xl mx-auto"
-            >
-              <Metric
-                variant="first"
-                accent={false}
-                number={<span ref={c11.ref} className="tabular-nums">{c11.display}</span>}
-                label="Medical Services"
-              />
-              <Metric
-                variant="middle"
-                accent
-                number={<CountUp247 />}
-                label="Emergency Care"
-              />
-              <Metric
-                variant="last"
-                accent={false}
-                number={<span ref={c100.ref} className="tabular-nums">{c100.display}</span>}
-                label="Patient-First Care"
-              />
-            </motion.div>
-          </div>
-
-          <motion.div
-            variants={fadeUpSmall}
-            className="mt-[56px] sm:mt-[68px] flex items-center justify-center gap-4"
-          >
-            <span
-              aria-hidden
-              className="h-px w-16 sm:w-24"
-              style={{ background: `linear-gradient(90deg, transparent, rgba(3,22,26,0.18))` }}
-            />
-            <span
-              className="text-[10.5px] font-semibold uppercase tracking-[0.32em]"
-              style={{ color: INK_MUTED }}
-            >
-              Delivering on every promise
-            </span>
-            <span
-              aria-hidden
-              className="h-px w-16 sm:w-24"
-              style={{ background: `linear-gradient(90deg, rgba(3,22,26,0.18), transparent)` }}
-            />
+            <div className="pt-3 sm:pt-4">
+              {TRUST_ITEMS.map((item, i) => (
+                <TrustIndicator
+                  key={item.num}
+                  num={item.num}
+                  title={item.title}
+                  desc={item.desc}
+                  index={i}
+                />
+              ))}
+            </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

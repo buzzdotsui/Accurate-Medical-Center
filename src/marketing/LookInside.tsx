@@ -1,529 +1,637 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import {
-  fadeUp,
-  fadeIn,
-  staggerContainerSlow,
-  EASE,
-  EASE_OUT,
-} from "./animations";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useInView } from "framer-motion";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { EASE_OUT, EASE_IN_OUT } from "./animations";
 
-interface SlideData {
+const BG = "#0b0f11";
+const TEXT = "#f4f2f5";
+const TEXT_SOFT = "rgba(244,242,245,0.62)";
+const TEXT_MUTED = "rgba(244,242,245,0.38)";
+const LEMON = "#d4e842";
+const SURFACE_BORDER = "rgba(244,242,245,0.08)";
+const VIDEO_BG = "#08090a";
+
+type Slide = {
   id: string;
-  src: string;
-  eyebrow: string;
+  num: string;
   title: string;
   description: string;
+  video: string;
+};
+
+const SLIDES: Slide[] = [
+  {
+    id: "01",
+    num: "01",
+    title: "THE FACILITY",
+    description:
+      "A purpose-built, modern medical facility designed for calm, efficient, and dignified patient journeys.",
+    video: "/marketing/videos/facility-slideshow/facility-slideshow.mp4",
+  },
+  {
+    id: "02",
+    num: "02",
+    title: "THE RECEPTION",
+    description:
+      "A welcoming reception and waiting area where every patient is greeted with care and professionalism.",
+    video: "/marketing/videos/reception-slideshow/reception-slideshow.mp4",
+  },
+  {
+    id: "03",
+    num: "03",
+    title: "CONSULTATION",
+    description:
+      "Private consultation rooms where experienced clinicians listen, assess, and guide treatment decisions.",
+    video: "/marketing/videos/consultation-slideshow/consultation-slideshow.mp4",
+  },
+  {
+    id: "04",
+    num: "04",
+    title: "HOSPITAL VIEW",
+    description:
+      "A complete view of our hospital spaces — structured, clean, and built to support every stage of care.",
+    video: "/marketing/videos/hospital-view-slideshow/hospital-view-slideshow.mp4",
+  },
+  {
+    id: "05",
+    num: "05",
+    title: "COMING IN",
+    description:
+      "From the moment you arrive, every touchpoint is designed to feel welcoming, calm, and reassuring.",
+    video: "/marketing/videos/coming-in-slideshow/coming-in-slideshow.mp4",
+  },
+];
+
+const SLIDE_COUNT = SLIDES.length;
+const AUTOPLAY_MS = 10000;
+const TICK_MS = 60;
+
+function pad(n: number) {
+  return n.toString().padStart(2, "0");
 }
 
-const SLIDES: readonly SlideData[] = [
-  {
-    id: "facility",
-    src: "/images/0814(2).mp4",
-    eyebrow: "01",
-    title: "Our Facility",
-    description: "State-of-the-art infrastructure built for patient comfort and safety.",
-  },
-  {
-    id: "patient-care",
-    src: "/images/A001_05131710_C303.mp4",
-    eyebrow: "02",
-    title: "Patient Care",
-    description: "Compassionate, hands-on care at every stage of treatment.",
-  },
-  {
-    id: "medical-services",
-    src: "/images/A001_05131713_C313.mp4",
-    eyebrow: "03",
-    title: "Medical Services",
-    description: "A full spectrum of diagnostic and therapeutic services.",
-  },
-] as const;
-
-const AUTOPLAY_INTERVAL = 9500;
-
-export function LookInside() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isIntersecting, setIsIntersecting] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [direction, setDirection] = useState<"next" | "prev">("next");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const progressRef = useRef<number | null>(null);
-  const progressStartRef = useRef<number>(0);
+// ── SlideVideo — defined outside LookInside to avoid "component during render" lint error ──
+function SlideVideo({
+  src,
+  sectionInView,
+}: {
+  src: string;
+  sectionInView: boolean;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
-      },
-      { threshold: 0.18 }
-    );
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    const v = ref.current;
+    if (!v) return;
+    if (sectionInView) {
+      v.currentTime = 0;
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    } else {
+      v.pause();
+      v.currentTime = 0;
     }
-    return () => observer.disconnect();
+  }, [sectionInView]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      tabIndex={-1}
+      className="absolute inset-0 w-full h-full object-cover"
+      onError={(e) => {
+        const v = e.currentTarget;
+        console.error("[LookInside] video error", {
+          src: v.src,
+          networkState: v.networkState,
+          error: v.error?.message,
+        });
+      }}
+    />
+  );
+}
+
+// ── SlideIndicators — defined outside LookInside to avoid "component during render" lint error ──
+function SlideIndicators({
+  index,
+  progress,
+  goTo,
+  prefix,
+}: {
+  index: number;
+  progress: number;
+  goTo: (n: number, dir: "forward" | "back") => void;
+  prefix: string;
+}) {
+  return (
+    <div
+      className="flex gap-1.5"
+      role="tablist"
+      aria-label="Experience slide selector"
+    >
+      {SLIDES.map((s, i) => (
+        <button
+          key={s.id}
+          role="tab"
+          aria-selected={i === index}
+          aria-label={`Slide ${s.num} — ${s.title}`}
+          onClick={() => goTo(i, i > index ? "forward" : "back")}
+          className="relative h-[3px] rounded-full overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40 transition-all duration-300"
+          style={{
+            width: i === index ? 28 : 12,
+            backgroundColor:
+              i === index ? "transparent" : "rgba(244,242,245,0.12)",
+          }}
+        >
+          {i === index && (
+            <motion.span
+              key={`${prefix}-dot-${index}`}
+              aria-hidden
+              className="absolute inset-0 rounded-full"
+              style={{ backgroundColor: LEMON, originX: 0 }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: progress / 100 }}
+              transition={{ ease: "linear", duration: TICK_MS / 1000 }}
+            />
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Main exported component ──────────────────────────────────────────────────
+export function LookInside() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const sectionInView = useInView(sectionRef, { once: false, amount: 0.2 });
+
+  const [index, setIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const slide = SLIDES[index];
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current !== null) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   }, []);
 
-  useEffect(() => {
-    videoRefs.current.forEach((video, index) => {
-      if (!video) return;
-      if (index === currentIndex && isPlaying && isIntersecting) {
-        if (video.readyState === 0) video.load();
-        video.currentTime = 0;
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-      }
-    });
-  }, [currentIndex, isPlaying, isIntersecting]);
+  const goTo = useCallback(
+    (next: number, dir: "forward" | "back" = "forward") => {
+      setDirection(dir);
+      setIndex(((next % SLIDE_COUNT) + SLIDE_COUNT) % SLIDE_COUNT);
+      setProgress(0);
+    },
+    []
+  );
+
+  const goNext = useCallback(() => goTo(index + 1, "forward"), [goTo, index]);
+  const goPrev = useCallback(() => goTo(index - 1, "back"), [goTo, index]);
 
   useEffect(() => {
-    if (!isPlaying || !isIntersecting) {
-      if (progressRef.current) {
-        cancelAnimationFrame(progressRef.current);
-        progressRef.current = null;
-      }
+    if (!sectionInView) {
+      clearTimer();
       return;
     }
-    progressStartRef.current = performance.now();
-    setProgress(0);
-    const tick = (now: number) => {
-      const elapsed = now - progressStartRef.current;
-      const pct = Math.min(100, (elapsed / AUTOPLAY_INTERVAL) * 100);
-      setProgress(pct);
-      if (pct >= 100) {
-        setDirection("next");
-        setCurrentIndex((prev) => (prev + 1) % SLIDES.length);
-        return;
-      }
-      progressRef.current = requestAnimationFrame(tick);
-    };
-    progressRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (progressRef.current) cancelAnimationFrame(progressRef.current);
-    };
-  }, [isPlaying, isIntersecting, currentIndex]);
+    clearTimer();
+    timerRef.current = setInterval(() => {
+      setProgress((p) => {
+        const step = (TICK_MS / AUTOPLAY_MS) * 100;
+        const n = p + step;
+        if (n >= 100) {
+          setIndex((i) => {
+            setDirection("forward");
+            return (i + 1) % SLIDE_COUNT;
+          });
+          return 0;
+        }
+        return n;
+      });
+    }, TICK_MS);
+    return clearTimer;
+  }, [sectionInView, clearTimer]);
 
-  const handleNext = useCallback(() => {
-    setDirection("next");
-    setCurrentIndex((prev) => (prev + 1) % SLIDES.length);
-    setIsPlaying(true);
-  }, []);
+  const current = pad(index + 1);
+  const total = pad(SLIDE_COUNT);
 
-  const handlePrev = useCallback(() => {
-    setDirection("prev");
-    setCurrentIndex((prev) => (prev === 0 ? SLIDES.length - 1 : prev - 1));
-    setIsPlaying(true);
-  }, []);
+  const videoVariants = {
+    enter: { opacity: 0, scale: 0.97 as number },
+    center: {
+      opacity: 1,
+      scale: 1 as number,
+      transition: { duration: 0.65, ease: EASE_OUT },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.97 as number,
+      transition: { duration: 0.45, ease: EASE_IN_OUT },
+    },
+  };
 
-  const togglePlay = useCallback(() => {
-    setIsPlaying((prev) => !prev);
-  }, []);
+  const titleVariants = {
+    enter: { opacity: 0, x: direction === "forward" ? 14 : -14 },
+    center: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.5, ease: EASE_OUT, delay: 0.08 },
+    },
+    exit: {
+      opacity: 0,
+      x: direction === "forward" ? -10 : 10,
+      transition: { duration: 0.3 },
+    },
+  };
 
-  const goToSlide = useCallback((index: number) => {
-    setDirection(index > currentIndex ? "next" : "prev");
-    setCurrentIndex(index);
-    setIsPlaying(true);
-  }, [currentIndex]);
+  const descVariants = {
+    enter: { opacity: 0, y: 10 },
+    center: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: EASE_OUT, delay: 0.14 },
+    },
+    exit: { opacity: 0, y: -6, transition: { duration: 0.25 } },
+  };
 
-  const current = SLIDES[currentIndex];
+  const PortraitVideoPanel = (
+    <div
+      className="relative w-full overflow-hidden rounded-2xl"
+      style={{
+        aspectRatio: "9 / 16",
+        boxShadow: "0 48px 100px rgba(0,0,0,0.7)",
+        border: `1px solid ${SURFACE_BORDER}`,
+      }}
+    >
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none z-10 rounded-2xl"
+        style={{
+          background:
+            "radial-gradient(ellipse 90% 80% at 50% 20%, transparent 0%, rgba(8,9,10,0.18) 80%, rgba(8,9,10,0.55) 100%)",
+        }}
+      />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={slide.id}
+          variants={videoVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          className="absolute inset-0"
+        >
+          <SlideVideo src={slide.video} sectionInView={sectionInView} />
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
 
   return (
     <section
+      ref={sectionRef}
       id="experience"
-      className="py-28 sm:py-36 lg:py-[168px] overflow-hidden relative"
-      style={{ backgroundColor: "#03161a" }}
+      className="relative overflow-hidden"
+      style={{ backgroundColor: BG }}
       aria-labelledby="experience-heading"
     >
+      {/* Dot grid texture */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(ellipse 85% 55% at 50% -5%, rgba(244,242,245,0.04) 0%, transparent 72%), radial-gradient(ellipse 45% 35% at 92% 110%, rgba(244,242,245,0.03) 0%, transparent 70%)",
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, rgba(244,242,245,0.055) 1px, transparent 0)",
+          backgroundSize: "32px 32px",
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.25 }}
-          variants={staggerContainerSlow}
-          className="mb-14 sm:mb-[72px] lg:mb-[88px] flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8"
-        >
-          <div className="max-w-2xl">
-            <motion.p
-              variants={fadeUp}
-              className="text-[10.5px] font-semibold uppercase tracking-[0.36em] mb-5"
-              style={{ color: "rgba(244,242,245,0.45)" }}
+      {/* ── DESKTOP SPLIT LAYOUT ──────────────────────────────────────────── */}
+      <div className="hidden lg:grid lg:grid-cols-[1fr_1px_1fr] min-h-[680px]">
+
+        {/* LEFT: editorial info */}
+        <div className="flex flex-col justify-between px-12 xl:px-16 py-16 xl:py-20">
+          {/* Top: heading */}
+          <div>
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.4em] mb-6"
+              style={{ color: TEXT_MUTED }}
             >
               Experience
-            </motion.p>
-            <motion.h2
-              variants={fadeUp}
+            </p>
+
+            <h2
               id="experience-heading"
-              className="text-[2.35rem] sm:text-5xl lg:text-[4.5rem] font-medium italic leading-[1.06] tracking-tight"
+              className="text-[2.6rem] xl:text-[3.2rem] font-bold italic leading-[1.05] tracking-tight mb-5"
               style={{
                 fontFamily: "var(--font-playfair-display)",
-                color: "#f4f2f5",
+                color: TEXT,
               }}
             >
               A Look Inside
-              <br className="hidden sm:block" />
-              <span style={{ color: "rgba(244,242,245,0.66)" }}>
-                Accurate Medical Center
-              </span>
-            </motion.h2>
-          </div>
-          <motion.div variants={fadeIn} className="sm:flex sm:flex-col sm:items-end gap-2 hidden">
-            <span
-              className="text-[10.5px] font-semibold tracking-[0.3em] uppercase"
-              style={{ color: "rgba(244,242,245,0.3)" }}
+              <br />
+              Accurate Medical
+              <br />
+              Center
+            </h2>
+
+            <p
+              className="text-[14px] xl:text-[15px] leading-[1.82] max-w-sm"
+              style={{ color: TEXT_SOFT }}
             >
-              Cinematic Showcase
-            </span>
-            <div className="flex items-center gap-3 mt-1.5">
-              <div
-                className="h-px w-14"
-                style={{ backgroundColor: "rgba(244,242,245,0.12)" }}
-              />
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                style={{ color: "rgba(244,242,245,0.22)" }}
-                aria-hidden
-              >
-                <path
-                  d="M12 2 L13.8 10.2 L22 12 L13.8 13.8 L12 22 L10.2 13.8 L2 12 L10.2 10.2 Z"
-                  fill="currentColor"
-                />
-              </svg>
-              <span
-                className="font-mono text-xs tracking-widest"
-                style={{ color: "rgba(244,242,245,0.36)" }}
-              >
-                00{SLIDES.length}
-              </span>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        <div ref={containerRef} className="relative">
-          <div
-            className="relative w-full overflow-hidden"
-            style={{
-              borderRadius: "1.85rem",
-              boxShadow:
-                "0 48px 120px rgba(0,0,0,0.58), 0 0 0 1px rgba(244,242,245,0.055) inset",
-            }}
-          >
-            <div className="relative w-full aspect-[16/9] lg:aspect-[21/9.2] overflow-hidden bg-[#050a0c]">
-              {SLIDES.map((slide, index) => (
-                <AnimatePresence mode="wait" key={slide.id} initial={false}>
-                  {index === currentIndex && (
-                    <motion.video
-                      ref={(el) => {
-                        videoRefs.current[index] = el;
-                      }}
-                      initial={{
-                        opacity: 0,
-                        scale: 1.055,
-                        x: direction === "next" ? 28 : -28,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        scale: 1,
-                        x: 0,
-                      }}
-                      exit={{
-                        opacity: 0,
-                        scale: 1.025,
-                        x: direction === "next" ? -22 : 22,
-                      }}
-                      transition={{ duration: 0.95, ease: EASE_OUT }}
-                      className="absolute inset-0 w-full h-full object-contain z-10"
-                      src={slide.src}
-                      muted
-                      loop
-                      playsInline
-                      preload="none"
-                      aria-hidden={index !== currentIndex}
-                      tabIndex={-1}
-                    />
-                  )}
-                </AnimatePresence>
-              ))}
-
-              <div
-                aria-hidden
-                className="absolute inset-0 z-[15] pointer-events-none"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(3,22,26,0.22) 0%, transparent 28%, transparent 42%, rgba(3,22,26,0.58) 76%, rgba(3,22,26,0.94) 100%), linear-gradient(90deg, rgba(3,22,26,0.52) 0%, transparent 22%, transparent 78%, rgba(3,22,26,0.52) 100%)",
-                }}
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0 z-[14] pointer-events-none opacity-[0.1]"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle at 1px 1px, rgba(244,242,245,0.62) 1px, transparent 0)",
-                  backgroundSize: "30px 30px",
-                  mixBlendMode: "overlay",
-                }}
-              />
-
-              <div className="hidden sm:flex absolute inset-0 z-20 p-8 lg:p-[56px] xl:p-[68px] flex-col">
-                <div className="flex-1" />
-                <div className="flex items-end justify-between gap-10 lg:gap-16">
-                  <div className="max-w-2xl">
-                    <div className="flex items-center gap-4 mb-6">
-                      <span
-                        className="font-mono text-sm font-semibold tracking-[0.22em]"
-                        style={{ color: "rgba(244,242,245,0.75)" }}
-                      >
-                        {current.eyebrow} / {String(SLIDES.length).padStart(2, "0")}
-                      </span>
-                      <div
-                        className="h-px flex-1 max-w-[68px]"
-                        style={{ backgroundColor: "rgba(244,242,245,0.2)" }}
-                      />
-                    </div>
-
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={`dt-${currentIndex}-${direction}`}
-                        initial={{ opacity: 0, y: 28 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -16 }}
-                        transition={{ duration: 0.62, ease: EASE }}
-                      >
-                        <h3
-                          className="text-3xl sm:text-4xl lg:text-[3rem] xl:text-[3.6rem] font-bold mb-3 tracking-tight leading-[1.06]"
-                          style={{
-                            fontFamily: "var(--font-playfair-display)",
-                            color: "#f4f2f5",
-                            textShadow: "0 10px 36px rgba(3,22,26,0.6)",
-                          }}
-                        >
-                          {current.title}
-                        </h3>
-                        <p
-                          className="text-base lg:text-lg xl:text-[1.15rem] font-light leading-[1.82] max-w-xl"
-                          style={{ color: "rgba(244,242,245,0.84)" }}
-                        >
-                          {current.description}
-                        </p>
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-3 pb-1">
-                    <button
-                      onClick={togglePlay}
-                      className="w-12 h-12 lg:w-[58px] lg:h-[58px] flex items-center justify-center rounded-full text-white transition-all duration-350 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
-                      style={{
-                        backgroundColor: "rgba(3,22,26,0.5)",
-                        backdropFilter: "blur(16px) saturate(1.2)",
-                        WebkitBackdropFilter: "blur(16px) saturate(1.2)",
-                        border: "1px solid rgba(244,242,245,0.18)",
-                        boxShadow: "0 10px 40px rgba(0,0,0,0.35)",
-                      }}
-                      aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
-                    >
-                      {isPlaying ? (
-                        <Pause className="w-[18px] h-[18px] fill-current" strokeWidth={2.25} />
-                      ) : (
-                        <Play className="w-[18px] h-[18px] fill-current ml-0.5" strokeWidth={2.25} />
-                      )}
-                    </button>
-                    <div
-                      className="flex items-center rounded-full overflow-hidden"
-                      style={{
-                        backgroundColor: "rgba(3,22,26,0.5)",
-                        backdropFilter: "blur(16px) saturate(1.2)",
-                        WebkitBackdropFilter: "blur(16px) saturate(1.2)",
-                        border: "1px solid rgba(244,242,245,0.18)",
-                        boxShadow: "0 10px 40px rgba(0,0,0,0.35)",
-                      }}
-                    >
-                      <button
-                        onClick={handlePrev}
-                        className="p-3.5 lg:p-4 text-white/72 hover:text-white hover:bg-white/10 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
-                        aria-label="Previous experience slide"
-                      >
-                        <ChevronLeft className="w-6 h-6 lg:w-[26px] lg:h-[26px]" strokeWidth={1.75} />
-                      </button>
-                      <div
-                        className="w-px h-6 bg-white/14"
-                        aria-hidden
-                      />
-                      <button
-                        onClick={handleNext}
-                        className="p-3.5 lg:p-4 text-white/72 hover:text-white hover:bg-white/10 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
-                        aria-label="Next experience slide"
-                      >
-                        <ChevronRight className="w-6 h-6 lg:w-[26px] lg:h-[26px]" strokeWidth={1.75} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              Step through our doors. Every space reflects our commitment to
+              patient dignity, clinical excellence, and calm, human care.
+            </p>
           </div>
 
-          <div className="sm:hidden mt-7 flex flex-col gap-5">
-            <div className="flex items-center gap-3">
+          {/* Bottom: nav info */}
+          <div className="mt-14">
+            {/* Large counter */}
+            <div className="flex items-baseline gap-2 mb-5">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={`counter-${index}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.3 }}
+                  className="font-mono text-[42px] xl:text-[52px] font-bold leading-none"
+                  style={{ color: TEXT }}
+                >
+                  {current}
+                </motion.span>
+              </AnimatePresence>
               <span
-                className="font-mono text-[11px] font-semibold tracking-[0.22em]"
-                style={{ color: "rgba(244,242,245,0.72)" }}
+                className="font-mono text-[18px] font-light"
+                style={{ color: TEXT_MUTED }}
               >
-                {current.eyebrow} / {String(SLIDES.length).padStart(2, "0")}
+                / {total}
               </span>
-              <div
-                className="h-px flex-1"
-                style={{ backgroundColor: "rgba(244,242,245,0.16)" }}
-              />
             </div>
 
+            {/* Slide title */}
             <AnimatePresence mode="wait">
-              <motion.div
-                key={`mc-${currentIndex}-${direction}`}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.48, ease: EASE }}
+              <motion.h3
+                key={`title-${index}`}
+                variants={titleVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="text-[11px] font-bold uppercase tracking-[0.28em] mb-2"
+                style={{ color: TEXT }}
               >
-                <h3
-                  className="text-[1.9rem] sm:text-3xl font-bold mb-2.5 tracking-tight leading-tight"
-                  style={{
-                    fontFamily: "var(--font-playfair-display)",
-                    color: "#f4f2f5",
-                  }}
-                >
-                  {current.title}
-                </h3>
-                <p
-                  className="text-[14.5px] leading-[1.72] font-light"
-                  style={{ color: "rgba(244,242,245,0.8)" }}
-                >
-                  {current.description}
-                </p>
-              </motion.div>
+                {slide.title}
+              </motion.h3>
             </AnimatePresence>
 
-            <div className="flex items-center justify-between mt-1.5">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handlePrev}
-                  className="w-[48px] h-[48px] flex items-center justify-center rounded-full text-white transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
-                  style={{
-                    backgroundColor: "rgba(3,22,26,0.55)",
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
-                    border: "1px solid rgba(244,242,245,0.16)",
-                  }}
-                  aria-label="Previous experience slide"
-                >
-                  <ChevronLeft className="w-5 h-5" strokeWidth={1.85} />
-                </button>
-                <button
-                  onClick={handleNext}
-                  className="w-[48px] h-[48px] flex items-center justify-center rounded-full text-white transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
-                  style={{
-                    backgroundColor: "rgba(3,22,26,0.55)",
-                    backdropFilter: "blur(12px)",
-                    WebkitBackdropFilter: "blur(12px)",
-                    border: "1px solid rgba(244,242,245,0.16)",
-                  }}
-                  aria-label="Next experience slide"
-                >
-                  <ChevronRight className="w-5 h-5" strokeWidth={1.85} />
-                </button>
-              </div>
-              <button
-                onClick={togglePlay}
-                className="w-[48px] h-[48px] flex items-center justify-center rounded-full text-white/80 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
-                style={{
-                  backgroundColor: "rgba(3,22,26,0.44)",
-                  border: "1px solid rgba(244,242,245,0.12)",
-                }}
-                aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+            {/* Slide description */}
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={`desc-${index}`}
+                variants={descVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="text-[13px] xl:text-[14px] leading-[1.78] max-w-xs mb-10"
+                style={{ color: TEXT_SOFT }}
               >
-                {isPlaying ? (
-                  <Pause className="w-[17px] h-[17px] fill-current" strokeWidth={2.25} />
-                ) : (
-                  <Play className="w-[17px] h-[17px] fill-current ml-0.5" strokeWidth={2.25} />
-                )}
+                {slide.description}
+              </motion.p>
+            </AnimatePresence>
+
+            {/* Prev / Next */}
+            <div className="flex items-center gap-4 mb-7">
+              <button
+                type="button"
+                onClick={goPrev}
+                aria-label="Previous slide"
+                className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.2em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40"
+                style={{ color: TEXT_MUTED }}
+              >
+                <ArrowLeft
+                  className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+                  aria-hidden
+                />
+                <span className="group-hover:text-white transition-colors duration-300">
+                  Prev
+                </span>
+              </button>
+
+              <span
+                aria-hidden
+                className="h-px flex-none w-5"
+                style={{ backgroundColor: SURFACE_BORDER }}
+              />
+
+              <button
+                type="button"
+                onClick={goNext}
+                aria-label="Next slide"
+                className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.2em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40"
+                style={{ color: TEXT_MUTED }}
+              >
+                <span className="group-hover:text-white transition-colors duration-300">
+                  Next
+                </span>
+                <ArrowRight
+                  className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden
+                />
               </button>
             </div>
-          </div>
 
-          <div className="mt-7 sm:mt-9 lg:mt-11 flex flex-col gap-5">
-            <div className="flex gap-2 sm:gap-2.5 w-full">
-              {SLIDES.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className="flex-1 h-[3px] sm:h-1 rounded-full overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
-                  style={{ backgroundColor: "rgba(244,242,245,0.1)" }}
-                  aria-label={`Go to slide ${index + 1}`}
-                  aria-current={currentIndex === index ? "true" : "false"}
-                >
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width:
-                        currentIndex === index
-                          ? isPlaying
-                            ? `${progress}%`
-                            : "100%"
-                          : index < currentIndex
-                          ? "100%"
-                          : "0%",
-                      backgroundColor:
-                        currentIndex === index
-                          ? "rgba(244,242,245,0.8)"
-                          : "rgba(244,242,245,0.28)",
-                      transition: "width 80ms linear, background-color 300ms ease",
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest uppercase">
-              <div className="flex items-center gap-3 sm:gap-3.5">
-                {SLIDES.map((s, i) => (
-                  <span
-                    key={s.id}
-                    className="transition-colors duration-300"
-                    style={{
-                      color:
-                        currentIndex === i
-                          ? "rgba(244,242,245,0.78)"
-                          : "rgba(244,242,245,0.22)",
-                    }}
-                  >
-                    {s.eyebrow}
-                  </span>
-                ))}
-              </div>
-              <span style={{ color: "rgba(244,242,245,0.28)" }}>
-                {String(currentIndex + 1).padStart(2, "0")}
-                <span className="mx-1">/</span>
-                {String(SLIDES.length).padStart(2, "0")}
-              </span>
-            </div>
+            {/* Dot indicators */}
+            <SlideIndicators
+              index={index}
+              progress={progress}
+              goTo={goTo}
+              prefix="desktop"
+            />
           </div>
         </div>
+
+        {/* Vertical divider */}
+        <div aria-hidden style={{ backgroundColor: SURFACE_BORDER }} />
+
+        {/* RIGHT: portrait video */}
+        <div
+          className="relative flex items-center justify-center px-12 xl:px-16 py-16 xl:py-20"
+          style={{ backgroundColor: VIDEO_BG }}
+        >
+          <div className="relative w-full max-w-[340px] xl:max-w-[380px]">
+            {PortraitVideoPanel}
+
+            {/* Lemon accent line */}
+            <motion.div
+              key={`lemon-${index}`}
+              aria-hidden
+              className="absolute -bottom-3 left-1/2 -translate-x-1/2 h-[2px] rounded-full"
+              style={{ backgroundColor: LEMON, width: 48 }}
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.2 }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── MOBILE / TABLET LAYOUT ────────────────────────────────────────── */}
+      <div className="lg:hidden px-5 sm:px-8 py-16 sm:py-20">
+
+        {/* Heading */}
+        <div className="mb-10 sm:mb-12">
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.4em] mb-4"
+            style={{ color: TEXT_MUTED }}
+          >
+            Experience
+          </p>
+          <h2
+            id="experience-heading-mobile"
+            className="text-[1.9rem] sm:text-[2.4rem] font-bold italic leading-[1.06] tracking-tight"
+            style={{
+              fontFamily: "var(--font-playfair-display)",
+              color: TEXT,
+            }}
+          >
+            A Look Inside Accurate Medical Center
+          </h2>
+        </div>
+
+        {/* Portrait video — centered */}
+        <div className="flex justify-center mb-8 sm:mb-10">
+          <div
+            className="relative overflow-hidden rounded-2xl w-full"
+            style={{
+              maxWidth: "min(100%, 380px)",
+              aspectRatio: "9 / 16",
+              boxShadow: "0 32px 72px rgba(0,0,0,0.65)",
+              border: `1px solid ${SURFACE_BORDER}`,
+            }}
+          >
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none z-10 rounded-2xl"
+              style={{
+                background:
+                  "radial-gradient(ellipse 90% 80% at 50% 20%, transparent 0%, rgba(8,9,10,0.15) 80%, rgba(8,9,10,0.5) 100%)",
+              }}
+            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`m-${slide.id}`}
+                variants={videoVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="absolute inset-0"
+              >
+                <SlideVideo src={slide.video} sectionInView={sectionInView} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Counter */}
+        <div className="flex items-baseline gap-3 mb-3">
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={`m-counter-${index}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.3 }}
+              className="font-mono text-[32px] sm:text-[38px] font-bold leading-none"
+              style={{ color: TEXT }}
+            >
+              {current}
+            </motion.span>
+          </AnimatePresence>
+          <span className="font-mono text-[16px]" style={{ color: TEXT_MUTED }}>
+            / {total}
+          </span>
+        </div>
+
+        {/* Slide title */}
+        <AnimatePresence mode="wait">
+          <motion.h3
+            key={`m-title-${index}`}
+            variants={titleVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="text-[11px] font-bold uppercase tracking-[0.28em] mb-2"
+            style={{ color: TEXT }}
+          >
+            {slide.title}
+          </motion.h3>
+        </AnimatePresence>
+
+        {/* Slide description */}
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={`m-desc-${index}`}
+            variants={descVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="text-[13px] sm:text-[14px] leading-[1.78] max-w-md mb-8"
+            style={{ color: TEXT_SOFT }}
+          >
+            {slide.description}
+          </motion.p>
+        </AnimatePresence>
+
+        {/* Prev / Next buttons */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label="Previous slide"
+            className="group inline-flex items-center gap-2.5 px-5 py-3 rounded-full border text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40"
+            style={{
+              borderColor: SURFACE_BORDER,
+              color: TEXT_MUTED,
+            }}
+          >
+            <ArrowLeft
+              className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5"
+              aria-hidden
+            />
+            Prev
+          </button>
+
+          <button
+            type="button"
+            onClick={goNext}
+            aria-label="Next slide"
+            className="group inline-flex items-center gap-2.5 px-5 py-3 rounded-full border text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40"
+            style={{
+              borderColor: SURFACE_BORDER,
+              color: TEXT_MUTED,
+            }}
+          >
+            Next
+            <ArrowRight
+              className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </button>
+        </div>
+
+        {/* Dot indicators */}
+        <SlideIndicators
+          index={index}
+          progress={progress}
+          goTo={goTo}
+          prefix="mobile"
+        />
       </div>
     </section>
   );

@@ -6,8 +6,9 @@ import {
   fadeUp,
   fadeUpSmall,
   staggerContainerSlow,
-  ornamentalStar,
   EASE_OUT,
+  EASE,
+  fadeIn,
 } from "./animations";
 
 const MISSION_ITEMS: readonly string[] = [
@@ -18,22 +19,64 @@ const MISSION_ITEMS: readonly string[] = [
   "Deliver expert online consultations to patients beyond Akure.",
 ] as const;
 
+function OrnamentalCorner({ position }: { position: "tl" | "tr" | "bl" | "br" }) {
+  const posClasses: Record<string, string> = {
+    tl: "top-0 left-0",
+    tr: "top-0 right-0 rotate-90",
+    bl: "bottom-0 left-0 -rotate-90",
+    br: "bottom-0 right-0 rotate-180",
+  };
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      aria-hidden
+      className={`absolute ${posClasses[position]} pointer-events-none opacity-45`}
+    >
+      <path
+        d="M2 18 V2 H18"
+        stroke="rgba(244,242,245,0.18)"
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+      <circle cx="4" cy="4" r="2" fill="rgba(244,242,245,0.6)" />
+    </svg>
+  );
+}
+
 function OrnamentalDivider() {
   return (
     <div className="flex items-center justify-center gap-3 my-9 sm:my-11" aria-hidden>
       <div
         className="h-px flex-1 max-w-[84px]"
-        style={{ backgroundColor: "rgba(244,242,245,0.14)" }}
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(244,242,245,0.18), transparent)",
+        }}
       />
       <motion.svg
         custom={0}
-        variants={ornamentalStar}
         animate="animate"
+        variants={{
+          animate: (i: number) => ({
+            opacity: [0.35, 0.7, 0.35],
+            scale: [1, 1.12, 1],
+            transition: {
+              duration: 5 + (i % 2),
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "mirror" as const,
+              delay: i * 0.3,
+            },
+          }),
+        }}
         width="20"
         height="20"
         viewBox="0 0 24 24"
         fill="none"
-        style={{ color: "rgba(244,242,245,0.38)", flexShrink: 0 }}
+        style={{ color: "#f4f2f5", flexShrink: 0 }}
       >
         <path
           d="M12 2 L13.8 10.2 L22 12 L13.8 13.8 L12 22 L10.2 13.8 L2 12 L10.2 10.2 Z"
@@ -42,7 +85,10 @@ function OrnamentalDivider() {
       </motion.svg>
       <div
         className="h-px flex-1 max-w-[84px]"
-        style={{ backgroundColor: "rgba(244,242,245,0.14)" }}
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(244,242,245,0.18), transparent)",
+        }}
       />
     </div>
   );
@@ -57,12 +103,24 @@ function BottomDecoration() {
       />
       <motion.svg
         custom={1}
-        variants={ornamentalStar}
         animate="animate"
+        variants={{
+          animate: (i: number) => ({
+            opacity: [0.2, 0.45, 0.2],
+            scale: [1, 1.15, 1],
+            transition: {
+              duration: 6 + (i % 2),
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "mirror" as const,
+              delay: i * 0.4,
+            },
+          }),
+        }}
         width="14"
         height="14"
         viewBox="0 0 24 24"
-        style={{ color: "rgba(244,242,245,0.2)", flexShrink: 0 }}
+        style={{ color: "rgba(244,242,245,0.28)", flexShrink: 0 }}
       >
         <path
           d="M12 2 L13.8 10.2 L22 12 L13.8 13.8 L12 22 L10.2 13.8 L2 12 L10.2 10.2 Z"
@@ -77,25 +135,236 @@ function BottomDecoration() {
   );
 }
 
+function VisionPanel() {
+  return (
+    <motion.article
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={staggerContainerSlow}
+      aria-labelledby="vision-heading"
+      className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-12 lg:px-14 py-17 sm:py-[88px] lg:py-[104px] overflow-hidden"
+      style={{
+        backgroundColor: "#000000",
+        boxShadow:
+          "0 38px 110px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
+      }}
+    >
+      <OrnamentalCorner position="tl" />
+      <OrnamentalCorner position="tr" />
+      <OrnamentalCorner position="bl" />
+      <OrnamentalCorner position="br" />
+
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-[inherit] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at 28% -8%, rgba(244,242,245,0.08) 0%, transparent 55%), radial-gradient(ellipse at 82% 108%, rgba(244,242,245,0.04) 0%, transparent 60%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-[inherit] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(244,242,245,0.04) 0%, transparent 60%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute top-0 left-11 right-11 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(244,242,245,0.22), transparent)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute bottom-0 left-11 right-11 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(244,242,245,0.08), transparent)",
+        }}
+      />
+
+      <motion.p
+        variants={fadeUpSmall}
+        className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-8 relative z-10"
+        style={{ color: "rgba(244,242,245,0.4)" }}
+      >
+        01
+        <span className="mx-2.5" style={{ color: "rgba(244,242,245,0.45)" }}>
+          ·
+        </span>
+        Vision
+      </motion.p>
+
+      <motion.h3
+        variants={fadeUp}
+        id="vision-heading"
+        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight"
+        style={{
+          fontFamily: "var(--font-playfair-display)",
+          color: "#f4f2f5",
+          textShadow: "0 8px 36px rgba(0,0,0,0.6)",
+        }}
+      >
+        Our Vision
+      </motion.h3>
+
+      <OrnamentalDivider />
+
+      <motion.p
+        variants={fadeUp}
+        className="text-[15px] sm:text-[17px] lg:text-lg font-medium italic leading-[1.8] max-w-xs sm:max-w-sm relative z-10"
+        style={{
+          fontFamily: "var(--font-playfair-display)",
+          color: "rgba(244,242,245,0.88)",
+        }}
+      >
+        {siteConfig.vision}
+      </motion.p>
+
+      <BottomDecoration />
+    </motion.article>
+  );
+}
+
+function MissionPanel() {
+  return (
+    <motion.article
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={staggerContainerSlow}
+      aria-labelledby="mission-heading"
+      className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-12 lg:px-14 py-17 sm:py-[88px] lg:py-[104px] overflow-hidden"
+      style={{
+        backgroundColor: "#000000",
+        boxShadow:
+          "0 38px 110px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
+      }}
+    >
+      <OrnamentalCorner position="tl" />
+      <OrnamentalCorner position="tr" />
+      <OrnamentalCorner position="bl" />
+      <OrnamentalCorner position="br" />
+
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-[inherit] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at 72% -8%, rgba(244,242,245,0.08) 0%, transparent 55%), radial-gradient(ellipse at 18% 108%, rgba(244,242,245,0.04) 0%, transparent 60%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 rounded-[inherit] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(244,242,245,0.04) 0%, transparent 60%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute top-0 left-11 right-11 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(244,242,245,0.22), transparent)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute bottom-0 left-11 right-11 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(244,242,245,0.08), transparent)",
+        }}
+      />
+
+      <motion.p
+        variants={fadeUpSmall}
+        className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-8 relative z-10"
+        style={{ color: "rgba(244,242,245,0.4)" }}
+      >
+        02
+        <span className="mx-2.5" style={{ color: "rgba(244,242,245,0.45)" }}>
+          ·
+        </span>
+        Mission
+      </motion.p>
+
+      <motion.h3
+        variants={fadeUp}
+        id="mission-heading"
+        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight"
+        style={{
+          fontFamily: "var(--font-playfair-display)",
+          color: "#f4f2f5",
+          textShadow: "0 8px 36px rgba(0,0,0,0.6)",
+        }}
+      >
+        Our Mission
+      </motion.h3>
+
+      <OrnamentalDivider />
+
+      <motion.ol
+        variants={staggerContainerSlow}
+        className="w-full text-left sm:text-center space-y-0 list-none relative z-10"
+        aria-label="Mission statement items"
+      >
+        {MISSION_ITEMS.map((item, i) => (
+          <motion.li key={i} variants={fadeUpSmall}>
+            {i > 0 && (
+              <div
+                className="h-px mx-auto mb-[18px] mt-[18px] max-w-[230px] sm:max-w-none"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(244,242,245,0.085), transparent)",
+                }}
+                aria-hidden
+              />
+            )}
+            <p
+              className="text-sm sm:text-[15.5px] lg:text-base font-medium italic leading-[1.82]"
+              style={{
+                fontFamily: "var(--font-playfair-display)",
+                color: "rgba(244,242,245,0.85)",
+              }}
+            >
+              {item}
+            </p>
+          </motion.li>
+        ))}
+      </motion.ol>
+
+      <BottomDecoration />
+    </motion.article>
+  );
+}
+
 export function VisionMission() {
   return (
     <section
       id="vision-mission"
-      className="py-26 sm:py-[136px] lg:py-[152px] relative overflow-hidden"
+      className="py-26 sm:py-[136px] lg:py-[168px] relative overflow-hidden"
       aria-labelledby="vm-heading"
-      style={{ backgroundColor: "#03161a" }}
+      style={{ backgroundColor: "#000000" }}
     >
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 85% 55% at 50% 50%, rgba(244,242,245,0.035) 0%, transparent 72%)",
+            "radial-gradient(ellipse 85% 55% at 50% -8%, rgba(244,242,245,0.05) 0%, transparent 62%), radial-gradient(ellipse 75% 48% at 50% 108%, rgba(244,242,245,0.03) 0%, transparent 70%)",
         }}
       />
       <div
         aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-[0.055]"
+        className="absolute inset-0 pointer-events-none opacity-[0.05]"
         style={{
           backgroundImage:
             "linear-gradient(rgba(244,242,245,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(244,242,245,0.8) 1px, transparent 1px)",
@@ -116,178 +385,30 @@ export function VisionMission() {
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.75, ease: EASE_OUT }}
-          className="text-center mb-17 sm:mb-[76px]"
+          transition={{ duration: 0.85, ease: EASE_OUT }}
+          className="text-center mb-17 sm:mb-[76px] lg:mb-[92px]"
         >
           <span
-            className="inline-flex items-center gap-3 px-4.5 py-2 rounded-full text-[10px] font-semibold uppercase tracking-[0.3em]"
+            className="inline-flex items-center gap-3 px-[22px] py-[10px] rounded-full text-[10px] font-semibold uppercase tracking-[0.3em]"
             style={{
-              color: "rgba(244,242,245,0.42)",
+              color: "rgba(244,242,245,0.5)",
               backgroundColor: "rgba(244,242,245,0.035)",
-              border: "1px solid rgba(244,242,245,0.07)",
+              border: "1px solid rgba(244,242,245,0.12)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
             }}
           >
             <span
               aria-hidden
               className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: "rgba(244,242,245,0.36)" }}
+              style={{ backgroundColor: "#f4f2f5", boxShadow: "0 0 10px rgba(244,242,245,0.5)" }}
             />
             Our Foundation
           </span>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-6.5 sm:gap-8 lg:gap-10">
-          <motion.article
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainerSlow}
-            aria-labelledby="vision-heading"
-            className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-12 lg:px-14 py-17 sm:py-[88px] lg:py-[104px] overflow-hidden"
-            style={{
-              backgroundColor: "#000000",
-              boxShadow:
-                "0 28px 90px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 0 1px rgba(255,255,255,0.03)",
-            }}
-          >
-            <div
-              aria-hidden
-              className="absolute inset-0 rounded-[inherit] pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(ellipse at 28% -8%, rgba(244,242,245,0.06) 0%, transparent 62%)",
-              }}
-            />
-            <div
-              aria-hidden
-              className="absolute top-0 left-11 right-11 h-px"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(244,242,245,0.1), transparent)",
-              }}
-            />
-
-            <motion.p
-              variants={fadeUpSmall}
-              className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-8 relative z-10"
-              style={{ color: "rgba(244,242,245,0.36)" }}
-            >
-              01
-              <span className="mx-2.5" style={{ color: "rgba(244,242,245,0.16)" }}>·</span>
-              Vision
-            </motion.p>
-
-            <motion.h3
-              variants={fadeUp}
-              id="vision-heading"
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight"
-              style={{
-                fontFamily: "var(--font-playfair-display)",
-                color: "#f4f2f5",
-              }}
-            >
-              Our Vision
-            </motion.h3>
-
-            <OrnamentalDivider />
-
-            <motion.p
-              variants={fadeUp}
-              className="text-[15px] sm:text-[17px] lg:text-lg font-medium italic leading-[1.8] max-w-xs sm:max-w-sm relative z-10"
-              style={{
-                fontFamily: "var(--font-playfair-display)",
-                color: "rgba(244,242,245,0.87)",
-              }}
-            >
-              {siteConfig.vision}
-            </motion.p>
-
-            <BottomDecoration />
-          </motion.article>
-
-          <motion.article
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={staggerContainerSlow}
-            aria-labelledby="mission-heading"
-            className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-12 lg:px-14 py-17 sm:py-[88px] lg:py-[104px] overflow-hidden"
-            style={{
-              backgroundColor: "#000000",
-              boxShadow:
-                "0 28px 90px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 0 1px rgba(255,255,255,0.03)",
-            }}
-          >
-            <div
-              aria-hidden
-              className="absolute inset-0 rounded-[inherit] pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(ellipse at 72% -8%, rgba(244,242,245,0.06) 0%, transparent 62%)",
-              }}
-            />
-            <div
-              aria-hidden
-              className="absolute top-0 left-11 right-11 h-px"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(244,242,245,0.1), transparent)",
-              }}
-            />
-
-            <motion.p
-              variants={fadeUpSmall}
-              className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-8 relative z-10"
-              style={{ color: "rgba(244,242,245,0.36)" }}
-            >
-              02
-              <span className="mx-2.5" style={{ color: "rgba(244,242,245,0.16)" }}>·</span>
-              Mission
-            </motion.p>
-
-            <motion.h3
-              variants={fadeUp}
-              id="mission-heading"
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight"
-              style={{
-                fontFamily: "var(--font-playfair-display)",
-                color: "#f4f2f5",
-              }}
-            >
-              Our Mission
-            </motion.h3>
-
-            <OrnamentalDivider />
-
-            <motion.ol
-              variants={staggerContainerSlow}
-              className="w-full text-left sm:text-center space-y-0 list-none relative z-10"
-              aria-label="Mission statement items"
-            >
-              {MISSION_ITEMS.map((item, i) => (
-                <motion.li key={i} variants={fadeUpSmall}>
-                  {i > 0 && (
-                    <div
-                      className="h-px mx-auto mb-[18px] mt-[18px] max-w-[230px] sm:max-w-none"
-                      style={{ backgroundColor: "rgba(244,242,245,0.065)" }}
-                      aria-hidden
-                    />
-                  )}
-                  <p
-                    className="text-sm sm:text-[15.5px] lg:text-base font-medium italic leading-[1.82]"
-                    style={{
-                      fontFamily: "var(--font-playfair-display)",
-                      color: "rgba(244,242,245,0.83)",
-                    }}
-                  >
-                    {item}
-                  </p>
-                </motion.li>
-              ))}
-            </motion.ol>
-
-            <BottomDecoration />
-          </motion.article>
+          <VisionPanel />
+          <MissionPanel />
         </div>
       </div>
     </section>

@@ -1,7 +1,8 @@
 import { Header }         from "./Header";
 import Hero               from "./Hero";
-import { About }          from "./About";
+// import { About }          from "./About";
 import { VisionMission }  from "./VisionMission";
+import { Services }       from "./Services";
 import { LookInside }     from "./LookInside";
 import { Contact }        from "./Contact";
 import { Footer }         from "./Footer";
@@ -12,8 +13,9 @@ export function MarketingHome() {
       <Header />
       <main className="flex-1">
         <Hero />
-        <About />
+        {/* <About /> */}
         <VisionMission />
+        <Services />
         <LookInside />
         <Contact />
       </main>

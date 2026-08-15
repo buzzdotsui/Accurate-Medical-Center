@@ -381,7 +381,6 @@ export function Services() {
           </motion.div>
 
           <motion.a
-            variants={fadeUp}
             href="#contact"
             onClick={(e) => {
               e.preventDefault();

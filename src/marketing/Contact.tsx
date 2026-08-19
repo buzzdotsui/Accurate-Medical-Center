@@ -13,10 +13,10 @@ import {
   EASE_OUT,
 } from "./animations";
 
-const phone    = siteConfig.contact.phone.primary;
-const whatsapp = siteConfig.contact.phone.whatsapp;
-const display  = siteConfig.contact.phone.displayPrimary;
-const email    = siteConfig.contact.email.general;
+const phone    = "07039092836";
+const whatsapp = "07039092836";
+const display  = "07039092836";
+const email    = "immediateaccuratediagnostics@yahoo.com";
 
 interface FormState { name: string; phone: string; email: string; message: string; }
 const INITIAL: FormState = { name: "", phone: "", email: "", message: "" };

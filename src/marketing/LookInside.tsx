@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { EASE_OUT } from "./animations";
+import { useMediaPreloader } from "./MediaPreloaderContext";
 
 const BG = "#0b0f11";
 const TEXT = "#f4f2f5";
@@ -54,14 +55,6 @@ const SLIDES: Slide[] = [
       "A complete view of our hospital spaces — structured, clean, and built to support every stage of care.",
     video: "/marketing/videos/hospital-view-slideshow/hospital-view-slideshow.mp4",
   },
-  {
-    id: "05",
-    num: "05",
-    title: "COMING IN",
-    description:
-      "From the moment you arrive, every touchpoint is designed to feel welcoming, calm, and reassuring.",
-    video: "/marketing/videos/coming-in-slideshow/coming-in-slideshow.mp4",
-  },
 ];
 
 const SLIDE_COUNT = SLIDES.length;
@@ -75,82 +68,68 @@ function pad(n: number) {
 // ── SlideVideo — defined outside LookInside to avoid "component during render" lint error ──
 function SlideVideo({
   src,
-  poster,
-  shouldLoad,
   isActive,
-  isTarget,
-  onReady,
-  sectionInView,
+  isNext,
+  index,
+  targetIndex,
+  onFirstPlay,
 }: {
   src: string;
-  poster: string;
-  shouldLoad: boolean;
   isActive: boolean;
-  isTarget: boolean;
-  onReady: () => void;
-  sectionInView: boolean;
+  isNext: boolean;
+  index: number;
+  targetIndex: number;
+  onFirstPlay?: () => void;
 }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [isReady, setIsReady] = useState(false);
-  const onReadyRef = useRef(onReady);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [canPlay, setCanPlay] = useState(false);
 
   useEffect(() => {
-    onReadyRef.current = onReady;
-  }, [onReady]);
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleCanPlay = () => {
+      setCanPlay(true);
+      if (index === 0 && onFirstPlay) {
+        onFirstPlay();
+      }
+    };
+
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("playing", handleCanPlay);
+
+    return () => {
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("playing", handleCanPlay);
+    };
+  }, [index, onFirstPlay]);
 
   useEffect(() => {
-    const v = ref.current;
+    const v = videoRef.current;
     if (!v) return;
-    
-    if (v.readyState >= 3) {
-      setIsReady(true);
-      if (isTarget) onReadyRef.current();
-    } else {
-      const handleCanPlay = () => {
-        setIsReady(true);
-        if (isTarget) onReadyRef.current();
-      };
-      v.addEventListener("canplay", handleCanPlay);
-      v.addEventListener("playing", handleCanPlay);
-      return () => {
-        v.removeEventListener("canplay", handleCanPlay);
-        v.removeEventListener("playing", handleCanPlay);
-      };
-    }
-  }, [isTarget, shouldLoad]);
-
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    if (isActive && sectionInView && isReady) {
+    if (isActive && canPlay) {
       const p = v.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
     } else {
       v.pause();
       if (!isActive) v.currentTime = 0;
     }
-  }, [isActive, sectionInView, isReady]);
+  }, [isActive, canPlay]);
 
   return (
     <div 
-      className={`absolute inset-0 transition-opacity duration-[800ms] ease-out ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+      className={`absolute inset-0 transition-opacity duration-[800ms] ease-out ${isActive || isNext ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
     >
-      <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center"
-        style={{ backgroundImage: `url(${poster})` }}
+      <video
+        ref={videoRef}
+        src={src}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        tabIndex={-1}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${canPlay ? 'opacity-100' : 'opacity-0'}`}
       />
-      {shouldLoad && (
-        <video
-          ref={ref}
-          src={src}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          tabIndex={-1}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isReady ? 'opacity-100' : 'opacity-0'}`}
-        />
-      )}
     </div>
   );
 }
@@ -214,6 +193,12 @@ export function LookInside() {
   const [progress, setProgress] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { registerAsset, setAssetReady } = useMediaPreloader();
+
+  // Register the first look-inside slide as a priority asset
+  useEffect(() => {
+    registerAsset("lookinside-0");
+  }, [registerAsset]);
 
   const slide = SLIDES[visibleIndex];
 
@@ -229,6 +214,7 @@ export function LookInside() {
       setDirection(dir);
       setTargetIndex(((next % SLIDE_COUNT) + SLIDE_COUNT) % SLIDE_COUNT);
       setProgress(0);
+      setVisibleIndex(((next % SLIDE_COUNT) + SLIDE_COUNT) % SLIDE_COUNT);
     },
     []
   );
@@ -253,6 +239,7 @@ export function LookInside() {
             setDirection("forward");
             return (i + 1) % SLIDE_COUNT;
           });
+          setVisibleIndex((i) => (i + 1) % SLIDE_COUNT);
           return 0;
         }
         return n;
@@ -308,28 +295,19 @@ export function LookInside() {
         }}
       />
       <div className="absolute inset-0">
-        {SLIDES.map((s, i) => {
-          const isTarget = i === targetIndex;
-          const isVisible = i === visibleIndex;
-          const shouldLoad = isTarget || isVisible || i === (visibleIndex + 1) % SLIDE_COUNT;
-
-          return (
-            <SlideVideo
-              key={s.id}
-              src={s.video}
-              poster="/marketing/images/logo.jpeg"
-              shouldLoad={shouldLoad}
-              isActive={isVisible}
-              isTarget={isTarget}
-              onReady={() => {
-                if (isTarget && targetIndex !== visibleIndex) {
-                  setVisibleIndex(targetIndex);
-                }
-              }}
-              sectionInView={sectionInView}
-            />
-          );
-        })}
+        {SLIDES.map((slide, idx) => (
+          <SlideVideo
+            key={slide.id}
+            src={slide.video}
+            isActive={idx === visibleIndex}
+            isNext={idx === targetIndex && idx !== visibleIndex}
+            index={idx}
+            targetIndex={targetIndex}
+            onFirstPlay={() => {
+              if (idx === 0) setAssetReady("lookinside-0");
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -563,28 +541,19 @@ export function LookInside() {
               }}
             />
             <div className="absolute inset-0">
-              {SLIDES.map((s, i) => {
-                const isTarget = i === targetIndex;
-                const isVisible = i === visibleIndex;
-                const shouldLoad = isTarget || isVisible || i === (visibleIndex + 1) % SLIDE_COUNT;
-
-                return (
-                  <SlideVideo
-                    key={`m-${s.id}`}
-                    src={s.video}
-                    poster="/marketing/images/logo.jpeg"
-                    shouldLoad={shouldLoad}
-                    isActive={isVisible}
-                    isTarget={isTarget}
-                    onReady={() => {
-                      if (isTarget && targetIndex !== visibleIndex) {
-                        setVisibleIndex(targetIndex);
-                      }
-                    }}
-                    sectionInView={sectionInView}
-                  />
-                );
-              })}
+              {SLIDES.map((slide, idx) => (
+                <SlideVideo
+                  key={`m-${slide.id}`}
+                  src={slide.video}
+                  isActive={idx === visibleIndex}
+                  isNext={idx === targetIndex && idx !== visibleIndex}
+                  index={idx}
+                  targetIndex={targetIndex}
+                  onFirstPlay={() => {
+                    if (idx === 0) setAssetReady("lookinside-0");
+                  }}
+                />
+              ))}
             </div>
           </div>
         </div>

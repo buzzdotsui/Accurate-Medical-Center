@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Calendar, ArrowRight, ChevronDown } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { EASE, heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide } from "./animations";
+import { Calendar, ArrowRight, ChevronDown } from "lucide-react";
+import { heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide, EASE } from "./animations";
+import { useMediaPreloader } from "./MediaPreloaderContext";
 
 const HERO_VIDEO = "/marketing/videos/hero/hero.mp4";
 
@@ -15,19 +16,26 @@ export default function Hero() {
   const yContent = useTransform(scrollY, [0, 600], [0, 70]);
   const opacityContent = useTransform(scrollY, [0, 350], [1, 0.2]);
 
+  const { registerAsset, setAssetReady } = useMediaPreloader();
+
   useEffect(() => {
+    registerAsset("hero-video");
     const v = videoRef.current;
     if (!v) return;
     v.playbackRate = 0.75;
     
     if (v.readyState >= 3) {
       setIsVideoReady(true);
+      setAssetReady("hero-video");
     }
     
     const onMeta = () => {
       v.playbackRate = 0.75;
     };
-    const onReady = () => setIsVideoReady(true);
+    const onReady = () => {
+      setIsVideoReady(true);
+      setAssetReady("hero-video");
+    };
     
     v.addEventListener("loadedmetadata", onMeta);
     v.addEventListener("canplay", onReady);
@@ -38,7 +46,7 @@ export default function Hero() {
       v.removeEventListener("canplay", onReady);
       v.removeEventListener("playing", onReady);
     };
-  }, []);
+  }, [registerAsset, setAssetReady]);
 
   const scrollToNext = () => {
     document
@@ -58,17 +66,11 @@ export default function Hero() {
         className="absolute inset-0 w-full h-[118%] -top-[9%]"
         aria-hidden
       >
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-[800ms]"
-          style={{ 
-            backgroundImage: 'url(/marketing/images/logo.jpeg)',
-            opacity: isVideoReady ? 0 : 1
-          }}
-        />
         <video
           ref={videoRef}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[800ms] ease-out ${isVideoReady ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1100ms] ease-out ${isVideoReady ? 'opacity-100' : 'opacity-0'}`}
           src={HERO_VIDEO}
+          poster="/marketing/images/logo.jpeg"
           autoPlay
           muted
           loop
@@ -86,19 +88,9 @@ export default function Hero() {
         aria-hidden
         style={{
           background: `
-            radial-gradient(ellipse at 50% 18%, transparent 0%, rgba(3,22,26,0.15) 45%, rgba(3,22,26,0.5) 78%, rgba(3,22,26,0.82) 100%),
-            radial-gradient(ellipse at 50% 100%, rgba(3,22,26,0.72) 0%, transparent 58%),
-            linear-gradient(90deg, rgba(3,22,26,0.48) 0%, transparent 24%, transparent 76%, rgba(3,22,26,0.48) 100%)
+            linear-gradient(180deg, rgba(3,22,26,0.5) 0%, rgba(3,22,26,0.1) 40%, rgba(3,22,26,0.7) 100%),
+            radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(3,22,26,0.6) 100%)
           `,
-        }}
-      />
-
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 50%, transparent 58%, rgba(3,22,26,0.58) 100%)",
         }}
       />
 
@@ -111,22 +103,21 @@ export default function Hero() {
       >
         <motion.h1
           variants={fadeUp}
-          className="text-4xl sm:text-[3.75rem] lg:text-[5.5rem] xl:text-[6.5rem] font-bold italic leading-[1.03] tracking-tight mb-9 sm:mb-12"
+          className="text-4xl sm:text-[3.75rem] lg:text-[5.5rem] xl:text-[6.5rem] font-bold italic leading-[1.03] tracking-tight mb-8 sm:mb-10"
           style={{
             fontFamily: "var(--font-playfair-display)",
             color: "#f4f2f5",
-            textShadow:
-              "0 10px 50px rgba(3,22,26,0.65), 0 2px 10px rgba(3,22,26,0.45)",
+            textShadow: "0 10px 40px rgba(3,22,26,0.7), 0 2px 10px rgba(3,22,26,0.5)",
           }}
         >
-          Healing Minds, Restoring Lives.
+          Leading Infertility &<br className="hidden sm:block" /> Addiction Care<br className="hidden sm:block" /> in South-West Nigeria
         </motion.h1>
 
         <motion.p
           variants={fadeUp}
-          className="text-[15px] sm:text-[17px] lg:text-lg text-[#f4f2f5]/78 max-w-2xl mx-auto mb-14 sm:mb-[72px] leading-[1.82] font-light"
+          className="text-[16px] sm:text-[18px] lg:text-[19px] text-[#f4f2f5]/90 max-w-2xl mx-auto mb-14 sm:mb-[72px] leading-[1.7] font-light text-shadow-sm"
         >
-          Accurate Medical Center delivers quality, accessible, compassionate healthcare for every individual and family in Akure and across Ondo State.
+          Specialized infertility and addiction care, supported by experienced healthcare professionals and compassionate, patient-first treatment.
         </motion.p>
 
         <motion.div

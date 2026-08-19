@@ -16,33 +16,6 @@ const MISSION_ITEMS: readonly string[] = [
   "Deliver expert online consultations to patients beyond Akure.",
 ] as const;
 
-function OrnamentalCorner({ position }: { position: "tl" | "tr" | "bl" | "br" }) {
-  const posClasses: Record<string, string> = {
-    tl: "top-0 left-0",
-    tr: "top-0 right-0 rotate-90",
-    bl: "bottom-0 left-0 -rotate-90",
-    br: "bottom-0 right-0 rotate-180",
-  };
-  return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      aria-hidden
-      className={`absolute ${posClasses[position]} pointer-events-none opacity-45`}
-    >
-      <path
-        d="M2 18 V2 H18"
-        stroke="rgba(244,242,245,0.18)"
-        strokeWidth="1"
-        strokeLinecap="round"
-      />
-      <circle cx="4" cy="4" r="2" fill="rgba(244,242,245,0.6)" />
-    </svg>
-  );
-}
-
 // Ornamental dividers removed
 
 function VisionPanel() {
@@ -60,10 +33,6 @@ function VisionPanel() {
           "0 38px 110px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
       }}
     >
-      <OrnamentalCorner position="tl" />
-      <OrnamentalCorner position="tr" />
-      <OrnamentalCorner position="bl" />
-      <OrnamentalCorner position="br" />
 
       <div
         aria-hidden
@@ -152,10 +121,6 @@ function MissionPanel() {
           "0 38px 110px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
       }}
     >
-      <OrnamentalCorner position="tl" />
-      <OrnamentalCorner position="tr" />
-      <OrnamentalCorner position="bl" />
-      <OrnamentalCorner position="br" />
 
       <div
         aria-hidden

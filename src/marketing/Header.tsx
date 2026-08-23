@@ -137,7 +137,7 @@ export function Header() {
 
             <div className="hidden lg:flex items-center gap-6">
               <Link
-                href="/login"
+                href="/register"
                 className="text-[12px] font-medium tracking-wider uppercase text-[#f4f2f5]/40 hover:text-[#f4f2f5] transition-colors"
                 aria-label="Staff Portal Login"
               >
@@ -280,7 +280,7 @@ export function Header() {
                 </Link>
                 
                 <Link
-                  href="/login"
+                  href="/register"
                   onClick={() => setMenuOpen(false)}
                   className="text-center text-[11px] font-medium tracking-[0.1em] uppercase text-[#f4f2f5]/40 hover:text-[#f4f2f5] transition-colors py-2"
                 >

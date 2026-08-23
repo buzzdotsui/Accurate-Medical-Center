@@ -59,6 +59,75 @@ export class AppointmentService {
     return appointment;
   }
 
+  static async requestPublicAppointment(data: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string;
+    service: string;
+    preferredDate: string;
+    notes?: string;
+    branchId: string;
+  }) {
+    // We import PatientService and generatePatientId lazily to avoid circular dependencies if any
+    const { PatientService } = await import('./patient.service');
+    const { generatePatientId } = await import('@/lib/utils/generate-id');
+
+    // 1. Deduplicate patient safely (non-transactional read is fine here)
+    let patient = await PatientService.findExistingPatient({
+      phone: data.phone,
+      email: data.email,
+      branchId: data.branchId,
+    });
+
+    // 2. Transaction for atomic creation
+    const appointment = await prisma.$transaction(async (tx) => {
+      let currentPatientId = patient?.id;
+      
+      if (!currentPatientId) {
+        // Create new patient inside transaction
+        const totalPatients = await tx.patient.count({ where: { branchId: data.branchId, deletedAt: null } });
+        const newPatientIdStr = generatePatientId(totalPatients + 1);
+        
+        const newPatient = await tx.patient.create({
+          data: {
+            patientId: newPatientIdStr,
+            branchId: data.branchId,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            email: data.email || null,
+          }
+        });
+        currentPatientId = newPatient.id;
+      }
+
+      // Create appointment
+      const appointmentId = generateAppointmentId();
+      return tx.appointment.create({
+        data: {
+          appointmentId,
+          patientId: currentPatientId,
+          branchId: data.branchId,
+          date: new Date(data.preferredDate),
+          type: 'IN_PERSON',
+          reason: data.service,
+          notes: data.notes || null,
+          status: 'SCHEDULED',
+        }
+      });
+    });
+
+    // Audit log (we log with 'PUBLIC' role to identify the source)
+    await AuditService.log({
+      userId: 'PUBLIC', userRole: 'SYSTEM', action: 'REQUEST_PUBLIC_APPOINTMENT',
+      resource: 'APPOINTMENT', resourceId: appointment.id, branchId: data.branchId,
+      details: { patientId: appointment.patientId, service: data.service }
+    }).catch(() => {});
+
+    return appointment;
+  }
+
   static async createWalkIn(data: { patientId: string; branchId: string; doctorId?: string; reason?: string; type?: string }, executorId: string) {
     const now = new Date();
     return prisma.$transaction(async (tx) => {

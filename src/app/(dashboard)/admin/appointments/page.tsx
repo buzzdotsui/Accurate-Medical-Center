@@ -1,15 +1,6 @@
-import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { CalendarPlus } from "lucide-react";
-
-const appointments = [
-  { id: "APT-5041", patient: "Adaeze Nwosu", doctor: "Dr. Smith", date: "Aug 11", time: "09:00 AM", type: "Follow-up", status: "Completed" },
-  { id: "APT-5042", patient: "Emeka Obi", doctor: "Dr. Musa", date: "Aug 11", time: "09:30 AM", type: "Review", status: "In Progress" },
-  { id: "APT-5043", patient: "James Adeleke", doctor: "Dr. Iheaka", date: "Aug 11", time: "10:00 AM", type: "Post-Op Check", status: "Scheduled" },
-  { id: "APT-5044", patient: "Ngozi Eze", doctor: "Dr. Smith", date: "Aug 11", time: "10:30 AM", type: "Consultation", status: "Scheduled" },
-  { id: "APT-5045", patient: "Ibrahim Sule", doctor: "Dr. Musa", date: "Aug 11", time: "11:00 AM", type: "First Visit", status: "Checked In" },
-  { id: "APT-5046", patient: "Grace Adeleke", doctor: "Dr. Chidi", date: "Aug 12", time: "09:00 AM", type: "ANC Visit", status: "Scheduled" },
-];
+import { EmptyState } from "@/components/ui/empty-state";
+import { CalendarPlus, Calendar } from "lucide-react";
 
 export default function AdminAppointmentsPage() {
   return (
@@ -24,32 +15,16 @@ export default function AdminAppointmentsPage() {
         </Button>
       </div>
 
-      <div className="border rounded-xl bg-card overflow-hidden">
-        <DataTable
-          columns={[
-            { header: "ID", accessorKey: "id" },
-            { header: "Patient", accessorKey: "patient" },
-            { header: "Doctor", accessorKey: "doctor" },
-            { header: "Date", accessorKey: "date" },
-            { header: "Time", accessorKey: "time" },
-            { header: "Type", accessorKey: "type" },
-            {
-              header: "Status", accessorKey: "status",
-              cell: (row) => (
-                <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                  row.status === "Completed" ? "bg-green-100 text-green-700" :
-                  row.status === "In Progress" ? "bg-blue-100 text-blue-700" :
-                  row.status === "Checked In" ? "bg-primary/10 text-primary" :
-                  "bg-muted text-muted-foreground"
-                }`}>{row.status}</span>
-              ),
-            },
-          ]}
-          data={appointments}
-          searchable
-          searchPlaceholder="Filter appointments..."
-        />
-      </div>
+      <EmptyState
+        icon={<Calendar className="w-full h-full" />}
+        title="No appointments scheduled"
+        description="Appointments will appear here once they are booked. Schedule a new appointment to get started."
+        action={
+          <Button className="gap-2">
+            <CalendarPlus className="w-4 h-4" /> Book Appointment
+          </Button>
+        }
+      />
     </div>
   );
 }

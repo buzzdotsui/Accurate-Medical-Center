@@ -76,6 +76,51 @@ export class PatientService {
     return patient;
   }
 
+  /**
+   * Deterministic deduplication for public appointment requests.
+   * Finds an existing patient by phone or email safely.
+   */
+  static async findExistingPatient(params: { phone?: string; email?: string; branchId: string }) {
+    if (!params.phone && !params.email) return null;
+
+    // Normalize
+    const normalizedPhone = params.phone ? params.phone.replace(/\D/g, '') : null;
+    const normalizedEmail = params.email ? params.email.toLowerCase().trim() : null;
+
+    if (!normalizedPhone && !normalizedEmail) return null;
+
+    const whereClauses = [];
+    if (normalizedPhone) whereClauses.push({ phone: { contains: normalizedPhone } });
+    if (normalizedEmail) whereClauses.push({ email: normalizedEmail });
+
+    const patients = await prisma.patient.findMany({
+      where: {
+        branchId: params.branchId,
+        deletedAt: null,
+        OR: whereClauses,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (patients.length === 0) return null;
+
+    // If both provided, ensure they don't point to completely different identities
+    if (normalizedPhone && normalizedEmail && patients.length > 1) {
+      const emailMatch = patients.find(p => p.email?.toLowerCase() === normalizedEmail);
+      const phoneMatch = patients.find(p => p.phone && p.phone.replace(/\D/g, '').includes(normalizedPhone));
+      
+      if (emailMatch && phoneMatch && emailMatch.id !== phoneMatch.id) {
+        // Conflicting identities. Prefer the exact email match as it is usually more definitive.
+        // Or if we want to be hyper-safe, we return null to force a new record that staff must merge later.
+        // Returning null prevents mistakenly revealing/associating the wrong patient.
+        return null;
+      }
+    }
+
+    // Return the best match (first one, since we ordered by desc, it's the most recent)
+    return patients[0];
+  }
+
   static async getPatientProfile(identifier: string, branchId?: string) {
     const patient = await prisma.patient.findFirst({
       where: {

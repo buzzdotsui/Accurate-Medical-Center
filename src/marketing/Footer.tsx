@@ -4,15 +4,16 @@ import Image from "next/image";
 import { siteConfig } from "@/config/site";
 import { MapPin, Mail, ArrowUp, Phone } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { fadeUpSmall, fadeUp, EASE } from "./animations";
 
 const NAV_LINKS = [
-  { label: "Home",        href: "#home" },
-  { label: "About",       href: "#about" },
-  { label: "Services",    href: "#about" },
-  { label: "Vision",      href: "#vision-mission" },
-  { label: "Experience",  href: "#experience" },
-  { label: "Contact",     href: "#contact" },
+  { label: "Home",        href: "/" },
+  { label: "About",       href: "/#about" },
+  { label: "Services",    href: "/#about" },
+  { label: "Vision",      href: "/#vision-mission" },
+  { label: "Experience",  href: "/#experience" },
+  { label: "Contact",     href: "/#contact" },
 ] as const;
 
 const SERVICE_LINKS = [
@@ -222,7 +223,7 @@ export function Footer() {
             <ul className="flex flex-col gap-3.5 gap-[14px]">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-[13.5px] transition-colors duration-200 hover:text-white group flex items-center gap-2.5"
                     style={{ color: "rgba(244,242,245,0.54)" }}
@@ -232,7 +233,7 @@ export function Footer() {
                       className="w-0 h-px bg-white/30 transition-all duration-300 ease-out group-hover:w-4 rounded-full"
                     />
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -248,8 +249,8 @@ export function Footer() {
             <ul className="flex flex-col gap-3.5 gap-[14px]">
               {SERVICE_LINKS.map((service) => (
                 <li key={service}>
-                  <a
-                    href="#about"
+                  <Link
+                    href={`/book-appointment?service=${encodeURIComponent(service)}`}
                     className="text-[13.5px] transition-colors duration-200 hover:text-white group flex items-center gap-2.5"
                     style={{ color: "rgba(244,242,245,0.54)" }}
                   >
@@ -258,7 +259,7 @@ export function Footer() {
                       className="w-0 h-px bg-white/30 transition-all duration-300 ease-out group-hover:w-4 rounded-full"
                     />
                     {service}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

@@ -1,16 +1,4 @@
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
-
-const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  user: 'user',
-  password: 'password',
-  database: 'accurate_medical',
-});
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import { prisma } from '../src/lib/db/client';
 
 async function main() {
   console.log('Starting DB seed...');

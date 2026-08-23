@@ -110,6 +110,20 @@ export function Sidebar({ role, user }: SidebarProps) {
             return navLink;
           })}
         </TooltipProvider>
+
+        <div className="pt-4 mt-4 border-t">
+          <Link
+            href="/"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group relative text-muted-foreground hover:bg-muted hover:text-foreground",
+              isCollapsed && "justify-center px-0"
+            )}
+            title={isCollapsed ? "View Website" : undefined}
+          >
+            <Icons.Globe className={cn("shrink-0", isCollapsed ? "w-6 h-6" : "w-5 h-5")} />
+            {!isCollapsed && <span className="truncate">View Website</span>}
+          </Link>
+        </div>
       </nav>
 
       {/* User Mini Profile */}

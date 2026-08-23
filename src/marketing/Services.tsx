@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Brain, Baby, Stethoscope, Shield, Ambulance, Video, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { fadeUp, fadeUpFast, ctaLift } from "./animations";
 
 const BG_NEUTRAL = "#faf9f8";
@@ -32,32 +33,62 @@ const SERVICES = [
   {
     id: "02",
     icon: "baby" as IconKey,
-    title: "Maternity & Delivery",
-    desc: "Safe, supportive maternity and delivery care from experienced healthcare professionals.",
+    title: "Infertility Care",
+    desc: "Advanced, compassionate fertility treatments designed to help you build your family.",
   },
   {
     id: "03",
-    icon: "stethoscope" as IconKey,
-    title: "Outpatient Care",
-    desc: "Comprehensive outpatient services focusing on accurate diagnosis and effective treatment.",
-  },
-  {
-    id: "04",
     icon: "shield" as IconKey,
-    title: "Addictions Care",
+    title: "Addiction Care",
     desc: "Structured, dignified addiction recovery programs tailored to each patient's unique journey.",
   },
   {
+    id: "04",
+    icon: "baby" as IconKey,
+    title: "Pregnancy Delivery",
+    desc: "Safe, supportive maternity and delivery care from experienced healthcare professionals.",
+  },
+  {
     id: "05",
-    icon: "ambulance" as IconKey,
-    title: "Ambulance Services",
-    desc: "Rapid-response emergency transport fully equipped for critical medical support.",
+    icon: "stethoscope" as IconKey,
+    title: "Outpatient Clinic Services",
+    desc: "Comprehensive outpatient services focusing on accurate diagnosis and effective treatment.",
   },
   {
     id: "06",
+    icon: "stethoscope" as IconKey,
+    title: "Surgery",
+    desc: "State-of-the-art surgical care performed by experienced specialists in a safe environment.",
+  },
+  {
+    id: "07",
+    icon: "stethoscope" as IconKey,
+    title: "Admissions",
+    desc: "Comfortable, monitored inpatient wards providing 24-hour medical and nursing care.",
+  },
+  {
+    id: "08",
     icon: "video" as IconKey,
-    title: "Online Consultations",
-    desc: "Expert medical advice and follow-up care available from the comfort of your home.",
+    title: "Ultrasound Scan",
+    desc: "Advanced diagnostic ultrasound imaging for accurate and timely medical assessments.",
+  },
+  {
+    id: "09",
+    icon: "video" as IconKey,
+    title: "X-ray Services",
+    desc: "Rapid and precise radiological imaging to support accurate clinical diagnoses.",
+  },
+  {
+    id: "10",
+    icon: "brain" as IconKey,
+    title: "Laboratories",
+    desc: "Fully equipped diagnostic laboratory services delivering reliable and rapid test results.",
+  },
+  {
+    id: "11",
+    icon: "ambulance" as IconKey,
+    title: "Ambulance Services",
+    desc: "Rapid-response emergency transport fully equipped for critical medical support.",
   },
 ];
 
@@ -104,20 +135,20 @@ export function Services() {
             const isHovered = hoveredIdx === idx;
 
             return (
-              <motion.div
-                key={srv.id}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-                variants={{
-                  hidden: { opacity: 0, y: 30 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
-                }}
-                onMouseEnter={() => setHoveredIdx(idx)}
-                onMouseLeave={() => setHoveredIdx(null)}
-                className="group relative flex flex-col md:flex-row items-start md:items-center py-10 sm:py-14 border-b transition-colors duration-500 cursor-default overflow-hidden"
-                style={{ borderColor: BORDER }}
-              >
+              <Link href={`/book-appointment?service=${encodeURIComponent(srv.title)}`} key={srv.id} passHref legacyBehavior>
+                <motion.a
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-50px" }}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
+                  }}
+                  onMouseEnter={() => setHoveredIdx(idx)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                  className="group relative flex flex-col md:flex-row items-start md:items-center py-10 sm:py-14 border-b transition-colors duration-500 cursor-pointer overflow-hidden block"
+                  style={{ borderColor: BORDER }}
+                >
                 {/* Hover Background Reveal */}
                 <div 
                   className="absolute inset-0 transition-opacity duration-500 ease-out pointer-events-none"
@@ -162,7 +193,8 @@ export function Services() {
                     />
                   </div>
                 </div>
-              </motion.div>
+                </motion.a>
+              </Link>
             );
           })}
         </div>
@@ -174,33 +206,30 @@ export function Services() {
           variants={fadeUp}
           className="mt-20 flex justify-center lg:justify-start"
         >
-          <motion.a
-            href="#contact"
-            onClick={(e) => {
-              e.preventDefault();
-              document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-            variants={ctaLift}
-            initial="rest"
-            whileHover="hover"
-            whileTap="tap"
-            className="group relative inline-flex items-center justify-center gap-3 px-8 py-[18px] rounded-full text-[15px] font-semibold overflow-hidden"
-            style={{
-              backgroundColor: CHARCOAL,
-              color: "#fff",
-              boxShadow: "0 10px 30px rgba(26,31,34,0.15)",
-            }}
-          >
-            <span
-              aria-hidden
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          <Link href="/book-appointment" passHref legacyBehavior>
+            <motion.a
+              variants={ctaLift}
+              initial="rest"
+              whileHover="hover"
+              whileTap="tap"
+              className="group relative inline-flex items-center justify-center gap-3 px-8 py-[18px] rounded-full text-[15px] font-semibold overflow-hidden"
               style={{
-                background: `linear-gradient(90deg, ${CHARCOAL} 0%, rgba(50,55,58,1) 100%)`,
+                backgroundColor: CHARCOAL,
+                color: "#fff",
+                boxShadow: "0 10px 30px rgba(26,31,34,0.15)",
               }}
-            />
-            <span className="relative z-10 tracking-wide">Explore All Services</span>
-            <ArrowRight className="relative z-10 w-[18px] h-[18px] transition-transform duration-300 group-hover:translate-x-1" />
-          </motion.a>
+            >
+              <span
+                aria-hidden
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{
+                  background: `linear-gradient(90deg, ${CHARCOAL} 0%, rgba(50,55,58,1) 100%)`,
+                }}
+              />
+              <span className="relative z-10 tracking-wide">Book an Appointment</span>
+              <ArrowRight className="relative z-10 w-[18px] h-[18px] transition-transform duration-300 group-hover:translate-x-1" />
+            </motion.a>
+          </Link>
         </motion.div>
       </div>
     </section>

@@ -1,3 +1,4 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const securityHeaders = [
@@ -9,18 +10,28 @@ const securityHeaders = [
   { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://res.cloudinary.com; font-src 'self'; connect-src 'self' wss: https:; media-src 'self' blob:; frame-src https://maps.google.com https://www.google.com;"
+    // res.cloudinary.com — video delivery (media-src) and poster images (img-src)
+    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://res.cloudinary.com; font-src 'self'; connect-src 'self' wss: https:; media-src 'self' blob: https://res.cloudinary.com; frame-src https://maps.google.com https://www.google.com;"
   }
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  typescript: {
-    ignoreBuildErrors: true,
+  env: {
+    // Injected at build time so server components can build Cloudinary URLs.
+    // The actual value is read from .env / docker-compose environment.
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || "hefhxm1l",
   },
-  experimental: {
-    memoryBasedWorkersCount: true,
-    cpus: 1,
+  output: "standalone",
+  outputFileTracingRoot: path.join(__dirname),
+  // Exclude large static public assets from standalone bundle tracing.
+  // Videos are served from Cloudinary CDN; any remaining MP4s in public/
+  // are excluded so the tracer does not copy them into the standalone output.
+  outputFileTracingExcludes: {
+    '*': [
+      './public/images/**',
+      './public/marketing/videos/**',
+      './public/vision and mission statement/**',
+    ],
   },
   async headers() {
     return [
@@ -33,3 +44,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+

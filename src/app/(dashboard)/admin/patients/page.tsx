@@ -1,17 +1,8 @@
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Search } from "lucide-react";
-
-const patients = [
-  { id: "P-10421", name: "Adaeze Nwosu", age: 34, gender: "F", phone: "0801 234 5678", lastVisit: "Aug 11", doctor: "Dr. Smith", status: "Active" },
-  { id: "P-10422", name: "Emeka Obi", age: 52, gender: "M", phone: "0802 345 6789", lastVisit: "Aug 11", doctor: "Dr. Musa", status: "Admitted" },
-  { id: "P-10419", name: "Fatima Aliyu", age: 28, gender: "F", phone: "0803 456 7890", lastVisit: "Aug 10", doctor: "Dr. Chidi", status: "Active" },
-  { id: "P-10415", name: "James Adeleke", age: 61, gender: "M", phone: "0804 567 8901", lastVisit: "Aug 10", doctor: "Dr. Iheaka", status: "Admitted" },
-  { id: "P-10312", name: "Ngozi Eze", age: 44, gender: "F", phone: "0805 678 9012", lastVisit: "Aug 8", doctor: "Dr. Smith", status: "Active" },
-  { id: "P-10290", name: "Ibrahim Sule", age: 61, gender: "M", phone: "0806 789 0123", lastVisit: "Aug 5", doctor: "Dr. Musa", status: "Active" },
-  { id: "P-10210", name: "Grace Adeleke", age: 22, gender: "F", phone: "0807 890 1234", lastVisit: "Aug 3", doctor: "Dr. Chidi", status: "Discharged" },
-];
+import { EmptyState } from "@/components/ui/empty-state";
+import { UserPlus, Search, Users } from "lucide-react";
 
 export default function AdminPatientsPage() {
   return (
@@ -33,32 +24,16 @@ export default function AdminPatientsPage() {
         </div>
       </div>
 
-      <div className="border rounded-xl bg-card overflow-hidden">
-        <DataTable
-          columns={[
-            { header: "ID", accessorKey: "id" },
-            { header: "Name", accessorKey: "name" },
-            { header: "Age", accessorKey: "age" },
-            { header: "Gender", accessorKey: "gender" },
-            { header: "Phone", accessorKey: "phone" },
-            { header: "Last Visit", accessorKey: "lastVisit" },
-            { header: "Assigned Doctor", accessorKey: "doctor" },
-            {
-              header: "Status", accessorKey: "status",
-              cell: (row) => (
-                <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                  row.status === "Admitted" ? "bg-red-100 text-red-700" :
-                  row.status === "Active" ? "bg-green-100 text-green-700" :
-                  "bg-muted text-muted-foreground"
-                }`}>{row.status}</span>
-              ),
-            },
-          ]}
-          data={patients}
-          searchable
-          searchPlaceholder="Filter patients..."
-        />
-      </div>
+      <EmptyState
+        icon={<Users className="w-full h-full" />}
+        title="No patients registered yet"
+        description="Patients will appear here once they are registered in the system. Use the button above to register your first patient."
+        action={
+          <Button className="gap-2">
+            <UserPlus className="w-4 h-4" /> Register Patient
+          </Button>
+        }
+      />
     </div>
   );
 }

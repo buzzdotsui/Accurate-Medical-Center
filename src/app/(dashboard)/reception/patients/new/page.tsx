@@ -24,7 +24,6 @@ export default function NewPatientRegistration() {
       email: "",
       phone: "",
       gender: undefined,
-      branchId: "cm17abcd10000000000000001", // Placeholder for actual branch ID context
     }
   });
 

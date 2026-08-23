@@ -1,27 +1,40 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter, Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastProvider } from "@/components/providers/toast-provider";
 import { siteConfig } from "@/config/site";
 
-const inter = Inter({
+const inter = localFont({
+  src: "../../public/fonts/Inter-Variable.woff2",
   variable: "--font-inter",
-  subsets: ["latin"],
+  display: "swap",
+  weight: "100 900",
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const plusJakartaSans = localFont({
+  src: "../../public/fonts/PlusJakartaSans-Variable.woff2",
   variable: "--font-plus-jakarta-sans",
-  subsets: ["latin"],
+  display: "swap",
+  weight: "200 800",
 });
 
 /** Elegant italic serif, used by marketing landing page for headings and Vision/Mission panels */
-const playfairDisplay = Playfair_Display({
+const playfairDisplay = localFont({
+  src: [
+    {
+      path: "../../public/fonts/PlayfairDisplay-Variable.woff2",
+      style: "normal",
+      weight: "400 900",
+    },
+    {
+      path: "../../public/fonts/PlayfairDisplay-Italic-Variable.woff2",
+      style: "italic",
+      weight: "400 900",
+    },
+  ],
   variable: "--font-playfair-display",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 

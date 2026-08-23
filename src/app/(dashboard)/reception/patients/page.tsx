@@ -1,18 +1,19 @@
 "use client";
 
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus, FileText } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { DataTable, Column } from "@/components/ui/data-table";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function PatientsList() {
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Real-world integration using the API we built in Module 5
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['patients', searchTerm],
     queryFn: async () => {
       const res = await fetch(`/api/v1/patients?search=${encodeURIComponent(searchTerm)}`);
@@ -20,6 +21,40 @@ export default function PatientsList() {
       return res.json();
     }
   });
+
+  const columns: Column<any>[] = [
+    {
+      accessorKey: "patientId",
+      header: "Patient ID",
+      cell: (row) => <span className="font-medium text-primary">{row.patientId}</span>
+    },
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: (row) => `${row.firstName} ${row.lastName}`
+    },
+    {
+      accessorKey: "phone",
+      header: "Contact",
+      cell: (row) => <span className="text-muted-foreground">{row.phone || '-'}</span>
+    },
+    {
+      accessorKey: "gender",
+      header: "Gender",
+      cell: (row) => row.gender || '-'
+    },
+    {
+      accessorKey: "actions",
+      header: "Actions",
+      cell: (row) => (
+        <div className="text-right">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={`/reception/patients/${row.id}`}>View Profile</Link>
+          </Button>
+        </div>
+      )
+    }
+  ];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -36,63 +71,53 @@ export default function PatientsList() {
         </Button>
       </div>
 
-      <Card className="border-none shadow-sm ring-1 ring-border/50">
-        <CardHeader className="pb-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search by name, ID, or phone..." 
-              className="pl-9 bg-muted/50 border-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+        {isLoading ? (
+          <LoadingState message="Loading patients database..." />
+        ) : error ? (
+          <ErrorState 
+            title="Failed to load patients" 
+            description={error.message} 
+            onRetry={() => refetch()} 
+          />
+        ) : data?.data?.patients?.length === 0 && !searchTerm ? (
+          <EmptyState
+            icon={<UserPlus className="w-full h-full" />}
+            title="No patients found"
+            description="The patient database is currently empty. Register your first patient to begin."
+            action={
+              <Button asChild>
+                <Link href="/reception/patients/new">
+                  <UserPlus className="w-4 h-4 mr-2" /> Register First Patient
+                </Link>
+              </Button>
+            }
+          />
+        ) : (
+          <div className="space-y-4">
+            <div className="relative max-w-md">
+              <input 
+                type="search"
+                placeholder="Search by name, ID, or phone (Server-side)..." 
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            {data?.data?.patients?.length === 0 ? (
+              <div className="py-10 text-center text-muted-foreground">
+                No patients match your search.
+              </div>
+            ) : (
+              <DataTable 
+                columns={columns} 
+                data={data?.data?.patients || []} 
+              />
+            )}
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="py-12 flex justify-center">
-              <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-            </div>
-          ) : data?.data?.patients?.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FileText className="w-12 h-12 text-muted-foreground/30 mb-4" />
-              <h3 className="text-lg font-medium">No patients found</h3>
-              <p className="text-muted-foreground mt-1">Try adjusting your search criteria.</p>
-            </div>
-          ) : (
-            <div className="relative w-full overflow-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead className="[&_tr]:border-b">
-                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Patient ID</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Contact</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Gender</th>
-                    <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="[&_tr:last-child]:border-0">
-                  {data?.data?.patients.map((patient: any) => (
-                    <tr key={patient.id} className="border-b transition-colors hover:bg-muted/50">
-                      <td className="p-4 align-middle font-medium text-primary">{patient.patientId}</td>
-                      <td className="p-4 align-middle">
-                        {patient.firstName} {patient.lastName}
-                      </td>
-                      <td className="p-4 align-middle text-muted-foreground">{patient.phone}</td>
-                      <td className="p-4 align-middle">{patient.gender || '-'}</td>
-                      <td className="p-4 align-middle text-right">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/reception/patients/${patient.id}`}>View Profile</Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 }

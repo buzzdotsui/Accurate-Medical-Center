@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Calendar, X, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   EASE,
   backdrop,
@@ -24,6 +26,8 @@ const NAV_LINKS = [
 export function Header() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -52,11 +56,15 @@ export function Header() {
 
   const scrollTo = useCallback((href: string) => {
     setMenuOpen(false);
+    if (pathname !== "/") {
+      router.push("/" + href);
+      return;
+    }
     requestAnimationFrame(() => {
       const el = document.querySelector(href);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-  }, []);
+  }, [pathname, router]);
 
   return (
     <>
@@ -127,31 +135,35 @@ export function Header() {
               ))}
             </nav>
 
-            <div className="hidden lg:flex items-center">
-              <motion.a
-                href="#contact"
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollTo("#contact");
-                }}
-                variants={ctaLift}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-                className="relative inline-flex items-center gap-2.5 px-[26px] py-[11px] rounded-full text-[13px] font-semibold tracking-wide overflow-hidden group"
-                style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 28px rgba(3,22,26,0.25)" }}
+            <div className="hidden lg:flex items-center gap-6">
+              <Link
+                href="/login"
+                className="text-[12px] font-medium tracking-wider uppercase text-[#f4f2f5]/40 hover:text-[#f4f2f5] transition-colors"
+                aria-label="Staff Portal Login"
               >
-                <span
-                  aria-hidden
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(255,255,255,0.45) 0%, transparent 55%)",
-                  }}
-                />
-                <Calendar className="relative z-10 w-4 h-4 shrink-0 transition-transform duration-400 ease-out group-hover:scale-110 group-hover:-rotate-6" aria-hidden="true" />
-                <span className="relative z-10">Book an Appointment</span>
-              </motion.a>
+                Staff
+              </Link>
+              <Link href="/book-appointment" passHref legacyBehavior>
+                <motion.a
+                  variants={ctaLift}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
+                  className="relative inline-flex items-center gap-2.5 px-[26px] py-[11px] rounded-full text-[13px] font-semibold tracking-wide overflow-hidden group"
+                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 28px rgba(3,22,26,0.25)" }}
+                >
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.45) 0%, transparent 55%)",
+                    }}
+                  />
+                  <Calendar className="relative z-10 w-4 h-4 shrink-0 transition-transform duration-400 ease-out group-hover:scale-110 group-hover:-rotate-6" aria-hidden="true" />
+                  <span className="relative z-10">Book an Appointment</span>
+                </motion.a>
+              </Link>
             </div>
 
             <button
@@ -255,20 +267,25 @@ export function Header() {
                 initial="hidden"
                 animate="visible"
                 transition={{ delay: 0.38, duration: 0.5 }}
-                className="p-6 pt-5 border-t border-white/[0.07]"
+                className="p-6 pt-5 border-t border-white/[0.07] flex flex-col gap-4"
               >
-                <a
-                  href="#contact"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollTo("#contact");
-                  }}
+                <Link
+                  href="/book-appointment"
+                  onClick={() => setMenuOpen(false)}
                   className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl text-sm font-semibold transition-transform active:scale-[0.98] hover:brightness-[0.98]"
                   style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 10px 32px rgba(3,22,26,0.2)" }}
                 >
                   <Calendar className="w-5 h-5" aria-hidden="true" />
                   Book an Appointment
-                </a>
+                </Link>
+                
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-center text-[11px] font-medium tracking-[0.1em] uppercase text-[#f4f2f5]/40 hover:text-[#f4f2f5] transition-colors py-2"
+                >
+                  Staff Portal
+                </Link>
               </motion.div>
             </motion.aside>
           </>

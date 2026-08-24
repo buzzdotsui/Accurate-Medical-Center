@@ -6,6 +6,7 @@ import { ok, created } from '@/lib/api/response';
 import { z } from 'zod';
 import { ROLES } from '@/config/roles';
 import { buildBranchFilter } from '@/lib/auth/resource-authorization';
+import { prisma } from '@/lib/db/client';
 
 const ListPatientsQuerySchema = z.object({
   skip: z.coerce.number().min(0).optional().default(0),
@@ -51,10 +52,20 @@ export const POST = withRole(
       }
     }
     
-    // Use user's branch if not SUPER_ADMIN
-    const branchId = session.user.role === ROLES.SUPER_ADMIN 
+    // Resolve branchId from session, or for SUPER_ADMIN fall back to HQ branch
+    let branchId = session.user.role === ROLES.SUPER_ADMIN 
       ? body.branchId 
       : session.user.branchId;
+    
+    if (!branchId && session.user.role === ROLES.SUPER_ADMIN) {
+      const hq = await prisma.branch.findFirst({
+        where: { isActive: true },
+        orderBy: { createdAt: 'asc' },
+        select: { id: true },
+      });
+      if (!hq) throw new Error('No active branch found.');
+      branchId = hq.id;
+    }
     
     const patient = await PatientService.createPatient({
       ...body,

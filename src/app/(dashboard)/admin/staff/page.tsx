@@ -1,9 +1,21 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { UserCog, Search, Users } from "lucide-react";
+import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
 
 export default function AdminStaffPage() {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  const handleSuccess = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -11,7 +23,7 @@ export default function AdminStaffPage() {
           <h1 className="text-3xl font-heading font-bold text-foreground">Staff</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage all clinical and administrative staff members.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setOpen(true)}>
           <UserCog className="w-4 h-4" /> Add Staff Member
         </Button>
       </div>
@@ -28,11 +40,18 @@ export default function AdminStaffPage() {
         title="No staff members added yet"
         description="Staff accounts will appear here once they are created. Add clinical and administrative team members to get started."
         action={
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setOpen(true)}>
             <UserCog className="w-4 h-4" /> Add Staff Member
           </Button>
         }
       />
+
+      <CreateStaffDialog
+        open={open}
+        onOpenChange={setOpen}
+        onSuccess={handleSuccess}
+      />
     </div>
   );
 }
+

@@ -1,10 +1,21 @@
-import { DataTable } from "@/components/ui/data-table";
+"use client";
+
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { UserPlus, Search, Users } from "lucide-react";
+import { RegisterPatientDialog } from "@/components/admin/patients/register-patient-dialog";
 
 export default function AdminPatientsPage() {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  const handleSuccess = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -12,7 +23,7 @@ export default function AdminPatientsPage() {
           <h1 className="text-3xl font-heading font-bold text-foreground">Patients</h1>
           <p className="text-sm text-muted-foreground mt-1">Browse, search, and manage all registered patients.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setOpen(true)}>
           <UserPlus className="w-4 h-4" /> Register Patient
         </Button>
       </div>
@@ -29,10 +40,16 @@ export default function AdminPatientsPage() {
         title="No patients registered yet"
         description="Patients will appear here once they are registered in the system. Use the button above to register your first patient."
         action={
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setOpen(true)}>
             <UserPlus className="w-4 h-4" /> Register Patient
           </Button>
         }
+      />
+
+      <RegisterPatientDialog
+        open={open}
+        onOpenChange={setOpen}
+        onSuccess={handleSuccess}
       />
     </div>
   );

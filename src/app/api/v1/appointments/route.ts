@@ -79,9 +79,22 @@ export const POST = withAuth(async (req, session) => {
   }
   
   // Use user's branch if not SUPER_ADMIN
-  const branchId = session.user.role === ROLES.SUPER_ADMIN 
+  let branchId = session.user.role === ROLES.SUPER_ADMIN 
     ? body.branchId 
     : session.user.branchId;
+  
+  // SUPER_ADMIN may not have a personal branchId — fall back to the first (HQ) branch
+  if (!branchId && session.user.role === ROLES.SUPER_ADMIN) {
+    const hq = await prisma.branch.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    });
+    if (!hq) {
+      throw new AppError('No active branch found. Please create a branch first.', 'BAD_REQUEST', 400);
+    }
+    branchId = hq.id;
+  }
   
   const appointment = await AppointmentService.createAppointment(
     { ...body, branchId: branchId! },

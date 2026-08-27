@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { signUp } from "@/lib/auth/client";
+import { signUp, signIn } from "@/lib/auth/client";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -35,9 +35,36 @@ export default function RegisterPage() {
     }
 
     if (data) {
-      // Navigate to dashboard upon successful registration
-      router.push("/dashboard");
-      router.refresh();
+      // Explicitly sign in because autoSignIn is disabled globally in our auth config
+      const { error: signInError } = await signIn.email({ email, password });
+      
+      if (signInError) {
+        setError(signInError.message || "Account created, but sign-in failed. Please try logging in manually.");
+        return;
+      }
+
+      // Automatically create a Patient Profile connected to this Better Auth account
+
+      try {
+        const res = await fetch('/api/v1/patients/self-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firstName: firstName.trim(), lastName: lastName.trim() }),
+        });
+        
+        if (!res.ok) {
+          const result = await res.json();
+          setError(result.error || "Account created, but patient profile linking failed. Please contact support.");
+          return;
+        }
+
+        // Navigate to dashboard upon successful registration
+        router.push("/dashboard");
+        router.refresh();
+      } catch (err) {
+        setError("Network error while creating patient profile.");
+        return;
+      }
     }
   }
 

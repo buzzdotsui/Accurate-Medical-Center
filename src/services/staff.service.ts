@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db/client';
 import { CreateStaffInput } from '@/lib/validations/staff';
-import { generateStaffId } from '@/lib/utils/generate-id';
+import { IdGeneratorService } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { auth } from '@/lib/auth/config';
 
@@ -47,17 +47,7 @@ export class StaffService {
     // 4. Wrap the remaining profile creation in a transaction
     try {
       return await prisma.$transaction(async (tx) => {
-        const totalStaff = await tx.staff.count();
-        const nextSequence = totalStaff + 1;
-        
-        // Determine department code for the ID (e.g., DOC, NRS, LAB)
-        let prefix = 'STF';
-        if (data.role === 'DOCTOR') prefix = 'DOC';
-        if (data.role === 'NURSE') prefix = 'NRS';
-        if (data.role === 'LAB_SCIENTIST') prefix = 'LAB';
-        if (data.role === 'PHARMACIST') prefix = 'RXS';
-        
-        const staffId = generateStaffId(prefix, nextSequence);
+        const staffId = await IdGeneratorService.generateStaffId(tx);
 
         const staff = await tx.staff.create({
           data: {

@@ -1,56 +1,65 @@
 import { prisma } from '@/lib/db/client';
 import { CreatePatientInput, UpdatePatientInput } from '@/lib/validations/patient';
-import { generatePatientId } from '@/lib/utils/generate-id';
+import { IdGeneratorService } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { Prisma } from '@prisma/client';
 
 export class PatientService {
-  static async createPatient(data: CreatePatientInput, executorId?: string) {
-    const branch = await prisma.branch.findUnique({
-      where: { id: data.branchId },
-    });
-    
-    if (!branch) {
-      throw new AppError('Invalid branch ID provided.', 'BAD_REQUEST', 400);
-    }
+  static async createPatient(data: {
+    userId?: string;
+    firstName: string;
+    lastName: string;
+    email?: string;
+    phone?: string;
+    gender?: string;
+    dateOfBirth?: Date;
+    address?: string;
+    bloodGroup?: string;
+    branchId?: string;
+    auditContext?: {
+      userId?: string;
+      userRole?: string;
+      ip?: string;
+      userAgent?: string;
+    };
+  }) {
+    return await prisma.$transaction(async (tx) => {
+      // Concurrency-safe sequential patient ID (e.g., AMC-PT-000001)
+      const patientId = await IdGeneratorService.generatePatientId(tx);
 
-    const result = await prisma.$transaction(async (tx) => {
-      const totalPatients = await tx.patient.count({ where: { branchId: data.branchId, deletedAt: null } });
-      const nextSequence = totalPatients + 1;
-      const patientId = generatePatientId(nextSequence);
-      
       const patient = await tx.patient.create({
         data: {
           patientId,
-          branch: { connect: { id: data.branchId! } },
+          userId: data.userId ?? null,
           firstName: data.firstName,
           lastName: data.lastName,
-          email: data.email || null,
-          phone: data.phone || null,
-          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-          gender: data.gender || null,
-          bloodGroup: data.bloodGroup || null,
-          genotype: data.genotype || null,
-          address: data.address || null,
-        },
+          email: data.email ?? null,
+          phone: data.phone ?? null,
+          gender: data.gender ?? null,
+          dateOfBirth: data.dateOfBirth ?? null,
+          address: data.address ?? null,
+          bloodGroup: data.bloodGroup ?? null,
+          ...(data.branchId ? { branchId: data.branchId } : {}),
+        } as Prisma.PatientUncheckedCreateInput,
       });
-      
+
+      if (data.auditContext) {
+        await AuditService.log({
+          userId: data.auditContext.userId || data.userId || "system",
+          userRole: data.auditContext.userRole || "PATIENT",
+          action: "CREATE_PATIENT",
+          resource: "PATIENT",
+          resourceId: patient.id,
+          details: { patientId: patient.patientId, email: patient.email },
+          ip: data.auditContext.ip,
+          userAgent: data.auditContext.userAgent,
+          branchId: data.branchId,
+        });
+      }
+
       return patient;
     });
-
-    if (executorId) {
-      await AuditService.log({
-        userId: executorId,
-        userRole: 'SYSTEM',
-        action: 'CREATE_PATIENT',
-        resource: 'PATIENT',
-        resourceId: result.id,
-        branchId: data.branchId,
-        details: { patientId: result.patientId }
-      }).catch(() => {});
-    }
-
-    return result;
   }
 
   static async getPatient(identifier: string, branchId?: string) {

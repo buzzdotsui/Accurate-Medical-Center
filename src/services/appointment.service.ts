@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db/client';
 import { CreateAppointmentInput, UpdateAppointmentStatusInput } from '@/lib/validations/appointment';
-import { generateAppointmentId, generateVisitId } from '@/lib/utils/generate-id';
+import { generateVisitId, IdGeneratorService } from '@/lib/utils/generate-id';
+
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 
@@ -34,20 +35,22 @@ export class AppointmentService {
       if (conflict) throw new AppError('Doctor already has an appointment at this time slot', 'BAD_REQUEST', 400);
     }
 
-    const appointmentId = generateAppointmentId();
-    const appointment = await prisma.appointment.create({
-      data: {
-        appointmentId,
-        patientId: data.patientId,
-        branchId: data.branchId,
-        doctorId: data.doctorId || null,
-        date: new Date(data.date),
-        timeSlot: data.timeSlot || null,
-        type: data.type,
-        reason: data.reason || null,
-        notes: data.notes || null,
-        status: 'SCHEDULED',
-      },
+    const appointment = await prisma.$transaction(async (tx) => {
+      const appointmentId = await IdGeneratorService.generateAppointmentId(tx);
+      return tx.appointment.create({
+        data: {
+          appointmentId,
+          patientId: data.patientId,
+          branchId: data.branchId,
+          doctorId: data.doctorId || null,
+          date: new Date(data.date),
+          timeSlot: data.timeSlot || null,
+          type: data.type,
+          reason: data.reason || null,
+          notes: data.notes || null,
+          status: 'SCHEDULED',
+        },
+      });
     });
 
     await AuditService.log({
@@ -69,9 +72,8 @@ export class AppointmentService {
     notes?: string;
     branchId: string;
   }) {
-    // We import PatientService and generatePatientId lazily to avoid circular dependencies if any
+    // We import PatientService lazily to avoid circular dependencies if any
     const { PatientService } = await import('./patient.service');
-    const { generatePatientId } = await import('@/lib/utils/generate-id');
 
     // 1. Deduplicate patient safely (non-transactional read is fine here)
     let patient = await PatientService.findExistingPatient({
@@ -86,8 +88,7 @@ export class AppointmentService {
       
       if (!currentPatientId) {
         // Create new patient inside transaction
-        const totalPatients = await tx.patient.count({ where: { branchId: data.branchId, deletedAt: null } });
-        const newPatientIdStr = generatePatientId(totalPatients + 1);
+        const newPatientIdStr = await IdGeneratorService.generatePatientId(tx);
         
         const newPatient = await tx.patient.create({
           data: {
@@ -103,7 +104,7 @@ export class AppointmentService {
       }
 
       // Create appointment
-      const appointmentId = generateAppointmentId();
+      const appointmentId = await IdGeneratorService.generateAppointmentId(tx);
       return tx.appointment.create({
         data: {
           appointmentId,
@@ -131,7 +132,7 @@ export class AppointmentService {
   static async createWalkIn(data: { patientId: string; branchId: string; doctorId?: string; reason?: string; type?: string }, executorId: string) {
     const now = new Date();
     return prisma.$transaction(async (tx) => {
-      const appointmentId = generateAppointmentId();
+      const appointmentId = await IdGeneratorService.generateAppointmentId(tx);
       const appointment = await tx.appointment.create({
         data: {
           appointmentId,

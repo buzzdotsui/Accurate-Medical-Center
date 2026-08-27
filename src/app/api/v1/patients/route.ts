@@ -68,9 +68,22 @@ export const POST = withRole(
     }
     
     const patient = await PatientService.createPatient({
-      ...body,
+      firstName: body.firstName,
+      lastName: body.lastName,
+      email: body.email,
+      phone: body.phone,
+      gender: body.gender,
+      dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : undefined,
+      address: body.address,
+      bloodGroup: body.bloodGroup,
       branchId: branchId!,
-    }, session.user.id);
+      auditContext: {
+        userId: session.user.id,
+        userRole: session.user.role,
+        ip: req.headers.get('x-forwarded-for') ?? undefined,
+        userAgent: req.headers.get('user-agent') || undefined,
+      }
+    });
     return created(patient);
   }
 );

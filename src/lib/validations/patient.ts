@@ -11,6 +11,7 @@ export const CreatePatientSchema = z.object({
   genotype: z.enum(['AA', 'AS', 'SS', 'AC', 'SC']).optional(),
   address: z.string().optional(),
   branchId: z.string().cuid('Invalid branch ID').optional(),
+  userId: z.string().cuid('Invalid user ID').optional(),
 });
 
 export type CreatePatientInput = z.infer<typeof CreatePatientSchema>;

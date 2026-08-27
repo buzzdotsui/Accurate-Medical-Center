@@ -90,10 +90,17 @@ export function Topbar({ user, role }: TopbarProps) {
           </kbd>
         </div>
 
-        {/* Notifications */}
-        <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors">
+        {/* Notifications — UI placeholder, not yet implemented (Stage 3.5).
+            The red dot and onClick are intentionally absent until a Notification
+            model and API are added in a future stage. */}
+        <button
+          className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors cursor-not-allowed opacity-60"
+          title="Notifications — coming soon"
+          aria-label="Notifications (not yet available)"
+          disabled
+          type="button"
+        >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 border-2 border-background" />
         </button>
 
         {/* User Profile */}

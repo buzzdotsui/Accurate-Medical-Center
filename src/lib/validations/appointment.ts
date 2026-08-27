@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 export const CreateAppointmentSchema = z.object({
-  patientId: z.string().cuid('Invalid patient ID'),
-  branchId: z.string().cuid('Invalid branch ID'),
-  doctorId: z.string().cuid('Invalid doctor ID').optional(),
+  patientId: z.string().min(1, 'Invalid patient ID'),
+  branchId: z.string().min(1, 'Invalid branch ID'),
+  doctorId: z.string().min(1, 'Invalid doctor ID').optional(),
   date: z.string().datetime(),
   timeSlot: z.string().optional(),
   type: z.enum(['IN_PERSON', 'ONLINE']).default('IN_PERSON'),

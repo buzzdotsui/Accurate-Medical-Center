@@ -24,6 +24,11 @@ import { ROLES, ROLE_LABELS, STAFF_ROLES } from "@/config/roles";
 
 // Client-side schema — mirrors the server-side CreateStaffSchema.
 // branchId is omitted here because the server uses the admin's own branch.
+//
+// FIX (Stage 3.5): z.string().cuid() was removed in Zod v4. This caused a
+// TypeError at module load time, preventing React from hydrating the page and
+// leaving the "Add Staff Member" button with no click handler. Replaced with
+// z.string().optional() for optional ID fields.
 const ClientCreateStaffSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -35,7 +40,7 @@ const ClientCreateStaffSchema = z.object({
     ROLES.RADIOGRAPHER, ROLES.ACCOUNTANT, ROLES.THEATRE_STAFF,
     ROLES.MATERNAL_STAFF, ROLES.MENTAL_HEALTH, ROLES.AMBULANCE,
   ]),
-  departmentId: z.string().cuid("Invalid department ID").optional().or(z.literal("")),
+  departmentId: z.string().optional().or(z.literal("")),
   specialization: z.string().optional(),
 });
 

@@ -21,18 +21,18 @@ export const POST = withRole(
   async (req, session) => {
     const body = await parseBody(req, CreateStaffSchema);
     
-    // For ADMIN, they can only create staff in their own branch
-    if (session.user.role !== ROLES.SUPER_ADMIN) {
-      if (body.branchId !== session.user.branchId) {
-        throw new Error('FORBIDDEN');
-      }
+    // Resolve the effective branchId. Dialog clients never send branchId;
+    // the server derives it from the admin's session.
+    // SUPER_ADMIN may optionally specify a target branch.
+    let branchId = (session.user.role === ROLES.SUPER_ADMIN && body.branchId)
+      ? body.branchId
+      : (body.branchId ?? session.user.branchId);
+
+    // For non-SUPER_ADMIN, if they explicitly specify a different branch, reject it.
+    if (session.user.role !== ROLES.SUPER_ADMIN && body.branchId && body.branchId !== session.user.branchId) {
+      throw new Error('FORBIDDEN');
     }
-    
-    // Use user's branch if not SUPER_ADMIN
-    let branchId = session.user.role === ROLES.SUPER_ADMIN && body.branchId
-      ? body.branchId 
-      : session.user.branchId;
-      
+
     // SUPER_ADMIN may not have a personal branchId — fall back to the first (HQ) branch
     if (!branchId && session.user.role === ROLES.SUPER_ADMIN) {
       const { prisma: db } = await import('@/lib/db/client');
@@ -46,7 +46,7 @@ export const POST = withRole(
       }
       branchId = hq.id;
     }
-    
+
     if (!branchId) {
       throw new Error('Branch ID is required');
     }

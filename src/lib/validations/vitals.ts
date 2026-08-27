@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const SaveVitalsSchema = z.object({
-  visitId: z.string().cuid('Invalid visit ID'),
+  visitId: z.string().min(1, 'Invalid visit ID'),
   bloodPressure: z.string().regex(/^\d{2,3}\/\d{2,3}$/, 'Format must be SYS/DIA (e.g. 120/80)').optional().or(z.literal('')),
   heartRate: z.coerce.number().min(30).max(250).optional(),
   temperature: z.coerce.number().min(30).max(45).optional(),

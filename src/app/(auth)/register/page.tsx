@@ -21,50 +21,65 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
 
+    // Step 1: Create the Better Auth user account
     const { data, error: authError } = await signUp.email({
       email,
       password,
       name: `${firstName} ${lastName}`.trim(),
     });
 
-    setLoading(false);
-
     if (authError) {
+      setLoading(false);
       setError(authError.message || "Failed to create account. Please try again.");
       return;
     }
 
-    if (data) {
-      // Explicitly sign in because autoSignIn is disabled globally in our auth config
-      const { error: signInError } = await signIn.email({ email, password });
-      
-      if (signInError) {
-        setError(signInError.message || "Account created, but sign-in failed. Please try logging in manually.");
+    if (!data) {
+      setLoading(false);
+      setError("Registration failed unexpectedly. Please try again.");
+      return;
+    }
+
+    // Step 2: Sign in to create a session (autoSignIn is disabled in auth config)
+    const { error: signInError } = await signIn.email({ email, password });
+
+    if (signInError) {
+      setLoading(false);
+      setError(
+        "Account created but automatic sign-in failed. Please sign in manually at /login."
+      );
+      return;
+    }
+
+    // Step 3: Create the Patient profile linked to this auth account
+    try {
+      const res = await fetch('/api/v1/patients/self-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // credentials: 'include' is the default for same-origin fetches
+        body: JSON.stringify({ firstName: firstName.trim(), lastName: lastName.trim() }),
+      });
+
+      if (!res.ok) {
+        const result = await res.json().catch(() => ({}));
+        setLoading(false);
+        // Safe recovery: auth user exists — direct them to login, server can create profile on next visit
+        setError(
+          result.error
+            ? `${result.error} — Please sign in to complete your profile setup.`
+            : "Account created, but patient profile setup failed. Please sign in and contact support if this persists."
+        );
         return;
       }
 
-      // Automatically create a Patient Profile connected to this Better Auth account
-
-      try {
-        const res = await fetch('/api/v1/patients/self-register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ firstName: firstName.trim(), lastName: lastName.trim() }),
-        });
-        
-        if (!res.ok) {
-          const result = await res.json();
-          setError(result.error || "Account created, but patient profile linking failed. Please contact support.");
-          return;
-        }
-
-        // Navigate to dashboard upon successful registration
-        router.push("/dashboard");
-        router.refresh();
-      } catch (err) {
-        setError("Network error while creating patient profile.");
-        return;
-      }
+      // Success — navigate to the role-based dashboard router
+      router.push("/dashboard");
+      router.refresh();
+    } catch (_err) {
+      setLoading(false);
+      setError(
+        "Network error while creating patient profile. Your account was created — please sign in at /login."
+      );
     }
   }
 

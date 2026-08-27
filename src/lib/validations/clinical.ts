@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 export const StartVisitSchema = z.object({
-  patientId: z.string().cuid(),
-  appointmentId: z.string().cuid().optional(),
-  doctorId: z.string().cuid().optional(),
+  patientId: z.string().min(1),
+  appointmentId: z.string().min(1).optional(),
+  doctorId: z.string().min(1).optional(),
   chiefComplaint: z.string().optional(),
 });
 

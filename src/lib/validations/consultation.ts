@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const CreateConsultationSchema = z.object({
-  visitId: z.string().cuid('Invalid visit ID'),
+  visitId: z.string().min(1, 'Invalid visit ID'),
   subjective: z.string().min(1, 'Subjective notes are required'),
   objective: z.string().min(1, 'Objective notes are required'),
   assessment: z.string().min(1, 'Assessment is required'),

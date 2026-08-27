@@ -14,6 +14,11 @@ const DialogPortal = DialogPrimitive.Portal
 
 const DialogClose = DialogPrimitive.Close
 
+/**
+ * DialogOverlay FIX (Stage 3.5): replaced broken tailwindcss-animate classes
+ * (animate-out, fade-out-0) with native CSS opacity transition so Radix
+ * receives transitionend and correctly unmounts the portal.
+ */
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -21,7 +26,10 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
+      "fixed inset-0 z-50 bg-black/80",
+      "transition-opacity duration-200",
+      "data-[state=open]:opacity-100",
+      "data-[state=closed]:opacity-0 data-[state=closed]:pointer-events-none",
       className
     )}
     {...props}
@@ -38,7 +46,11 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-scale-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
+        // Use native CSS opacity+scale transitions — Tailwind v4 native, no plugin needed.
+        "transition-[opacity,transform] duration-200",
+        "data-[state=open]:opacity-100 data-[state=open]:scale-100",
+        "data-[state=closed]:opacity-0 data-[state=closed]:scale-95 data-[state=closed]:pointer-events-none",
         className
       )}
       {...props}

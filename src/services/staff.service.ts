@@ -4,12 +4,21 @@ import { IdGeneratorService } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { auth } from '@/lib/auth/config';
 
+// ResolvedStaffInput is derived from CreateStaffInput but makes branchId
+// required. The API route always resolves the correct branch from the session
+// before calling this service, so by the time we reach here branchId is
+// guaranteed to be a concrete string.
+type ResolvedStaffInput = Omit<CreateStaffInput, 'branchId'> & { branchId: string };
+
 export class StaffService {
   /**
    * Create a new staff member (Admin only action).
    * Registers the user in the authentication system and creates the Staff profile.
+   *
+   * @param data - Staff input with a resolved (non-null) branchId
+   * @param adminUserId - The ID of the admin performing the action (for audit log)
    */
-  static async createStaff(data: CreateStaffInput, adminUserId: string) {
+  static async createStaff(data: ResolvedStaffInput, adminUserId: string) {
     // 1. Check if branch exists
     const branch = await prisma.branch.findUnique({
       where: { id: data.branchId },
@@ -67,7 +76,7 @@ export class StaffService {
           data: {
             userId: adminUserId,
             userRole: 'ADMIN',
-            action: 'CREATE_STAFF',
+            action: 'STAFF_CREATED',
             resource: 'STAFF',
             resourceId: staff.id,
             details: JSON.stringify({ role: data.role, email: data.email }),

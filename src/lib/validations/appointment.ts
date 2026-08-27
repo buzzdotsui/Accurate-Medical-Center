@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 export const CreateAppointmentSchema = z.object({
   patientId: z.string().min(1, 'Invalid patient ID'),
-  branchId: z.string().min(1, 'Invalid branch ID'),
+  // branchId is OPTIONAL here — the API route resolves it from the session
+  // (for SUPER_ADMIN: falls back to first active HQ branch).
+  // Clients (dialogs) should never need to supply branchId.
+  branchId: z.string().min(1, 'Invalid branch ID').optional(),
   doctorId: z.string().min(1, 'Invalid doctor ID').optional(),
   date: z.string().datetime(),
   timeSlot: z.string().optional(),

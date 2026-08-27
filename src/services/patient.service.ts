@@ -48,7 +48,7 @@ export class PatientService {
         await AuditService.log({
           userId: data.auditContext.userId || data.userId || "system",
           userRole: data.auditContext.userRole || "PATIENT",
-          action: "CREATE_PATIENT",
+          action: "PATIENT_REGISTERED",
           resource: "PATIENT",
           resourceId: patient.id,
           details: { patientId: patient.patientId, email: patient.email },
@@ -293,7 +293,7 @@ export class PatientService {
       await AuditService.log({
         userId: executorId,
         userRole: 'SYSTEM',
-        action: 'UPDATE_PATIENT',
+        action: 'PATIENT_UPDATED',
         resource: 'PATIENT',
         resourceId: id,
         branchId: existing.branchId,
@@ -317,7 +317,7 @@ export class PatientService {
       await AuditService.log({
         userId: executorId,
         userRole: 'SYSTEM',
-        action: 'DELETE_PATIENT',
+        action: 'PATIENT_DEACTIVATED',
         resource: 'PATIENT',
         resourceId: id,
         branchId: existing.branchId,

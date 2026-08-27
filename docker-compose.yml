@@ -13,6 +13,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - BETTER_AUTH_SECRET=generate_a_secure_secret_for_production
       - BETTER_AUTH_URL=http://localhost:3000
+      - ALLOW_SEED=true
     depends_on:
       db:
         condition: service_healthy

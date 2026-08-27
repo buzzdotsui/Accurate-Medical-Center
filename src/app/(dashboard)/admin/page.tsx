@@ -1,9 +1,21 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { StatCard } from "@/components/ui/stat-card";
 import { Users, Calendar, TrendingUp, Bed, Activity, Clock, ShieldAlert, BarChart3 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const [staffDialogOpen, setStaffDialogOpen] = useState(false);
+
+  const handleStaffSuccess = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -12,10 +24,14 @@ export default function AdminDashboardPage() {
           <p className="text-sm text-muted-foreground mt-1">Real-time metrics for Accurate Medical Center.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2 bg-background">
+          <Button
+            variant="outline"
+            className="gap-2 bg-background"
+            onClick={() => router.push("/analytics/reports")}
+          >
             <BarChart3 className="w-4 h-4" /> Reports
           </Button>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setStaffDialogOpen(true)}>
             <Users className="w-4 h-4" /> Add Staff
           </Button>
         </div>
@@ -52,13 +68,20 @@ export default function AdminDashboardPage() {
             title="No staff on duty"
             description="Staff shift assignments will appear here once staff members are added to the system."
             action={
-              <Button size="sm" className="gap-2">
+              <Button size="sm" className="gap-2" onClick={() => setStaffDialogOpen(true)}>
                 <Users className="w-4 h-4" /> Add Staff Member
               </Button>
             }
           />
         </div>
       </div>
+
+      {/* Staff creation dialog — wired to the dashboard quick actions */}
+      <CreateStaffDialog
+        open={staffDialogOpen}
+        onOpenChange={setStaffDialogOpen}
+        onSuccess={handleStaffSuccess}
+      />
     </div>
   );
 }

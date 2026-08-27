@@ -1,10 +1,22 @@
 import { prisma } from '@/lib/db/client';
 import { logger } from '@/lib/utils/logger';
 
+export type AuditAction = 
+  // PATIENT DOMAIN
+  | 'PATIENT_REGISTERED' | 'PATIENT_UPDATED' | 'PATIENT_ACTIVATED' | 'PATIENT_DEACTIVATED'
+  // STAFF DOMAIN
+  | 'STAFF_CREATED' | 'STAFF_UPDATED' | 'STAFF_ACTIVATED' | 'STAFF_DEACTIVATED'
+  // APPOINTMENT DOMAIN
+  | 'APPOINTMENT_CREATED' | 'APPOINTMENT_UPDATED' | 'APPOINTMENT_CANCELLED' | 'APPOINTMENT_COMPLETED'
+  // OTHER EXISTING ACTIONS
+  | 'RECORD_VITALS' | 'SAVE_RADIOLOGY_REPORT' | 'CREATE_PRESCRIPTION' | 'DISPENSE_PRESCRIPTION' 
+  | 'SAVE_LAB_RESULT' | 'ADMIT_PATIENT' | 'ADJUST_STOCK' | 'ASSIGN_SHIFT' 
+  | 'CREATE_CONSULTATION' | 'START_VISIT' | 'ADD_DIAGNOSIS' | 'PROCESS_PAYMENT' | 'UPDATE_SETTINGS';
+
 export interface AuditLogParams {
   userId: string;
   userRole: string;
-  action: string;
+  action: AuditAction;
   resource: string;
   resourceId?: string;
   details?: Record<string, unknown>;

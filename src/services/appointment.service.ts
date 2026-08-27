@@ -54,7 +54,7 @@ export class AppointmentService {
     });
 
     await AuditService.log({
-      userId: executorId, userRole: 'SYSTEM', action: 'CREATE_APPOINTMENT',
+      userId: executorId, userRole: 'SYSTEM', action: 'APPOINTMENT_CREATED',
       resource: 'APPOINTMENT', resourceId: appointment.id, branchId: data.branchId,
       details: { patientId: data.patientId, date: data.date, timeSlot: data.timeSlot }
     }).catch(() => {});
@@ -121,7 +121,7 @@ export class AppointmentService {
 
     // Audit log (we log with 'PUBLIC' role to identify the source)
     await AuditService.log({
-      userId: 'PUBLIC', userRole: 'SYSTEM', action: 'REQUEST_PUBLIC_APPOINTMENT',
+      userId: 'PUBLIC', userRole: 'SYSTEM', action: 'APPOINTMENT_CREATED',
       resource: 'APPOINTMENT', resourceId: appointment.id, branchId: data.branchId,
       details: { patientId: appointment.patientId, service: data.service }
     }).catch(() => {});
@@ -159,7 +159,7 @@ export class AppointmentService {
       });
 
       await AuditService.log({
-        userId: executorId, userRole: 'SYSTEM', action: 'CREATE_WALKIN',
+        userId: executorId, userRole: 'SYSTEM', action: 'APPOINTMENT_CREATED',
         resource: 'APPOINTMENT', resourceId: appointment.id, branchId: data.branchId,
         details: { patientId: data.patientId, visitId: visit.id }
       }).catch(() => {});
@@ -256,8 +256,12 @@ export class AppointmentService {
       return result;
     });
 
+    const action = data.status === 'COMPLETED' ? 'APPOINTMENT_COMPLETED' : 
+                   data.status === 'CANCELLED' ? 'APPOINTMENT_CANCELLED' : 
+                   'APPOINTMENT_UPDATED';
+
     await AuditService.log({
-      userId: executorId, userRole: 'SYSTEM', action: 'UPDATE_APPOINTMENT_STATUS',
+      userId: executorId, userRole: 'SYSTEM', action,
       resource: 'APPOINTMENT', resourceId: updated.id, branchId: appointment.branchId,
       details: { oldStatus: appointment.status, newStatus: data.status }
     }).catch(() => {});
@@ -283,7 +287,7 @@ export class AppointmentService {
 
     if (executorId) {
       await AuditService.log({
-        userId: executorId, userRole: 'SYSTEM', action: 'RESCHEDULE_APPOINTMENT',
+        userId: executorId, userRole: 'SYSTEM', action: 'APPOINTMENT_UPDATED',
         resource: 'APPOINTMENT', resourceId: id, branchId: appointment.branchId,
         details: { newDate, newTimeSlot }
       }).catch(() => {});

@@ -5,61 +5,100 @@ import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 import { Prisma } from '@prisma/client';
 
-export class PatientService {
-  static async createPatient(data: {
+export type CreatePatientData = {
+  userId?: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  gender?: string;
+  dateOfBirth?: Date;
+  address?: string;
+  bloodGroup?: string;
+  genotype?: string;
+  branchId?: string;
+  auditContext?: {
     userId?: string;
-    firstName: string;
-    lastName: string;
-    email?: string;
-    phone?: string;
-    gender?: string;
-    dateOfBirth?: Date;
-    address?: string;
-    bloodGroup?: string;
-    branchId?: string;
-    auditContext?: {
-      userId?: string;
-      userRole?: string;
-      ip?: string;
-      userAgent?: string;
-    };
-  }) {
-    return await prisma.$transaction(async (tx) => {
-      // Concurrency-safe sequential patient ID (e.g., AMC-PT-000001)
-      const patientId = await IdGeneratorService.generatePatientId(tx);
+    userRole?: string;
+    ip?: string;
+    userAgent?: string;
+    /** Free-text tag identifying which entry point created this patient (for audit trail clarity). */
+    source?: string;
+  };
+};
 
-      const patient = await tx.patient.create({
-        data: {
-          patientId,
-          userId: data.userId ?? null,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email ?? null,
-          phone: data.phone ?? null,
-          gender: data.gender ?? null,
-          dateOfBirth: data.dateOfBirth ?? null,
-          address: data.address ?? null,
-          bloodGroup: data.bloodGroup ?? null,
-          ...(data.branchId ? { branchId: data.branchId } : {}),
-        } as Prisma.PatientUncheckedCreateInput,
-      });
+export class PatientService {
+  /**
+   * THE single authoritative patient-creation routine.
+   *
+   * Every code path that creates a Patient row — public self-registration,
+   * admin/reception registration, and the implicit patient creation that
+   * happens during public appointment booking — MUST go through this method
+   * (directly, or via `createPatient` below). It is the only place a Patient
+   * ID is minted and the only place a PATIENT_REGISTERED audit event is
+   * written, so identity/audit behaviour cannot drift between entry points.
+   *
+   * Accepts a caller-supplied transaction so it can be composed atomically
+   * with other writes (e.g. creating an appointment for a brand-new
+   * public-booking patient in the same transaction).
+   */
+  static async createPatientInTx(
+    tx: Prisma.TransactionClient,
+    data: CreatePatientData
+  ) {
+    // Concurrency-safe sequential patient ID (e.g., AMC-PT-000001)
+    const patientId = await IdGeneratorService.generatePatientId(tx);
 
-      if (data.auditContext) {
-        await AuditService.log({
-          userId: data.auditContext.userId || data.userId || "system",
-          userRole: data.auditContext.userRole || "PATIENT",
-          action: "PATIENT_REGISTERED",
-          resource: "PATIENT",
-          resourceId: patient.id,
-          details: { patientId: patient.patientId, email: patient.email },
-          ip: data.auditContext.ip,
-          userAgent: data.auditContext.userAgent,
-          branchId: data.branchId,
-        });
-      }
-
-      return patient;
+    const patient = await tx.patient.create({
+      data: {
+        patientId,
+        userId: data.userId ?? null,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email ?? null,
+        phone: data.phone ?? null,
+        gender: data.gender ?? null,
+        dateOfBirth: data.dateOfBirth ?? null,
+        address: data.address ?? null,
+        bloodGroup: data.bloodGroup ?? null,
+        genotype: data.genotype ?? null,
+        ...(data.branchId ? { branchId: data.branchId } : {}),
+      } as Prisma.PatientUncheckedCreateInput,
     });
+
+    // Written via `tx` (not the global `AuditService.log`) so the audit
+    // event participates in the same transaction as the Patient insert
+    // and the ID sequence increment. If the transaction rolls back, the
+    // audit event rolls back with it — no orphaned audit records.
+    // This runs unconditionally: every patient creation must leave an
+    // audit trail, regardless of which entry point called this method.
+    await tx.auditLog.create({
+      data: {
+        userId: data.auditContext?.userId || data.userId || "system",
+        userRole: data.auditContext?.userRole || "PATIENT",
+        action: "PATIENT_REGISTERED",
+        resource: "PATIENT",
+        resourceId: patient.id,
+        details: {
+          patientId: patient.patientId,
+          email: patient.email,
+          source: data.auditContext?.source ?? "UNSPECIFIED",
+        } as Prisma.InputJsonValue,
+        ip: data.auditContext?.ip,
+        userAgent: data.auditContext?.userAgent,
+        branchId: patient.branchId,
+      },
+    });
+
+    return patient;
+  }
+
+  /**
+   * Convenience wrapper around `createPatientInTx` for callers that don't
+   * already have an open transaction (the common case).
+   */
+  static async createPatient(data: CreatePatientData) {
+    return await prisma.$transaction((tx) => this.createPatientInTx(tx, data));
   }
 
   static async getPatient(identifier: string, branchId?: string) {
@@ -306,7 +345,7 @@ export class PatientService {
   static async deletePatient(id: string, executorId?: string) {
     const existing = await prisma.patient.findUnique({ where: { id } });
     if (!existing) throw new AppError('Patient not found', 'NOT_FOUND', 404);
-    if (existing.deletedAt) throw new AppError('Patient already deleted', 'BAD_REQUEST', 400);
+    if (existing.deletedAt) throw new AppError('Patient already deactivated', 'BAD_REQUEST', 400);
 
     const result = await prisma.patient.update({
       where: { id },
@@ -318,6 +357,33 @@ export class PatientService {
         userId: executorId,
         userRole: 'SYSTEM',
         action: 'PATIENT_DEACTIVATED',
+        resource: 'PATIENT',
+        resourceId: id,
+        branchId: existing.branchId,
+      }).catch(() => {});
+    }
+
+    return result;
+  }
+
+  /**
+   * Reactivate a previously deactivated (soft-deleted) patient record.
+   */
+  static async activatePatient(id: string, executorId?: string) {
+    const existing = await prisma.patient.findUnique({ where: { id } });
+    if (!existing) throw new AppError('Patient not found', 'NOT_FOUND', 404);
+    if (!existing.deletedAt) throw new AppError('Patient is already active', 'BAD_REQUEST', 400);
+
+    const result = await prisma.patient.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+
+    if (executorId) {
+      await AuditService.log({
+        userId: executorId,
+        userRole: 'SYSTEM',
+        action: 'PATIENT_ACTIVATED',
         resource: 'PATIENT',
         resourceId: id,
         branchId: existing.branchId,

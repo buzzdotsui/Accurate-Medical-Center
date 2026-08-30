@@ -1,14 +1,17 @@
 import { NextRequest } from 'next/server';
-import { withAuth, parseBody } from '@/lib/api/middleware';
+import { withRole, parseBody } from '@/lib/api/middleware';
 import { CreateConsultationSchema } from '@/lib/validations/consultation';
 import { ConsultationService } from '@/services/consultation.service';
 import { created } from '@/lib/api/response';
+import { ROLES } from '@/config/roles';
 
 /**
  * POST /api/v1/consultations
- * Create a new consultation (SOAP note) and complete the visit
+ * Create a new consultation (SOAP note), diagnoses, and prescriptions,
+ * and complete the visit. This is exclusively a doctor's clinical
+ * responsibility.
  */
-export const POST = withAuth(async (req, session) => {
+export const POST = withRole([ROLES.SUPER_ADMIN, ROLES.DOCTOR], async (req, session) => {
   const body = await parseBody(req, CreateConsultationSchema);
   const consultation = await ConsultationService.saveConsultation(body, session.user.id);
   return created(consultation);

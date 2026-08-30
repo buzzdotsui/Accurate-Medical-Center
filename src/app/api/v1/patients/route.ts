@@ -5,8 +5,7 @@ import { PatientService } from '@/services/patient.service';
 import { ok, created } from '@/lib/api/response';
 import { z } from 'zod';
 import { ROLES } from '@/config/roles';
-import { buildBranchFilter } from '@/lib/auth/resource-authorization';
-import { prisma } from '@/lib/db/client';
+import { buildBranchFilter, resolveBranchId } from '@/lib/auth/resource-authorization';
 
 const ListPatientsQuerySchema = z.object({
   skip: z.coerce.number().min(0).optional().default(0),
@@ -44,29 +43,9 @@ export const POST = withRole(
   [ROLES.RECEPTIONIST, ROLES.ADMIN, ROLES.SUPER_ADMIN, ROLES.DOCTOR, ROLES.NURSE],
   async (req, session) => {
     const body = await parseBody(req, CreatePatientSchema);
-    
-    // If user specified a branchId, ensure they can only specify their own branch
-    if (body.branchId && session.user.role !== ROLES.SUPER_ADMIN) {
-      if (body.branchId !== session.user.branchId) {
-        throw new Error('FORBIDDEN');
-      }
-    }
-    
-    // Resolve branchId from session, or for SUPER_ADMIN fall back to HQ branch
-    let branchId = session.user.role === ROLES.SUPER_ADMIN 
-      ? body.branchId 
-      : session.user.branchId;
-    
-    if (!branchId && session.user.role === ROLES.SUPER_ADMIN) {
-      const hq = await prisma.branch.findFirst({
-        where: { isActive: true },
-        orderBy: { createdAt: 'asc' },
-        select: { id: true },
-      });
-      if (!hq) throw new Error('No active branch found.');
-      branchId = hq.id;
-    }
-    
+
+    const branchId = await resolveBranchId(session.user, body.branchId);
+
     const patient = await PatientService.createPatient({
       firstName: body.firstName,
       lastName: body.lastName,
@@ -76,12 +55,14 @@ export const POST = withRole(
       dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : undefined,
       address: body.address,
       bloodGroup: body.bloodGroup,
-      branchId: branchId!,
+      genotype: body.genotype,
+      branchId,
       auditContext: {
         userId: session.user.id,
         userRole: session.user.role,
         ip: req.headers.get('x-forwarded-for') ?? undefined,
         userAgent: req.headers.get('user-agent') || undefined,
+        source: 'STAFF_REGISTRATION',
       }
     });
     return created(patient);

@@ -374,6 +374,60 @@ export function buildBranchFilter(user: SessionUser): { branchId?: string } {
 }
 
 /**
+ * Resolves the authoritative branchId for a WRITE operation (e.g. creating a
+ * patient, staff member, or appointment).
+ *
+ * Rules:
+ * - SUPER_ADMIN may operate on any branch. If they don't specify one, we
+ *   fall back to the first active branch (SUPER_ADMIN accounts are not
+ *   themselves tied to a specific branch).
+ * - Every other role is restricted to their own assigned branch. If the
+ *   caller supplies a different branchId, this is rejected with 403.
+ * - If the resolved branchId is still missing (e.g. an ADMIN, RECEPTIONIST,
+ *   DOCTOR, NURSE, or PATIENT account with no branchId assigned), this
+ *   throws a controlled 403 rather than letting `undefined`/`null` reach
+ *   Prisma, which would otherwise surface as an unhandled NOT NULL
+ *   constraint violation (a raw 500).
+ */
+export async function resolveBranchId(
+  user: SessionUser,
+  requestedBranchId: string | null | undefined,
+): Promise<string> {
+  if (
+    user.role !== ROLES.SUPER_ADMIN &&
+    requestedBranchId &&
+    requestedBranchId !== user.branchId
+  ) {
+    throw new AppError('You cannot operate on another branch.', 'FORBIDDEN', 403);
+  }
+
+  let branchId: string | null | undefined =
+    user.role === ROLES.SUPER_ADMIN ? requestedBranchId : user.branchId;
+
+  if (!branchId && user.role === ROLES.SUPER_ADMIN) {
+    const hq = await prisma.branch.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    });
+    if (!hq) {
+      throw new AppError('No active branch found. Please seed the database first.', 'BAD_REQUEST', 400);
+    }
+    branchId = hq.id;
+  }
+
+  if (!branchId) {
+    throw new AppError(
+      'Your account is not assigned to a branch. Please contact an administrator.',
+      'FORBIDDEN',
+      403,
+    );
+  }
+
+  return branchId;
+}
+
+/**
  * Verify staff member access (can view another staff member's profile).
  */
 export async function verifyStaffAccess(

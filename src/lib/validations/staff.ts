@@ -34,3 +34,24 @@ export const CreateStaffSchema = z.object({
 });
 
 export type CreateStaffInput = z.infer<typeof CreateStaffSchema>;
+
+/**
+ * Schema for updating a staff member's profile.
+ * Intentionally excludes email/password/role — credential and role changes
+ * must go through the authentication system, never through this endpoint.
+ */
+export const UpdateStaffSchema = z.object({
+  departmentId: z.string().min(1, 'Invalid department ID').optional().nullable(),
+  specialization: z.string().optional().nullable(),
+  licenseNumber: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+});
+
+export type UpdateStaffInput = z.infer<typeof UpdateStaffSchema>;
+
+export const SetStaffStatusSchema = z.object({
+  isActive: z.boolean(),
+});
+
+export type SetStaffStatusInput = z.infer<typeof SetStaffStatusSchema>;

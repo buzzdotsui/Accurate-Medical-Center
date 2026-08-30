@@ -25,3 +25,9 @@ export const UpdatePatientSchema = CreatePatientSchema.partial().extend({
 });
 
 export type UpdatePatientInput = z.infer<typeof UpdatePatientSchema>;
+
+export const SetPatientStatusSchema = z.object({
+  isActive: z.boolean(),
+});
+
+export type SetPatientStatusInput = z.infer<typeof SetPatientStatusSchema>;

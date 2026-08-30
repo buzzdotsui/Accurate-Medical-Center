@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server';
-import { withAuth, parseBody } from '@/lib/api/middleware';
+import { withAuth, withRole, parseBody } from '@/lib/api/middleware';
 import { UpdatePatientSchema } from '@/lib/validations/patient';
 import { PatientService } from '@/services/patient.service';
 import { ok } from '@/lib/api/response';
 import { verifyPatientAccess } from '@/lib/auth/resource-authorization';
-import { AppError } from '@/lib/api/errors';
 import { RouteContext, getParam } from '@/lib/utils/route-types';
+import { ROLES } from '@/config/roles';
 
 /**
  * GET /api/v1/patients/[id]
@@ -28,29 +28,28 @@ export const GET = withAuth(async (req, session, ctx: RouteContext) => {
 
 /**
  * PATCH /api/v1/patients/[id]
- * Update patient details
+ * Update administrative patient details (demographics, contact info).
  * 
  * Authorization:
  * - SUPER_ADMIN: Can update any patient
- * - PATIENT: Cannot update (use patient portal)
- * - Staff: Can update patients in their branch
+ * - ADMIN, RECEPTIONIST: "update administrative patient information" is
+ *   their responsibility, scoped to their own branch
+ * - PATIENT: Cannot update via this endpoint (use the patient portal)
+ * - Other clinical/support roles (DOCTOR, NURSE, PHARMACIST, etc.) do not
+ *   edit patient demographic records — they work through visits,
+ *   diagnoses, and prescriptions instead.
  */
-export const PATCH = withAuth(async (req, session, ctx: RouteContext) => {
-  const patientId = await getParam(ctx, 'id');
-  
-  if (session.user.role === 'PATIENT') {
-    throw new AppError(
-      'Patients cannot update their profile via this endpoint.',
-      'FORBIDDEN',
-      403
-    );
+export const PATCH = withRole(
+  [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.RECEPTIONIST],
+  async (req, session, ctx: RouteContext) => {
+    const patientId = await getParam(ctx, 'id');
+
+    // Verify access before updating patient
+    await verifyPatientAccess(session.user, patientId, 'UPDATE');
+
+    const body = await parseBody(req, UpdatePatientSchema);
+
+    const patient = await PatientService.updatePatient({ ...body, id: patientId }, session.user.id);
+    return ok(patient);
   }
-  
-  // Verify access before updating patient
-  await verifyPatientAccess(session.user, patientId, 'UPDATE');
-  
-  const body = await parseBody(req, UpdatePatientSchema);
-  
-  const patient = await PatientService.updatePatient({ ...body, id: patientId });
-  return ok(patient);
-});
+);

@@ -5,10 +5,13 @@ import { AuditService } from './audit.service';
 
 export class HrService {
   /**
-   * Get all active staff members with their departments
+   * Get all staff members with their departments.
+   * When `branchId` is provided (i.e. caller is not SUPER_ADMIN), results
+   * are scoped to that branch only.
    */
-  static async getStaffDirectory() {
+  static async getStaffDirectory(branchId?: string) {
     return await prisma.staff.findMany({
+      where: branchId ? { branchId } : undefined,
       include: {
         user: { select: { name: true, email: true, role: true } },
         department: true

@@ -1,6 +1,8 @@
 import { auth } from './config';
 import { type NextRequest } from 'next/server';
 import { AppError } from '@/lib/api/errors';
+import { prisma } from '@/lib/db/client';
+import { ROLES } from '@/config/roles';
 
 /**
  * A typed representation of the authenticated user extracted from a session.
@@ -38,23 +40,38 @@ export async function getSessionUser(req: NextRequest): Promise<{
   }
 
   const raw = session.user as Record<string, unknown>;
+  const role = (raw.role as string) ?? ROLES.PATIENT;
 
-  // Block disabled accounts from accessing any protected resource.
-  if (raw.isActive === false) {
-    throw new AppError(
-      'Your account has been disabled. Please contact your administrator.',
-      'FORBIDDEN',
-      403,
-    );
+  // Deactivated staff must be blocked immediately, even mid-session.
+  // There is no `isActive` column/additionalField on the Better Auth
+  // `User` record, so `raw.isActive` is never actually populated by
+  // Better Auth — checking it here would silently never trigger. The real,
+  // authoritative flag is `Staff.isActive` (toggled by
+  // `StaffService.setActive`), so we look it up directly for staff roles.
+  let isActive: boolean | null = null;
+  if (role !== ROLES.PATIENT) {
+    const staff = await prisma.staff.findUnique({
+      where: { userId: raw.id as string },
+      select: { isActive: true },
+    });
+    isActive = staff?.isActive ?? null;
+
+    if (staff && !staff.isActive) {
+      throw new AppError(
+        'Your account has been disabled. Please contact your administrator.',
+        'FORBIDDEN',
+        403,
+      );
+    }
   }
 
   const user: SessionUser = {
     id: raw.id as string,
     email: raw.email as string,
     name: (raw.name as string) ?? '',
-    role: (raw.role as string) ?? 'PATIENT',
+    role,
     branchId: raw.branchId as string | null | undefined,
-    isActive: raw.isActive as boolean | null | undefined,
+    isActive,
     image: raw.image as string | null | undefined,
   };
 

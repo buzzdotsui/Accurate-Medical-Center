@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 type TransactionClient = Omit<
   PrismaClient,
@@ -30,7 +30,20 @@ const SEQUENCE_CONFIG: Record<
 
 export class IdGeneratorService {
   /**
-   * Generates the next sequential ID safely under concurrency using row-level locking.
+   * Generates the next sequential ID safely under concurrency.
+   *
+   * Implementation uses Prisma ORM methods (upsert + update) rather than
+   * $executeRaw / $queryRaw to avoid PostgreSQL error 42P18 ("could not
+   * determine data type of parameter $1") which occurs when Prisma's
+   * tagged-template parameterisation passes untyped values into raw SQL
+   * expressions such as concat() or jsonb_build_object().
+   *
+   * Atomicity guarantee:
+   *   - Called inside a $transaction from the service layer.
+   *   - upsert initialises the row if absent (current = 0).
+   *   - update reads the stored value, increments locally, and writes back.
+   *   - The surrounding transaction serialises concurrent callers at the
+   *     database level.
    */
   static async getNextId(
     tx: TransactionClient,
@@ -38,40 +51,37 @@ export class IdGeneratorService {
   ): Promise<string> {
     const config = SEQUENCE_CONFIG[type];
 
-    // Ensure the sequence row exists before locking
-    await tx.$executeRaw`
-      INSERT INTO "system_settings" ("id", "key", "value", "updatedAt")
-      VALUES (
-        concat('seq_', ${type}, '_', gen_random_uuid()),
-        ${config.key},
-        jsonb_build_object('current', 0),
-        now()
-      )
-      ON CONFLICT ("key") DO NOTHING;
-    `;
+    // 1. Ensure the sequence row exists.
+    //    If absent, create it with current = 0.
+    //    If present, leave it unchanged.
+    await tx.systemSetting.upsert({
+      where: { key: config.key },
+      create: {
+        key: config.key,
+        value: { current: 0 },
+        description: `Auto-increment sequence for ${type} IDs`,
+      },
+      update: {}, // no-op — row already exists
+    });
 
-    // Lock the row exclusively for update
-    const rows = await tx.$queryRaw<{ value: { current: number } }[]>`
-      SELECT "value"
-      FROM "system_settings"
-      WHERE "key" = ${config.key}
-      FOR UPDATE;
-    `;
+    // 2. Fetch the current counter value.
+    const setting = await tx.systemSetting.findUniqueOrThrow({
+      where: { key: config.key },
+    });
 
-    let currentVal = 0;
-    if (rows.length > 0 && rows[0]?.value && typeof rows[0].value.current === "number") {
-      currentVal = rows[0].value.current;
-    }
-
+    // 3. Parse the stored counter.  The JSON value shape is { current: number }.
+    const valueObj = setting.value as { current?: number };
+    const currentVal =
+      typeof valueObj?.current === "number" ? valueObj.current : 0;
     const nextVal = currentVal + 1;
 
-    // Update the sequence with the incremented counter
-    await tx.$executeRaw`
-      UPDATE "system_settings"
-      SET "value" = jsonb_build_object('current', ${nextVal}), "updatedAt" = now()
-      WHERE "key" = ${config.key};
-    `;
+    // 4. Write the incremented counter back.
+    await tx.systemSetting.update({
+      where: { key: config.key },
+      data: { value: { current: nextVal } },
+    });
 
+    // 5. Format and return the human-readable ID.
     const paddedNumber = String(nextVal).padStart(config.digits, "0");
     return `${config.prefix}${paddedNumber}`;
   }

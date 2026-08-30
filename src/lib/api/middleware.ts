@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { isAppError, AppError } from './errors';
 import { error as errorResponse, serverError, validationError } from './response';
 import { logger } from '@/lib/utils/logger';
@@ -35,7 +36,55 @@ export function withApiHandler(handler: ApiHandler): ApiHandler {
       if (error instanceof z.ZodError) {
         return validationError(error.format());
       }
-      
+
+      // Prisma runtime errors (constraint violations, missing related
+      // records, etc.) are genuine application-level failures with a known
+      // shape — classify them into the correct HTTP status instead of
+      // letting them fall through as an opaque 500. Full details (including
+      // the Prisma error code and meta) are always logged server-side; only
+      // a safe, generic message is ever sent to the client in production.
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        logger.error('Unhandled Prisma Error', {
+          error: error.message,
+          code: error.code,
+          meta: JSON.stringify(error.meta),
+          path: req.nextUrl.pathname,
+          method: req.method,
+        });
+
+        const isDev = process.env.NODE_ENV !== 'production';
+
+        switch (error.code) {
+          case 'P2002': // Unique constraint violation
+            return errorResponse(
+              'CONFLICT',
+              'A record with this value already exists.',
+              409,
+              isDev ? error.meta : undefined,
+            );
+          case 'P2003': // Foreign key constraint violation
+          case 'P2025': // Related record required but not found
+            return errorResponse(
+              'BAD_REQUEST',
+              'A referenced record (e.g. branch or department) is invalid or does not exist.',
+              400,
+              isDev ? error.meta : undefined,
+            );
+          case 'P2011': // Null constraint violation
+          case 'P2012': // Missing a required value
+            return errorResponse(
+              'BAD_REQUEST',
+              'A required field was missing when saving this record.',
+              400,
+              isDev ? error.meta : undefined,
+            );
+          default:
+            return serverError(
+              isDev ? `Database error (${error.code}): ${error.message}` : undefined,
+            );
+        }
+      }
+
       logger.error('Unhandled API Error', {
         error: error instanceof Error ? error.stack : String(error),
         path: req.nextUrl.pathname,

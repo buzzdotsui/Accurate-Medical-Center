@@ -15,8 +15,10 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
   NO_SHOW: [],
 };
 
+export type ResolvedAppointmentInput = Omit<CreateAppointmentInput, 'branchId'> & { branchId: string };
+
 export class AppointmentService {
-  static async createAppointment(data: CreateAppointmentInput, executorId: string) {
+  static async createAppointment(data: ResolvedAppointmentInput, executorId: string) {
     const patient = await prisma.patient.findUnique({ where: { id: data.patientId } });
     if (!patient) throw new AppError('Patient not found', 'NOT_FOUND', 404);
 
@@ -87,18 +89,21 @@ export class AppointmentService {
       let currentPatientId = patient?.id;
       
       if (!currentPatientId) {
-        // Create new patient inside transaction
-        const newPatientIdStr = await IdGeneratorService.generatePatientId(tx);
-        
-        const newPatient = await tx.patient.create({
-          data: {
-            patientId: newPatientIdStr,
-            branchId: data.branchId,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            phone: data.phone,
-            email: data.email || null,
-          }
+        // Create new patient inside transaction via the single authoritative
+        // patient-creation routine (PatientService). This guarantees the
+        // same Patient ID generation and audit trail as every other
+        // registration path, instead of duplicating patient.create() here.
+        const newPatient = await PatientService.createPatientInTx(tx, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone,
+          email: data.email,
+          branchId: data.branchId,
+          auditContext: {
+            userId: 'PUBLIC',
+            userRole: 'SYSTEM',
+            source: 'PUBLIC_APPOINTMENT_BOOKING',
+          },
         });
         currentPatientId = newPatient.id;
       }

@@ -1,6 +1,4 @@
-# STAGE 4 — HMS OPERATIONAL CORE / REAL WORKFLOWS
 
-We are now proceeding from the completed Stage 3.5.
 
 DO NOT deploy.
 DO NOT run destructive database commands.

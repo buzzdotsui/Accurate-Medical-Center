@@ -28,14 +28,27 @@ export const auth = betterAuth({
   },
   user: {
     additionalFields: {
+      // `input: false` is critical: it stops these fields from being
+      // settable through the public sign-up/update surface (both the
+      // client SDK AND a raw HTTP POST to /api/auth/sign-up/email), which
+      // would otherwise let anyone self-elevate to ADMIN/SUPER_ADMIN or
+      // claim a branch by simply adding an extra field to the request
+      // body. Every account starts as a PATIENT with no branch.
+      //
+      // Elevated roles/branches are only ever assigned server-side, by
+      // `StaffService.createStaff` (itself gated behind an ADMIN/SUPER_ADMIN
+      // authorization check), via a direct Prisma write — never through
+      // this Better Auth input path.
       role: {
         type: 'string',
         required: false,
         defaultValue: 'PATIENT',
+        input: false,
       },
       branchId: {
         type: 'string',
         required: false,
+        input: false,
       },
     },
   },

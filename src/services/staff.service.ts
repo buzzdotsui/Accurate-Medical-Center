@@ -1,8 +1,10 @@
 import { prisma } from '@/lib/db/client';
-import { CreateStaffInput } from '@/lib/validations/staff';
+import { CreateStaffInput, UpdateStaffInput } from '@/lib/validations/staff';
 import { IdGeneratorService } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { auth } from '@/lib/auth/config';
+import { AuditService } from './audit.service';
+import { Prisma } from '@prisma/client';
 
 // ResolvedStaffInput is derived from CreateStaffInput but makes branchId
 // required. The API route always resolves the correct branch from the session
@@ -37,15 +39,19 @@ export class StaffService {
       throw new AppError('A user with this email already exists.', 'CONFLICT', 409);
     }
 
-    // 3. Register user via Better Auth (Server-side API)
-    // Note: Better Auth handles the password hashing and User record creation
+    // 3. Register user via Better Auth (Server-side API).
+    // Note: Better Auth handles password hashing and the base User record.
+    // `role`/`branchId` are configured with `input: false` (see auth/config.ts)
+    // so they are IGNORED here even though we're calling from the server —
+    // Better Auth strips non-input additional fields at the endpoint level
+    // regardless of caller. Every account is created as a plain PATIENT with
+    // no branch; we deliberately elevate it to the real role/branch in step 4
+    // below via a direct, authorization-gated Prisma write.
     const authResponse = await auth.api.signUpEmail({
       body: {
         email: data.email,
         password: data.password,
         name: `${data.firstName} ${data.lastName}`,
-        role: data.role,
-        branchId: data.branchId,
       },
     });
 
@@ -53,9 +59,24 @@ export class StaffService {
       throw new AppError('Failed to create user authentication record.', 'INTERNAL_SERVER_ERROR', 500);
     }
 
-    // 4. Wrap the remaining profile creation in a transaction
+    // 4. Wrap role elevation + profile creation in a single transaction so
+    // Better Auth user, User.role/branchId, and the Staff profile can never
+    // drift out of sync with each other.
     try {
       return await prisma.$transaction(async (tx) => {
+        // Elevate the account from the PATIENT default to its real staff
+        // role/branch. This is a trusted, server-only write — it never goes
+        // through the public Better Auth input surface — and only happens
+        // here, reached exclusively via the ADMIN/SUPER_ADMIN-gated
+        // `POST /api/v1/hr/staff` route.
+        await tx.user.update({
+          where: { id: authResponse.user.id },
+          data: {
+            role: data.role,
+            branchId: data.branchId,
+          },
+        });
+
         const staffId = await IdGeneratorService.generateStaffId(tx);
 
         const staff = await tx.staff.create({
@@ -79,7 +100,7 @@ export class StaffService {
             action: 'STAFF_CREATED',
             resource: 'STAFF',
             resourceId: staff.id,
-            details: JSON.stringify({ role: data.role, email: data.email }),
+            details: { role: data.role, email: data.email, departmentId: data.departmentId } as Prisma.InputJsonValue,
             branchId: data.branchId,
           }
         });
@@ -95,5 +116,70 @@ export class StaffService {
       }
       throw error;
     }
+  }
+
+  /**
+   * Update a staff member's profile details (department, specialization,
+   * license, contact info). Does NOT touch authentication credentials —
+   * email/password changes go through the auth system, never through here.
+   */
+  static async updateStaff(staffId: string, data: UpdateStaffInput, executorId: string) {
+    const existing = await prisma.staff.findUnique({ where: { id: staffId } });
+    if (!existing) throw new AppError('Staff member not found', 'NOT_FOUND', 404);
+
+    const updated = await prisma.staff.update({
+      where: { id: staffId },
+      data: {
+        departmentId: data.departmentId,
+        specialization: data.specialization,
+        licenseNumber: data.licenseNumber,
+        phone: data.phone,
+        address: data.address,
+      },
+    });
+
+    await AuditService.log({
+      userId: executorId,
+      userRole: 'ADMIN',
+      action: 'STAFF_UPDATED',
+      resource: 'STAFF',
+      resourceId: staffId,
+      branchId: existing.branchId,
+      details: { changedFields: Object.keys(data) },
+    }).catch(() => {});
+
+    return updated;
+  }
+
+  /**
+   * Activate or deactivate a staff member's access. Deactivated staff keep
+   * their historical clinical/administrative records intact but can no
+   * longer authenticate or be assigned new work (enforced elsewhere via
+   * `isActive`/session checks).
+   */
+  static async setActive(staffId: string, isActive: boolean, executorId: string) {
+    const existing = await prisma.staff.findUnique({ where: { id: staffId } });
+    if (!existing) throw new AppError('Staff member not found', 'NOT_FOUND', 404);
+
+    if (existing.isActive === isActive) {
+      // No-op: avoid writing a misleading duplicate audit event.
+      return existing;
+    }
+
+    const updated = await prisma.staff.update({
+      where: { id: staffId },
+      data: { isActive },
+    });
+
+    await AuditService.log({
+      userId: executorId,
+      userRole: 'ADMIN',
+      action: isActive ? 'STAFF_ACTIVATED' : 'STAFF_DEACTIVATED',
+      resource: 'STAFF',
+      resourceId: staffId,
+      branchId: existing.branchId,
+    }).catch(() => {});
+
+    return updated;
   }
 }

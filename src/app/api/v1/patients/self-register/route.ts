@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
         userRole: 'PATIENT',
         ip: req.headers.get('x-forwarded-for') ?? undefined,
         userAgent: req.headers.get('user-agent') ?? undefined,
+        source: 'PUBLIC_SELF_REGISTER',
       },
     });
 

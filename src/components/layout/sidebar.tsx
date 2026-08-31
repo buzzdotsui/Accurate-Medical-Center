@@ -14,6 +14,7 @@ import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SidebarProps {
@@ -24,13 +25,20 @@ interface SidebarProps {
 export function Sidebar({ role, user }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const items = navConfig[role] || [];
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const userInitials = user?.name ? user.name.substring(0, 2).toUpperCase() : "U";
 
+  // Clearing the query cache is essential here: the React Query client is
+  // a single instance for the whole browser tab (mounted once at the root
+  // layout), so without this, a different user signing in right after on
+  // the same tab would briefly see this user's cached notifications/data
+  // until each query happened to refetch.
   const handleLogout = async () => {
     await authClient.signOut();
+    queryClient.clear();
     router.push("/login");
   };
 

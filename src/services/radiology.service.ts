@@ -37,7 +37,10 @@ export class RadiologyService {
   static async saveReport(requestId: string, data: SaveRadiologyReportInput, executorId: string) {
     const request = await prisma.radiologyRequest.findUnique({
       where: { id: requestId },
-      include: { visit: true, doctor: { select: { userId: true } } }
+      include: {
+        visit: { include: { patient: { select: { userId: true } } } },
+        doctor: { select: { userId: true } },
+      }
     });
 
     if (!request) throw new AppError('Radiology Request not found', 'NOT_FOUND', 404);
@@ -81,14 +84,29 @@ export class RadiologyService {
       return report;
     });
 
-    // Notify the requesting doctor that the report is ready. Best-effort;
-    // never fails the radiology report save.
+    // Notify the requesting doctor and the patient that the report is
+    // ready. Best-effort; never fails the radiology report save.
     if (request.doctor?.userId) {
       NotificationService.createNotification({
         userId: request.doctor.userId,
+        type: 'RADIOLOGY',
         title: 'Radiology report ready',
         body: `Report for ${request.scanType} - ${request.region} (${request.requestId}) is now available.`,
-        type: 'ALERT',
+        link: `/radiology/requests/${request.id}`,
+        resource: 'RADIOLOGY_REQUEST',
+        resourceId: request.id,
+      }).catch(() => {});
+    }
+
+    if (request.visit.patient.userId) {
+      NotificationService.createNotification({
+        userId: request.visit.patient.userId,
+        type: 'RADIOLOGY',
+        title: 'Radiology report available',
+        body: `Your ${request.scanType} report is now available.`,
+        link: '/patient',
+        resource: 'RADIOLOGY_REQUEST',
+        resourceId: request.id,
       }).catch(() => {});
     }
 

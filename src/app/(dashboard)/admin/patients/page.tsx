@@ -33,7 +33,10 @@ export default function AdminPatientsPage() {
       const params = new URLSearchParams({ take: "50" });
       if (debouncedSearch) params.set("search", debouncedSearch);
       const res = await fetch(`/api/v1/patients?${params}`);
-      if (!res.ok) throw new Error("Failed to fetch patients");
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error?.message ?? "Failed to fetch patients");
+      }
       return res.json();
     },
   });
@@ -65,6 +68,15 @@ export default function AdminPatientsPage() {
       ),
     },
     {
+      accessorKey: "email",
+      header: "Email",
+      cell: (row) => (
+        <span className="text-muted-foreground text-sm">
+          {String(row.email ?? "—")}
+        </span>
+      ),
+    },
+    {
       accessorKey: "phone",
       header: "Phone",
       cell: (row) => (
@@ -84,6 +96,30 @@ export default function AdminPatientsPage() {
         ) : (
           <span className="text-muted-foreground text-sm">—</span>
         ),
+    },
+    {
+      accessorKey: "dateOfBirth",
+      header: "Date of Birth",
+      cell: (row) =>
+        row.dateOfBirth ? (
+          <span className="text-muted-foreground text-sm">
+            {format(new Date(String(row.dateOfBirth)), "dd MMM yyyy")}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        ),
+    },
+    {
+      accessorKey: "branch",
+      header: "Branch",
+      cell: (row) => {
+        const branch = row.branch as { name?: string; code?: string } | null | undefined;
+        return branch?.name ? (
+          <span className="text-muted-foreground text-sm">{branch.name}</span>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        );
+      },
     },
     {
       accessorKey: "createdAt",

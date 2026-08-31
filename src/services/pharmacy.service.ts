@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/client';
 import { DispensePrescriptionInput } from '@/lib/validations/pharmacy';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
 
 export class PharmacyService {
   /**
@@ -111,6 +112,8 @@ export class PharmacyService {
         details: { status: data.status, itemCount: prescription.items.length }
       }).catch(() => {});
 
+      this.notifyPatientOfDispense(data.status, prescription.visit.patient.userId, updated.id).catch(() => {});
+
       return updated;
     }
 
@@ -132,6 +135,26 @@ export class PharmacyService {
       details: { status: data.status }
     }).catch(() => {});
 
+    this.notifyPatientOfDispense(data.status, prescription.visit.patient.userId, updated.id).catch(() => {});
+
     return updated;
+  }
+
+  /**
+   * Notify the patient when their prescription is fully dispensed
+   * (ready/collected). Best-effort and a no-op for patients with no
+   * linked portal account.
+   */
+  private static async notifyPatientOfDispense(status: string, patientUserId: string | null, prescriptionId: string) {
+    if (status !== 'DISPENSED' || !patientUserId) return;
+    await NotificationService.createNotification({
+      userId: patientUserId,
+      type: 'PRESCRIPTION',
+      title: 'Prescription dispensed',
+      body: 'Your prescription has been dispensed and is ready for collection.',
+      link: '/patient',
+      resource: 'PRESCRIPTION',
+      resourceId: prescriptionId,
+    });
   }
 }

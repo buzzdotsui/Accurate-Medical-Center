@@ -2,6 +2,8 @@ import { prisma } from '@/lib/db/client';
 import { AdmitPatientInput, DischargePatientInput } from '@/lib/validations/inpatient';
 import { AppError } from '@/lib/api/errors';
 import { generateAdmissionId } from '@/lib/utils/generate-id';
+import { NotificationService } from './notification.service';
+import { ROLES } from '@/config/roles';
 
 export class InpatientService {
   /**
@@ -124,6 +126,34 @@ export class InpatientService {
       });
 
       return admission;
+    }).then((admission) => {
+      // Notification side-effects for the admission just created.
+      // Best-effort: never blocks the admission itself.
+      if (patient.userId) {
+        NotificationService.createNotification({
+          userId: patient.userId,
+          type: 'INPATIENT',
+          title: 'You have been admitted',
+          body: `You have been admitted for: ${data.reason}.`,
+          link: '/patient',
+          resource: 'ADMISSION',
+          resourceId: admission.id,
+        }).catch(() => {});
+      }
+
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.NURSE],
+        branchId: patient.branchId,
+        type: 'INPATIENT',
+        title: 'New patient admission',
+        body: `A new patient has been admitted: ${data.reason}.`,
+        link: '/nurse/ward',
+        resource: 'ADMISSION',
+        resourceId: admission.id,
+        excludeUserId: executorId,
+      }).catch(() => {});
+
+      return admission;
     });
   }
 
@@ -172,6 +202,21 @@ export class InpatientService {
           branchId: admission.patient.branchId,
         },
       });
+
+      return updated;
+    }).then((updated) => {
+      // Best-effort: never blocks the discharge itself.
+      if (admission.patient.userId) {
+        NotificationService.createNotification({
+          userId: admission.patient.userId,
+          type: 'INPATIENT',
+          title: 'You have been discharged',
+          body: 'You have been discharged. Please review your discharge summary.',
+          link: '/patient',
+          resource: 'ADMISSION',
+          resourceId: admission.id,
+        }).catch(() => {});
+      }
 
       return updated;
     });

@@ -360,6 +360,9 @@ export class PatientService {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
+        include: {
+          branch: { select: { id: true, name: true, code: true } },
+        },
       })
     ]);
 

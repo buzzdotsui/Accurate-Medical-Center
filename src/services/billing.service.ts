@@ -2,6 +2,8 @@ import { prisma } from '@/lib/db/client';
 import { ProcessPaymentInput } from '@/lib/validations/billing';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
+import { ROLES } from '@/config/roles';
 
 export class BillingService {
   /**
@@ -42,7 +44,7 @@ export class BillingService {
   static async processPayment(invoiceId: string, data: ProcessPaymentInput, executorId: string) {
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
-      include: { payments: true }
+      include: { payments: true, patient: { select: { userId: true, branchId: true } } }
     });
 
     if (!invoice) throw new AppError('Invoice not found', 'NOT_FOUND', 404);
@@ -89,6 +91,34 @@ export class BillingService {
       });
 
       return { payment, invoice: updatedInvoice };
+    }).then((result) => {
+      // Notification side-effects for the payment just recorded.
+      // Best-effort: never blocks the payment itself.
+      if (invoice.patient.userId) {
+        NotificationService.createNotification({
+          userId: invoice.patient.userId,
+          type: 'BILLING',
+          title: 'Payment received',
+          body: `A payment of ${data.amount} was received for your invoice. New status: ${result.invoice.status}.`,
+          link: '/patient',
+          resource: 'INVOICE',
+          resourceId: invoice.id,
+        }).catch(() => {});
+      }
+
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.ADMIN],
+        branchId: invoice.patient.branchId,
+        type: 'BILLING',
+        title: 'Payment received',
+        body: `A payment of ${data.amount} was recorded against an invoice. New status: ${result.invoice.status}.`,
+        link: '/billing/invoices',
+        resource: 'INVOICE',
+        resourceId: invoice.id,
+        excludeUserId: executorId,
+      }).catch(() => {});
+
+      return result;
     });
   }
 }

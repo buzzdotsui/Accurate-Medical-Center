@@ -871,15 +871,32 @@ model Refund {
 // ===========================================================================
 
 model Notification {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
   body        String
-  type        String   // ALERT, REMINDER, MESSAGE
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  // Domain category, e.g. APPOINTMENT | CONSULTATION | LAB | RADIOLOGY |
+  // PRESCRIPTION | BILLING | INPATIENT | STAFF | SYSTEM. Kept as a plain
+  // String (not a Prisma enum) to match every other "type/status"
+  // discriminator column in this schema (User.role, Appointment.status,
+  // AuditLog.action, etc. are all String) - the allowed values are
+  // enforced in TypeScript via NotificationService's own union type.
+  type        String
+  // Optional deep-link into the app for "go to the related record".
+  link        String?
+  // Generic (resource, resourceId) pair identifying the source record,
+  // mirroring the existing AuditLog.resource/resourceId pattern rather
+  // than adding one nullable FK-like column per domain (appointmentId,
+  // invoiceId, labRequestId, ...).
+  resource    String?
+  resourceId  String?
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
 
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
   @@map("notifications")
 }
 

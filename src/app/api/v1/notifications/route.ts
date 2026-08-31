@@ -21,7 +21,7 @@ const ListNotificationsQuerySchema = z.object({
 export const GET = withAuth(async (req, session) => {
   const { unreadOnly, take } = parseQuery(req, ListNotificationsQuerySchema);
   const [notifications, unreadCount] = await Promise.all([
-    NotificationService.listNotifications(session.user.id, { unreadOnly, take }),
+    NotificationService.getUserNotifications(session.user.id, { unreadOnly, take }),
     NotificationService.getUnreadCount(session.user.id),
   ]);
   return ok({ notifications, unreadCount });

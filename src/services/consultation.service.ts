@@ -2,6 +2,8 @@ import { prisma } from '@/lib/db/client';
 import { CreateConsultationInput } from '@/lib/validations/consultation';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
+import { ROLES } from '@/config/roles';
 import { generatePrescriptionId, generateLabRequestId, generateRadiologyRequestId } from '@/lib/utils/generate-id';
 
 export class ConsultationService {
@@ -159,6 +161,61 @@ export class ConsultationService {
         resource: 'RADIOLOGY_REQUEST', resourceId: result.radiologyRequestIds.join(','),
         branchId: visit.patient.branchId,
         details: { visitId: data.visitId, patientId: visit.patientId }
+      }).catch(() => {});
+    }
+
+    // Notification side-effects for the consultation's real state
+    // transitions. Best-effort: never blocks the consultation itself.
+    const branchId = visit.patient.branchId;
+
+    if (visit.patient.userId) {
+      NotificationService.createNotification({
+        userId: visit.patient.userId,
+        type: 'CONSULTATION',
+        title: 'Consultation completed',
+        body: 'Your consultation has been completed. View your records for details.',
+        link: '/patient',
+        resource: 'VISIT',
+        resourceId: data.visitId,
+      }).catch(() => {});
+    }
+
+    if (result.prescriptionId) {
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.PHARMACIST],
+        branchId,
+        type: 'PRESCRIPTION',
+        title: 'New prescription to dispense',
+        body: `Prescription ${result.prescriptionId} is ready for dispensing.`,
+        link: '/pharmacy/prescriptions',
+        resource: 'PRESCRIPTION',
+        resourceId: result.prescriptionId,
+      }).catch(() => {});
+    }
+
+    if (result.labRequestIds.length > 0) {
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.LAB_SCIENTIST],
+        branchId,
+        type: 'LAB',
+        title: 'New lab request',
+        body: `${result.labRequestIds.length} new lab request(s) submitted for processing.`,
+        link: '/laboratory/requests',
+        resource: 'LAB_REQUEST',
+        resourceId: result.labRequestIds[0],
+      }).catch(() => {});
+    }
+
+    if (result.radiologyRequestIds.length > 0) {
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.RADIOGRAPHER],
+        branchId,
+        type: 'RADIOLOGY',
+        title: 'New radiology request',
+        body: `${result.radiologyRequestIds.length} new radiology request(s) submitted for scanning.`,
+        link: '/radiology/requests',
+        resource: 'RADIOLOGY_REQUEST',
+        resourceId: result.radiologyRequestIds[0],
       }).catch(() => {});
     }
 

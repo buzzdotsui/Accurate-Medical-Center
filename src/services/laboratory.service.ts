@@ -42,7 +42,10 @@ export class LaboratoryService {
   static async saveResult(requestId: string, data: SaveLabResultInput, executorId: string) {
     const request = await prisma.labRequest.findUnique({
       where: { id: requestId },
-      include: { visit: true, doctor: { select: { userId: true } } }
+      include: {
+        visit: { include: { patient: { select: { userId: true } } } },
+        doctor: { select: { userId: true } },
+      }
     });
 
     if (!request) throw new AppError('Lab Request not found', 'NOT_FOUND', 404);
@@ -88,14 +91,29 @@ export class LaboratoryService {
       return result;
     });
 
-    // Notify the requesting doctor that the result is ready. Best-effort;
-    // never fails the lab result save.
+    // Notify the requesting doctor and the patient that the result is
+    // ready. Best-effort; never fails the lab result save.
     if (request.doctor?.userId) {
       NotificationService.createNotification({
         userId: request.doctor.userId,
+        type: 'LAB',
         title: 'Lab result ready',
         body: `Result for ${request.testName} (${request.requestId}) is now available.`,
-        type: 'ALERT',
+        link: `/laboratory/requests/${request.id}`,
+        resource: 'LAB_REQUEST',
+        resourceId: request.id,
+      }).catch(() => {});
+    }
+
+    if (request.visit.patient.userId) {
+      NotificationService.createNotification({
+        userId: request.visit.patient.userId,
+        type: 'LAB',
+        title: 'Lab result available',
+        body: `Your result for ${request.testName} is now available.`,
+        link: '/patient',
+        resource: 'LAB_REQUEST',
+        resourceId: request.id,
       }).catch(() => {});
     }
 

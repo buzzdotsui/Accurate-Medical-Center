@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, Loader2, AlertCircle, CheckCheck } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -11,24 +12,43 @@ interface Notification {
   title: string;
   body: string;
   type: string;
+  link: string | null;
   isRead: boolean;
   createdAt: string;
 }
 
 /**
- * Real in-app notification bell, backed by `GET /api/v1/notifications`.
- * Replaces the Stage 3.5 disabled placeholder bell now that the
- * Notification model has a real service/API behind it (Stage 13). The
- * unread badge is always the server-computed count - never a fabricated
- * number.
+ * Real in-app notification bell, backed by the Notification model /
+ * NotificationService / `/api/v1/notifications*` routes. The unread badge
+ * is always the server-computed count for the authenticated session user
+ * only - never a fabricated number, and never another user's data.
+ *
+ * The badge count polls the lightweight `/unread-count` endpoint on an
+ * interval; the full notification list is only fetched once the panel is
+ * actually opened, so an idle dashboard tab isn't repeatedly re-fetching
+ * notification bodies it isn't displaying.
  */
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const { data: countData } = useQuery({
+    queryKey: ["notifications", "unread-count"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/notifications/unread-count");
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message || "Failed to load unread count");
+      }
+      return json.data as { unreadCount: number };
+    },
+    refetchInterval: 30_000,
+  });
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["notifications"],
+    queryKey: ["notifications", "list"],
     queryFn: async () => {
       const res = await fetch("/api/v1/notifications?take=15");
       const json = await res.json();
@@ -37,21 +57,25 @@ export function NotificationBell() {
       }
       return json.data as { notifications: Notification[]; unreadCount: number };
     },
-    refetchInterval: 60_000,
+    enabled: open,
   });
 
   const markReadMutation = useMutation({
     mutationFn: async (id: string) => {
-      await fetch(`/api/v1/notifications/${id}/read`, { method: "POST" });
+      await fetch(`/api/v1/notifications/${id}/read`, { method: "PATCH" });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
   });
 
   const markAllReadMutation = useMutation({
     mutationFn: async () => {
-      await fetch("/api/v1/notifications/read-all", { method: "POST" });
+      await fetch("/api/v1/notifications/read-all", { method: "PATCH" });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
   });
 
   useEffect(() => {
@@ -64,7 +88,13 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const unreadCount = data?.unreadCount ?? 0;
+  const unreadCount = countData?.unreadCount ?? data?.unreadCount ?? 0;
+
+  function handleNotificationClick(n: Notification) {
+    if (!n.isRead) markReadMutation.mutate(n.id);
+    setOpen(false);
+    if (n.link) router.push(n.link);
+  }
 
   return (
     <div ref={containerRef} className="relative">
@@ -84,8 +114,8 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 w-80 max-h-96 overflow-y-auto rounded-md border bg-popover shadow-lg z-50">
-          <div className="flex items-center justify-between px-4 py-2.5 border-b">
+        <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-11 w-auto sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto rounded-md border bg-popover shadow-lg z-[100]">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b sticky top-0 bg-popover">
             <span className="text-sm font-semibold">Notifications</span>
             {unreadCount > 0 && (
               <button
@@ -126,7 +156,7 @@ export function NotificationBell() {
                 <li key={n.id}>
                   <button
                     type="button"
-                    onClick={() => !n.isRead && markReadMutation.mutate(n.id)}
+                    onClick={() => handleNotificationClick(n)}
                     className={cn(
                       "w-full text-left px-4 py-3 border-b last:border-0 transition-colors hover:bg-muted/60",
                       !n.isRead && "bg-primary/5"

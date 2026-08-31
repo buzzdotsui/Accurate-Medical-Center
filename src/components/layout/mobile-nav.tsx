@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, LogOut } from "lucide-react"
 import * as Icons from "lucide-react"
 
 import { cn } from "@/lib/utils/cn"
@@ -11,6 +11,8 @@ import { siteConfig } from "@/config/site"
 import { navConfig } from "@/config/nav"
 import type { Role } from "@/config/roles"
 import type { User } from "better-auth"
+import { authClient } from "@/lib/auth/client"
+import { useQueryClient } from "@tanstack/react-query"
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Logo } from "@/components/ui/logo"
@@ -24,8 +26,23 @@ interface MobileNavProps {
 export function MobileNav({ role, user }: MobileNavProps) {
   const [open, setOpen] = React.useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const queryClient = useQueryClient()
   const items = navConfig[role] || []
   const userInitials = user?.name ? user.name.substring(0, 2).toUpperCase() : "U"
+
+  // Every authenticated role reaches this same component on mobile (the
+  // desktop Sidebar is `hidden` below the `md` breakpoint), so this is the
+  // only logout control mobile users have. Reuses the same Better Auth
+  // sign-out call as the desktop sidebar — no parallel auth system. Also
+  // clears the React Query cache (a single instance for the whole tab), so
+  // a different user signing in next never sees this user's cached data.
+  const handleLogout = async () => {
+    setOpen(false)
+    await authClient.signOut()
+    queryClient.clear()
+    router.push("/login")
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -80,17 +97,28 @@ export function MobileNav({ role, user }: MobileNavProps) {
 
         {/* User Mini Profile */}
         <div className="p-4 border-t bg-muted/20">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
-              <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
-                {userInitials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium truncate">{user?.name || "User Name"}</span>
-              <span className="text-xs text-muted-foreground truncate">{role.replace('_', ' ')}</span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 overflow-hidden">
+              <Avatar className="h-10 w-10 border-2 border-primary/20 shrink-0">
+                <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
+                <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-medium truncate">{user?.name || "User Name"}</span>
+                <span className="text-xs text-muted-foreground truncate">{role.replace('_', ' ')}</span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0"
+              aria-label="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </div>
       </SheetContent>

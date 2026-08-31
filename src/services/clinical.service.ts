@@ -4,6 +4,8 @@ import { StartVisitSchema, RecordVitalsSchema, AddDiagnosisSchema } from '@/lib/
 import { generateVisitId } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
+import { ROLES } from '@/config/roles';
 
 export class ClinicalService {
   /**
@@ -39,6 +41,42 @@ export class ClinicalService {
       resourceId: visit.id,
       details: { patientId: data.patientId }
     });
+
+    // A new visit means a patient just entered the clinical queue — notify
+    // the branch's nurses (triage/vitals) and the assigned doctor, if any.
+    // Best-effort: never blocks the check-in itself.
+    const patient = await prisma.patient.findUnique({
+      where: { id: data.patientId },
+      select: { branchId: true },
+    });
+    if (patient) {
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.NURSE],
+        branchId: patient.branchId,
+        type: 'APPOINTMENT',
+        title: 'New patient in queue',
+        body: 'A patient is waiting for triage/vitals.',
+        link: '/nurse/queue',
+        resource: 'VISIT',
+        resourceId: visit.id,
+        excludeUserId: executorId,
+      }).catch(() => {});
+    }
+
+    if (data.doctorId) {
+      prisma.staff.findUnique({ where: { id: data.doctorId }, select: { userId: true } }).then((doctor) => {
+        if (!doctor) return;
+        NotificationService.createNotification({
+          userId: doctor.userId,
+          type: 'APPOINTMENT',
+          title: 'Patient checked in',
+          body: 'A patient assigned to you has checked in.',
+          link: '/doctor/queue',
+          resource: 'VISIT',
+          resourceId: visit.id,
+        }).catch(() => {});
+      }).catch(() => {});
+    }
 
     return visit;
   }

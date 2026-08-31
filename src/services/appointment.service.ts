@@ -5,6 +5,7 @@ import { generateVisitId, IdGeneratorService } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
+import { ROLES } from '@/config/roles';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   SCHEDULED: ['ARRIVED', 'CANCELLED', 'NO_SHOW', 'CHECKED_IN'],
@@ -62,32 +63,77 @@ export class AppointmentService {
       details: { patientId: data.patientId, date: data.date, timeSlot: data.timeSlot }
     }).catch(() => {});
 
-    // Notify the assigned doctor, if any, that a new appointment was booked
-    // for them. Best-effort: a notification failure must never block
-    // appointment creation.
+    // Notify the assigned doctor, the patient, and other front-desk staff.
+    // Best-effort: a notification failure must never block appointment
+    // creation.
     if (data.doctorId) {
-      this.notifyDoctorOfAppointment(data.doctorId, patient, appointment.date).catch(() => {});
+      this.notifyDoctorOfAppointment(data.doctorId, patient, appointment.date, appointment.id).catch(() => {});
     }
+    this.notifyPatientOfAppointment(
+      data.patientId,
+      'Appointment booked',
+      `Your appointment on ${new Date(appointment.date).toLocaleString()} has been booked.`,
+      appointment.id,
+    ).catch(() => {});
+    NotificationService.notifyRoleInBranch({
+      roles: [ROLES.RECEPTIONIST, ROLES.ADMIN],
+      branchId: data.branchId,
+      type: 'APPOINTMENT',
+      title: 'New appointment scheduled',
+      body: `${patient.firstName} ${patient.lastName} has a new appointment on ${new Date(appointment.date).toLocaleString()}.`,
+      link: '/reception/appointments',
+      resource: 'APPOINTMENT',
+      resourceId: appointment.id,
+      excludeUserId: executorId,
+    }).catch(() => {});
 
     return appointment;
   }
 
   /**
    * Look up the assigned doctor's User.id (Notification.userId references
-   * User, not Staff) and create an in-app ALERT notification.
+   * User, not Staff) and create an in-app notification.
    */
   private static async notifyDoctorOfAppointment(
     doctorId: string,
     patient: { firstName: string; lastName: string },
-    date: Date
+    date: Date,
+    appointmentId: string,
   ) {
     const doctor = await prisma.staff.findUnique({ where: { id: doctorId }, select: { userId: true } });
     if (!doctor) return;
     await NotificationService.createNotification({
       userId: doctor.userId,
+      type: 'APPOINTMENT',
       title: 'New appointment scheduled',
       body: `${patient.firstName} ${patient.lastName} has been scheduled for ${new Date(date).toLocaleString()}.`,
-      type: 'ALERT',
+      link: '/doctor/queue',
+      resource: 'APPOINTMENT',
+      resourceId: appointmentId,
+    });
+  }
+
+  /**
+   * Notify the patient's own portal account, if one exists (patients
+   * created via public booking/walk-in never have a linked User, so this
+   * is a no-op for them — never an error).
+   */
+  private static async notifyPatientOfAppointment(
+    patientId: string,
+    title: string,
+    body: string,
+    appointmentId: string,
+  ) {
+    const patient = await prisma.patient.findUnique({ where: { id: patientId }, select: { userId: true } });
+    if (!patient?.userId) return;
+    await NotificationService.createNotification({
+      userId: patient.userId,
+      type: 'APPOINTMENT',
+      title,
+      body,
+      link: '/patient',
+      resource: 'APPOINTMENT',
+      resourceId: appointmentId,
     });
   }
 
@@ -158,6 +204,19 @@ export class AppointmentService {
       details: { patientId: appointment.patientId, service: data.service }
     }).catch(() => {});
 
+    // Reception/admin need to know about unattended online bookings —
+    // nobody on staff actively created this one.
+    NotificationService.notifyRoleInBranch({
+      roles: [ROLES.RECEPTIONIST, ROLES.ADMIN],
+      branchId: data.branchId,
+      type: 'APPOINTMENT',
+      title: 'New online appointment request',
+      body: `${data.firstName} ${data.lastName} requested an appointment for ${data.service} on ${new Date(data.preferredDate).toLocaleString()}.`,
+      link: '/reception/appointments',
+      resource: 'APPOINTMENT',
+      resourceId: appointment.id,
+    }).catch(() => {});
+
     return appointment;
   }
 
@@ -197,6 +256,38 @@ export class AppointmentService {
       }).catch(() => {});
 
       return { appointment, visit };
+    }).then((result) => {
+      // Walk-in patients go straight into the clinical queue — the nursing
+      // team (and the assigned doctor, if any) need to know immediately.
+      // Fire-and-forget: never blocks the walk-in itself.
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.NURSE],
+        branchId: data.branchId,
+        type: 'APPOINTMENT',
+        title: 'New walk-in patient in queue',
+        body: 'A walk-in patient has checked in and is waiting for triage.',
+        link: '/nurse/queue',
+        resource: 'VISIT',
+        resourceId: result.visit.id,
+        excludeUserId: executorId,
+      }).catch(() => {});
+
+      if (data.doctorId) {
+        prisma.staff.findUnique({ where: { id: data.doctorId }, select: { userId: true } }).then((doctor) => {
+          if (!doctor) return;
+          NotificationService.createNotification({
+            userId: doctor.userId,
+            type: 'APPOINTMENT',
+            title: 'Patient checked in',
+            body: 'A walk-in patient assigned to you has checked in.',
+            link: '/doctor/queue',
+            resource: 'VISIT',
+            resourceId: result.visit.id,
+          }).catch(() => {});
+        }).catch(() => {});
+      }
+
+      return result;
     });
   }
 
@@ -266,6 +357,7 @@ export class AppointmentService {
     const updateData: any = { status: data.status };
     const now = new Date();
 
+    let createdNewVisit = false;
     const updated = await prisma.$transaction(async (tx) => {
       const result = await tx.appointment.update({ where: { id }, data: updateData });
 
@@ -283,6 +375,7 @@ export class AppointmentService {
               chiefComplaint: appointment.reason ?? undefined,
             }
           });
+          createdNewVisit = true;
         }
       }
       return result;
@@ -297,6 +390,73 @@ export class AppointmentService {
       resource: 'APPOINTMENT', resourceId: updated.id, branchId: appointment.branchId,
       details: { oldStatus: appointment.status, newStatus: data.status }
     }).catch(() => {});
+
+    // Notification side-effects, gated on the actual state transition that
+    // just happened — never on a mere GET/refetch.
+    if (data.status === 'ARRIVED' && createdNewVisit) {
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.NURSE],
+        branchId: appointment.branchId,
+        type: 'APPOINTMENT',
+        title: 'Patient checked in',
+        body: 'A patient has checked in and is waiting for triage.',
+        link: '/nurse/queue',
+        resource: 'APPOINTMENT',
+        resourceId: updated.id,
+        excludeUserId: executorId,
+      }).catch(() => {});
+
+      if (appointment.doctorId) {
+        prisma.staff.findUnique({ where: { id: appointment.doctorId }, select: { userId: true } }).then((doctor) => {
+          if (!doctor) return;
+          NotificationService.createNotification({
+            userId: doctor.userId,
+            type: 'APPOINTMENT',
+            title: 'Patient checked in',
+            body: 'Your patient has checked in and is waiting.',
+            link: '/doctor/queue',
+            resource: 'APPOINTMENT',
+            resourceId: updated.id,
+          }).catch(() => {});
+        }).catch(() => {});
+      }
+    }
+
+    if (data.status === 'CANCELLED') {
+      this.notifyPatientOfAppointment(
+        appointment.patientId,
+        'Appointment cancelled',
+        'Your appointment has been cancelled.',
+        updated.id,
+      ).catch(() => {});
+
+      NotificationService.notifyRoleInBranch({
+        roles: [ROLES.RECEPTIONIST, ROLES.ADMIN],
+        branchId: appointment.branchId,
+        type: 'APPOINTMENT',
+        title: 'Appointment cancelled',
+        body: 'An appointment has been cancelled.',
+        link: '/reception/appointments',
+        resource: 'APPOINTMENT',
+        resourceId: updated.id,
+        excludeUserId: executorId,
+      }).catch(() => {});
+
+      if (appointment.doctorId) {
+        prisma.staff.findUnique({ where: { id: appointment.doctorId }, select: { userId: true } }).then((doctor) => {
+          if (!doctor) return;
+          NotificationService.createNotification({
+            userId: doctor.userId,
+            type: 'APPOINTMENT',
+            title: 'Appointment cancelled',
+            body: 'One of your appointments has been cancelled.',
+            link: '/doctor/queue',
+            resource: 'APPOINTMENT',
+            resourceId: updated.id,
+          }).catch(() => {});
+        }).catch(() => {});
+      }
+    }
 
     return updated;
   }
@@ -322,6 +482,40 @@ export class AppointmentService {
         userId: executorId, userRole: 'SYSTEM', action: 'APPOINTMENT_UPDATED',
         resource: 'APPOINTMENT', resourceId: id, branchId: appointment.branchId,
         details: { newDate, newTimeSlot }
+      }).catch(() => {});
+    }
+
+    this.notifyPatientOfAppointment(
+      appointment.patientId,
+      'Appointment rescheduled',
+      `Your appointment has been rescheduled to ${new Date(newDate).toLocaleString()}.`,
+      updated.id,
+    ).catch(() => {});
+
+    NotificationService.notifyRoleInBranch({
+      roles: [ROLES.RECEPTIONIST, ROLES.ADMIN],
+      branchId: appointment.branchId,
+      type: 'APPOINTMENT',
+      title: 'Appointment rescheduled',
+      body: `An appointment has been rescheduled to ${new Date(newDate).toLocaleString()}.`,
+      link: '/reception/appointments',
+      resource: 'APPOINTMENT',
+      resourceId: updated.id,
+      excludeUserId: executorId,
+    }).catch(() => {});
+
+    if (appointment.doctorId) {
+      prisma.staff.findUnique({ where: { id: appointment.doctorId }, select: { userId: true } }).then((doctor) => {
+        if (!doctor) return;
+        NotificationService.createNotification({
+          userId: doctor.userId,
+          type: 'APPOINTMENT',
+          title: 'Appointment rescheduled',
+          body: `An appointment has been rescheduled to ${new Date(newDate).toLocaleString()}.`,
+          link: '/doctor/queue',
+          resource: 'APPOINTMENT',
+          resourceId: updated.id,
+        }).catch(() => {});
       }).catch(() => {});
     }
 

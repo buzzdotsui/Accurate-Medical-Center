@@ -4,6 +4,7 @@ import { IdGeneratorService } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { auth } from '@/lib/auth/config';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
 import { Prisma } from '@prisma/client';
 
 // ResolvedStaffInput is derived from CreateStaffInput but makes branchId
@@ -104,6 +105,21 @@ export class StaffService {
             branchId: data.branchId,
           }
         });
+
+        return staff;
+      }).then((staff) => {
+        // Organization-wide visibility for SUPER_ADMIN when any staff is
+        // created (mirrors the SUPER_ADMIN cross-branch override used
+        // throughout the RBAC layer). Best-effort: never blocks staff creation.
+        NotificationService.notifySuperAdmins({
+          type: 'STAFF',
+          title: 'New staff member created',
+          body: `${data.firstName} ${data.lastName} (${data.role}) was added to the team.`,
+          link: '/admin/staff',
+          resource: 'STAFF',
+          resourceId: staff.id,
+          excludeUserId: adminUserId,
+        }).catch(() => {});
 
         return staff;
       });

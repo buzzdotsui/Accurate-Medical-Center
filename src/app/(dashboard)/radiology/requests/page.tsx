@@ -3,19 +3,30 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Radiation, Search } from "lucide-react";
+import { Radiation } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
+interface RadiologyRequest {
+  id: string;
+  requestId: string;
+  scanType: string;
+  region: string;
+  priority: string;
+  status: string;
+  createdAt: string;
+  visit: { patient: { firstName: string; lastName: string; patientId: string } };
+  doctor: { user: { name: string } };
+}
+
 export default function RadiologyQueue() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['radiology-requests'],
     queryFn: async () => {
-      // Mock data for frontend demo
-      return [
-        { id: "RAD-001", patient: { name: "Mary Smith", id: "AMC-2026-0004" }, type: "CT Scan", region: "Chest", doctor: "Dr. Adams", priority: "STAT", time: "11:15 AM", status: "SCANNED" },
-        { id: "RAD-002", patient: { name: "John Doe", id: "AMC-2026-0001" }, type: "XRAY", region: "Left Ankle", doctor: "Dr. Lee", priority: "ROUTINE", time: "11:30 AM", status: "REQUESTED" },
-      ];
+      const res = await fetch('/api/v1/radiology/requests');
+      if (!res.ok) throw new Error('Failed to fetch radiology requests');
+      const json = await res.json();
+      return json.data as RadiologyRequest[];
     }
   });
 
@@ -33,6 +44,12 @@ export default function RadiologyQueue() {
           {isLoading ? (
             <div className="py-12 flex justify-center">
               <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <h3 className="text-lg font-medium text-destructive">Failed to load radiology requests</h3>
+              <p className="text-muted-foreground mt-1">{(error as Error)?.message}</p>
+              <button onClick={() => refetch()} className="mt-4 text-sm text-primary underline">Retry</button>
             </div>
           ) : data?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -54,15 +71,15 @@ export default function RadiologyQueue() {
                   </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
-                  {data?.map((req: any) => (
+                  {data?.map((req) => (
                     <tr key={req.id} className="border-b transition-colors hover:bg-muted/30 group">
-                      <td className="p-6 align-middle font-medium">{req.time}</td>
+                      <td className="p-6 align-middle font-medium">{new Date(req.createdAt).toLocaleTimeString()}</td>
                       <td className="p-6 align-middle">
-                        <div className="font-bold text-base">{req.patient.name}</div>
-                        <div className="text-xs text-muted-foreground">{req.patient.id}</div>
+                        <div className="font-bold text-base">{req.visit.patient.firstName + ' ' + req.visit.patient.lastName}</div>
+                        <div className="text-xs text-muted-foreground">{req.visit.patient.patientId}</div>
                       </td>
                       <td className="p-6 align-middle">
-                        <div className="font-medium">{req.type}</div>
+                        <div className="font-medium">{req.scanType}</div>
                         <div className="text-xs text-muted-foreground">{req.region}</div>
                       </td>
                       <td className="p-6 align-middle">
@@ -73,12 +90,12 @@ export default function RadiologyQueue() {
                         </span>
                       </td>
                       <td className="p-6 align-middle font-medium">
-                         {req.status}
+                        {req.status === 'SCANNED' ? 'Scanned - needs report' : 'Pending'}
                       </td>
                       <td className="p-6 align-middle text-right">
                         <Button variant={req.priority === 'STAT' ? 'destructive' : 'default'} asChild className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                           <Link href={`/radiology/requests/${req.id}`}>
-                            {req.status === 'SCANNED' ? 'Write Report' : 'Upload Image'}
+                            {req.status === 'SCANNED' ? 'Write Report' : 'Mark Scanned'}
                           </Link>
                         </Button>
                       </td>

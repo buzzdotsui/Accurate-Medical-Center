@@ -36,85 +36,61 @@ export const navConfig: Record<Role, NavItem[]> = {
 
   [ROLES.DOCTOR]: [
     { title: 'Dashboard', href: '/doctor', icon: 'layout-dashboard' },
+    { title: 'Clinical Queue', href: '/doctor/queue', icon: 'list-ordered' },
     { title: 'My Patients', href: '/doctor/patients', icon: 'users' },
-    { title: 'Appointments', href: '/doctor/appointments', icon: 'calendar-check' },
-    { title: 'Consultations', href: '/doctor/consultations', icon: 'stethoscope' },
     { title: 'Prescriptions', href: '/doctor/prescriptions', icon: 'pill' },
-    { title: 'Lab Requests', href: '/doctor/lab-requests', icon: 'flask-conical' },
-    { title: 'Radiology', href: '/doctor/radiology', icon: 'scan' },
   ],
 
   [ROLES.NURSE]: [
     { title: 'Dashboard', href: '/nurse', icon: 'layout-dashboard' },
-    { title: 'Patients', href: '/nurse/patients', icon: 'users' },
-    { title: 'Vitals & Triage', href: '/nurse/vitals', icon: 'activity' },
+    { title: 'Triage Queue', href: '/nurse/queue', icon: 'list-ordered' },
     { title: 'Ward Management', href: '/nurse/ward', icon: 'bed' },
-    { title: 'Medications', href: '/nurse/medications', icon: 'pill' },
   ],
 
   [ROLES.RECEPTIONIST]: [
     { title: 'Dashboard', href: '/reception', icon: 'layout-dashboard' },
-    { title: 'Register Patient', href: '/reception/register', icon: 'user-plus' },
+    { title: 'Register Patient', href: '/reception/patients/new', icon: 'user-plus' },
     { title: 'Appointments', href: '/reception/appointments', icon: 'calendar-check' },
-    { title: 'Queue Management', href: '/reception/queue', icon: 'list-ordered' },
-    { title: 'Billing', href: '/reception/billing', icon: 'receipt' },
+    { title: 'Patients', href: '/reception/patients', icon: 'users' },
   ],
 
   [ROLES.PHARMACIST]: [
     { title: 'Dashboard', href: '/pharmacy', icon: 'layout-dashboard' },
     { title: 'Prescriptions', href: '/pharmacy/prescriptions', icon: 'pill' },
-    { title: 'Dispense', href: '/pharmacy/dispense', icon: 'package-check' },
     { title: 'Inventory', href: '/pharmacy/inventory', icon: 'package' },
-    { title: 'Purchase Orders', href: '/pharmacy/orders', icon: 'truck' },
   ],
 
   [ROLES.LAB_SCIENTIST]: [
     { title: 'Dashboard', href: '/laboratory', icon: 'layout-dashboard' },
-    { title: 'Pending Requests', href: '/laboratory/requests', icon: 'clipboard-list' },
-    { title: 'Samples', href: '/laboratory/samples', icon: 'droplets' },
-    { title: 'Enter Results', href: '/laboratory/results', icon: 'flask-conical' },
+    { title: 'Lab Requests', href: '/laboratory/requests', icon: 'clipboard-list' },
   ],
 
   [ROLES.RADIOGRAPHER]: [
     { title: 'Dashboard', href: '/radiology', icon: 'layout-dashboard' },
     { title: 'Scan Requests', href: '/radiology/requests', icon: 'scan' },
-    { title: 'Draft Reports', href: '/radiology/reports', icon: 'file-medical' },
-    { title: 'Image Archive', href: '/radiology/archive', icon: 'archive' },
   ],
 
   [ROLES.ACCOUNTANT]: [
     { title: 'Dashboard', href: '/billing', icon: 'layout-dashboard' },
     { title: 'Invoices', href: '/billing/invoices', icon: 'receipt' },
-    { title: 'Payments', href: '/billing/payments', icon: 'credit-card' },
-    { title: 'Expenses', href: '/billing/expenses', icon: 'trending-down' },
-    { title: 'Financial Reports', href: '/billing/reports', icon: 'bar-chart-3' },
   ],
 
   [ROLES.THEATRE_STAFF]: [
     { title: 'Dashboard', href: '/theatre', icon: 'layout-dashboard' },
-    { title: 'Surgical Schedule', href: '/theatre/schedule', icon: 'calendar' },
-    { title: 'Patient Prep', href: '/theatre/prep', icon: 'check-square' },
-    { title: 'Post-Op Recovery', href: '/theatre/recovery', icon: 'bed' },
+    { title: 'Inpatient Wards', href: '/inpatient/admissions', icon: 'bed' },
   ],
 
   [ROLES.MATERNAL_STAFF]: [
     { title: 'Dashboard', href: '/maternal', icon: 'layout-dashboard' },
-    { title: 'ANC Visits', href: '/maternal/anc', icon: 'baby' },
-    { title: 'Deliveries', href: '/maternal/deliveries', icon: 'activity' },
-    { title: 'Postnatal Care', href: '/maternal/postnatal', icon: 'heart' },
+    { title: 'Inpatient Wards', href: '/inpatient/admissions', icon: 'bed' },
   ],
 
   [ROLES.MENTAL_HEALTH]: [
     { title: 'Dashboard', href: '/psych', icon: 'layout-dashboard' },
-    { title: 'Assessments', href: '/psych/assessments', icon: 'brain' },
-    { title: 'Therapy Sessions', href: '/psych/sessions', icon: 'users' },
-    { title: 'Recovery Tracking', href: '/psych/recovery', icon: 'line-chart' },
   ],
 
   [ROLES.AMBULANCE]: [
     { title: 'Dashboard', href: '/ambulance', icon: 'layout-dashboard' },
-    { title: 'Dispatch Requests', href: '/ambulance/requests', icon: 'radio' },
-    { title: 'Fleet Status', href: '/ambulance/fleet', icon: 'truck' },
   ],
 
   [ROLES.PATIENT]: [

@@ -1,22 +1,31 @@
 "use client";
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, Mail, Phone, MoreHorizontal } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ROLE_LABELS, type Role } from "@/config/roles";
+import { Users } from "lucide-react";
+
+interface StaffMember {
+  id: string;
+  staffId: string;
+  isActive: boolean;
+  specialization: string | null;
+  user: { name: string; email: string; role: string };
+  department: { name: string; code: string } | null;
+}
 
 export default function StaffDirectory() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['hr-staff'],
+  const { data, isLoading, isError, error, refetch } = useQuery<StaffMember[]>({
+    queryKey: ["hr-staff"],
     queryFn: async () => {
-      // Mock data for frontend demo
-      return [
-        { id: "EMP-001", name: "Dr. Sarah Adams", role: "DOCTOR", department: "Cardiology", status: "ACTIVE", email: "s.adams@accurate.med", phone: "555-0101" },
-        { id: "EMP-002", name: "John Lee", role: "NURSE", department: "ICU", status: "ACTIVE", email: "j.lee@accurate.med", phone: "555-0102" },
-        { id: "EMP-003", name: "Emily Chen", role: "PHARMACIST", department: "Pharmacy", status: "ON_LEAVE", email: "e.chen@accurate.med", phone: "555-0103" },
-      ];
-    }
+      const res = await fetch("/api/v1/hr/staff");
+      if (!res.ok) throw new Error(`Failed to fetch staff: ${res.statusText}`);
+      const json = await res.json();
+      return json.data as StaffMember[];
+    },
   });
 
   return (
@@ -24,64 +33,94 @@ export default function StaffDirectory() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Staff Directory</h1>
-          <p className="text-muted-foreground mt-1">View and manage hospital personnel records.</p>
+          <p className="text-muted-foreground mt-1">View hospital personnel records.</p>
         </div>
       </div>
 
-      <Card className="border-none shadow-sm ring-1 ring-border/50">
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="py-12 flex justify-center">
-              <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-            </div>
-          ) : (
-            <div className="relative w-full overflow-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead className="[&_tr]:border-b bg-muted/50">
-                  <tr className="border-b transition-colors hover:bg-muted/50">
-                    <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Employee</th>
-                    <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Department</th>
-                    <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Contact</th>
-                    <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Status</th>
-                    <th className="h-12 px-6 text-right align-middle font-medium text-muted-foreground">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="[&_tr:last-child]:border-0">
-                  {data?.map((staff: any) => (
-                    <tr key={staff.id} className="border-b transition-colors hover:bg-muted/30">
-                      <td className="p-6 align-middle">
-                        <div className="font-bold text-base flex items-center gap-2">
-                          {staff.name}
-                        </div>
-                        <div className="text-xs text-muted-foreground">{staff.id} • {staff.role}</div>
-                      </td>
-                      <td className="p-6 align-middle font-medium">
-                        {staff.department}
-                      </td>
-                      <td className="p-6 align-middle text-muted-foreground">
-                        <div className="flex items-center gap-2 text-xs"><Mail className="w-3 h-3" /> {staff.email}</div>
-                        <div className="flex items-center gap-2 text-xs mt-1"><Phone className="w-3 h-3" /> {staff.phone}</div>
-                      </td>
-                      <td className="p-6 align-middle">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          staff.status === 'ACTIVE' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
-                        }`}>
-                          {staff.status.replace('_', ' ')}
+      <div className="rounded-lg border bg-card shadow-sm ring-1 ring-border/50 overflow-hidden">
+        {isLoading ? (
+          <div className="p-6 space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-1.5 flex-1">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="p-8">
+            <ErrorState
+              title="Failed to load staff"
+              description={(error as Error).message}
+              onRetry={() => refetch()}
+            />
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="p-8">
+            <EmptyState
+              icon={<Users className="w-full h-full" />}
+              title="No staff members found"
+              description="Staff accounts will appear here once they are created."
+            />
+          </div>
+        ) : (
+          <div className="relative w-full overflow-auto">
+            <table className="w-full caption-bottom text-sm">
+              <thead className="bg-muted/50">
+                <tr className="border-b transition-colors">
+                  <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Name / ID</th>
+                  <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Role</th>
+                  <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Department</th>
+                  <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Contact</th>
+                  <th className="h-12 px-6 text-left align-middle font-medium text-muted-foreground">Status</th>
+                </tr>
+              </thead>
+              <tbody className="[&_tr:last-child]:border-0">
+                {data.map((staff) => (
+                  <tr key={staff.id} className="border-b transition-colors hover:bg-muted/30">
+                    <td className="px-6 py-4 align-middle">
+                      <div className="font-semibold text-foreground">{staff.user.name}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{staff.staffId}</div>
+                    </td>
+                    <td className="px-6 py-4 align-middle">
+                      <Badge variant="outline" className="text-xs">
+                        {ROLE_LABELS[staff.user.role as Role] ?? staff.user.role}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 align-middle text-sm">
+                      {staff.department ? (
+                        <span>
+                          {staff.department.name}
+                          <span className="ml-1 text-xs text-muted-foreground">({staff.department.code})</span>
                         </span>
-                      </td>
-                      <td className="p-6 align-middle text-right">
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 align-middle text-sm text-muted-foreground">
+                      {staff.user.email}
+                    </td>
+                    <td className="px-6 py-4 align-middle">
+                      <Badge
+                        variant={staff.isActive ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {staff.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

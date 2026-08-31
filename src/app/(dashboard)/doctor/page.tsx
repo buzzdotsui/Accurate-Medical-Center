@@ -14,6 +14,11 @@ interface DoctorStats {
   consultationsDone: number;
 }
 
+interface LabRequest {
+  id: string;
+  status: string;
+}
+
 export default function DoctorDashboard() {
   const { data, isLoading, error, refetch, isFetching } = useQuery<DoctorStats>({
     queryKey: ["doctor_dashboard_stats"],
@@ -28,6 +33,25 @@ export default function DoctorDashboard() {
     },
     staleTime: 60_000,
   });
+
+  const { data: labData, isLoading: labLoading } = useQuery<LabRequest[]>({
+    queryKey: ["doctor_lab_requests_count"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/laboratory/requests?take=100");
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error?.message ?? "Failed to load lab requests");
+      }
+      const json = await res.json();
+      // The lab requests route returns ok(requests) — data is the array directly
+      return Array.isArray(json.data) ? json.data : [];
+    },
+    staleTime: 60_000,
+  });
+
+  const pendingLabCount = labData
+    ? labData.filter((r) => r.status !== "COMPLETED").length
+    : null;
 
   return (
     <div className="space-y-8">
@@ -82,11 +106,15 @@ export default function DoctorDashboard() {
               value={data?.todayAppointments ?? 0}
               icon={CalendarCheck}
             />
-            <StatCard
-              title="Pending Lab Results"
-              value="—"
-              icon={ClipboardList}
-            />
+            {labLoading ? (
+              <Skeleton className="h-28 w-full rounded-xl" />
+            ) : (
+              <StatCard
+                title="Pending Lab Results"
+                value={pendingLabCount ?? 0}
+                icon={ClipboardList}
+              />
+            )}
             <StatCard
               title="Consultations Done"
               value={data?.consultationsDone ?? 0}

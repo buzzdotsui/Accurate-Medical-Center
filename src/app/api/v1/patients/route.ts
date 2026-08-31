@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { withAuth, withRole, parseBody, parseQuery } from '@/lib/api/middleware';
+import { withRole, parseBody, parseQuery } from '@/lib/api/middleware';
 import { CreatePatientSchema } from '@/lib/validations/patient';
 import { PatientService } from '@/services/patient.service';
 import { ok, created } from '@/lib/api/response';
@@ -22,16 +22,23 @@ const ListPatientsQuerySchema = z.object({
  * - ADMIN, DOCTOR, NURSE, PHARMACIST, etc.: See patients in their branch only
  * - PATIENT: Not accessible
  */
-export const GET = withAuth(async (req, session) => {
-  const query = parseQuery(req, ListPatientsQuerySchema);
-  const branchFilter = buildBranchFilter(session.user);
-  
-  const result = await PatientService.listPatients({
-    ...query,
-    branchId: branchFilter.branchId,
-  });
-  return ok(result);
-});
+export const GET = withRole(
+  [
+    ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE,
+    ROLES.RECEPTIONIST, ROLES.PHARMACIST, ROLES.LAB_SCIENTIST, ROLES.RADIOGRAPHER,
+    ROLES.ACCOUNTANT, ROLES.THEATRE_STAFF, ROLES.MATERNAL_STAFF,
+    ROLES.MENTAL_HEALTH, ROLES.AMBULANCE,
+  ],
+  async (req, session) => {
+    const query = parseQuery(req, ListPatientsQuerySchema);
+    const branchFilter = buildBranchFilter(session.user);
+    const result = await PatientService.listPatients({
+      ...query,
+      branchId: branchFilter.branchId,
+    });
+    return ok(result);
+  }
+);
 
 /**
  * POST /api/v1/patients

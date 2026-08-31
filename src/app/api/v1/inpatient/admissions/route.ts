@@ -14,7 +14,7 @@ import { buildBranchFilter, resolveBranchId } from '@/lib/auth/resource-authoriz
  * profile/timeline).
  */
 export const GET = withRole(
-  [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE],
+  [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE, ROLES.THEATRE_STAFF, ROLES.MATERNAL_STAFF],
   async (req, session) => {
     const branchFilter = buildBranchFilter(session.user);
     const admissions = await InpatientService.getActiveAdmissions(branchFilter.branchId);

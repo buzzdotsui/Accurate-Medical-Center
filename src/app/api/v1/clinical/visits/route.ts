@@ -64,7 +64,7 @@ export const POST = withRole(
   [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.RECEPTIONIST, ROLES.NURSE, ROLES.DOCTOR],
   async (req: NextRequest, session) => {
     const body = await parseBody(req, StartVisitSchema);
-    const visit = await ClinicalService.startVisit(body, session.user.id);
+    const visit = await ClinicalService.startVisit(body, session.user.id, session.user.role);
     return created(visit);
   }
 );

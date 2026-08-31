@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth/config';
 import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
 import { Prisma } from '@prisma/client';
+import { logger } from '@/lib/utils/logger';
 
 // ResolvedStaffInput is derived from CreateStaffInput but makes branchId
 // required. The API route always resolves the correct branch from the session
@@ -119,7 +120,9 @@ export class StaffService {
           resource: 'STAFF',
           resourceId: staff.id,
           excludeUserId: adminUserId,
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+        });
 
         return staff;
       });

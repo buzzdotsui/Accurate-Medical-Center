@@ -51,8 +51,21 @@ export default function ReceptionDashboard() {
   const totalPatients = patientsData?.data?.total ?? "—";
   const appointments = apptsData?.data?.appointments || [];
   const todayAppointmentsCount = apptsData?.data?.total ?? "—";
+  const todayApptCount = statsLoading ? null : (statsData?.todayTotal ?? 0);
   const checkedInCount = statsLoading ? null : (statsData?.todayCheckedIn ?? 0);
   const queueCount = statsLoading ? null : (statsData?.inQueue ?? 0);
+
+  const { data: queueVisits, isLoading: queueLoading } = useQuery({
+    queryKey: ['reception_live_queue'],
+    queryFn: async () => {
+      const res = await fetch('/api/v1/clinical/visits?status=IN_PROGRESS&take=10');
+      if (!res.ok) return { visits: [], total: 0 };
+      const json = await res.json();
+      return json.data;
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
 
   const apptColumns: Column<any>[] = [
     { accessorKey: "timeSlot", header: "Time" },
@@ -99,7 +112,17 @@ export default function ReceptionDashboard() {
       {/* Stats Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Patients" value={totalPatients} icon={Users} />
-        <StatCard title="Today's Appts" value={todayAppointmentsCount} icon={CalendarPlus} />
+        {todayApptCount === null ? (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Today's Appts</CardTitle>
+              <CalendarPlus className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent><Skeleton className="h-8 w-16" /></CardContent>
+          </Card>
+        ) : (
+          <StatCard title="Today's Appts" value={todayApptCount} icon={CalendarPlus} />
+        )}
         {checkedInCount === null ? (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -131,11 +154,37 @@ export default function ReceptionDashboard() {
             Live Waiting Queue
             <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-1 rounded-full">Live</span>
           </h2>
-          <EmptyState
-            icon={<Clock className="w-full h-full" />}
-            title="Waiting queue is empty"
-            description="Patients checked in and waiting will appear here in real time."
-          />
+          {queueLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          ) : queueVisits?.visits?.length > 0 ? (
+            <div className="bg-card rounded-xl border border-border shadow-sm divide-y divide-border">
+              {queueVisits.visits.map((v: any) => {
+                const waitMins = Math.floor((Date.now() - new Date(v.startedAt).getTime()) / 60000);
+                return (
+                  <Link key={v.id} href={`/reception/patients/${v.patient.patientId}`} className="flex items-center justify-between p-4 hover:bg-muted/40 transition-colors">
+                    <div>
+                      <div className="font-medium">{v.patient.firstName + ' ' + v.patient.lastName}</div>
+                      <div className="text-xs text-muted-foreground">{v.patient.patientId}</div>
+                    </div>
+                    <div className={`text-sm font-semibold flex items-center gap-1 ${waitMins > 30 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      <Timer className="w-4 h-4" />
+                      {waitMins}m
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<Clock className="w-full h-full" />}
+              title="Waiting queue is empty"
+              description="Patients checked in and waiting will appear here in real time."
+            />
+          )}
         </div>
 
         {/* Today's Appointments */}

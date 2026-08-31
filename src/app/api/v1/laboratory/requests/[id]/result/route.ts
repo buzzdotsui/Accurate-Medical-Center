@@ -5,6 +5,7 @@ import { LaboratoryService } from '@/services/laboratory.service';
 import { ok } from '@/lib/api/response';
 import { RouteContext, getParam } from '@/lib/utils/route-types';
 import { ROLES } from '@/config/roles';
+import { verifyLabRequestAccess } from '@/lib/auth/resource-authorization';
 
 /**
  * POST /api/v1/laboratory/requests/:id/result
@@ -16,6 +17,7 @@ import { ROLES } from '@/config/roles';
  */
 export const POST = withRole([ROLES.SUPER_ADMIN, ROLES.LAB_SCIENTIST], async (req, session, ctx: RouteContext) => {
   const requestId = await getParam(ctx, 'id');
+  await verifyLabRequestAccess(session.user, requestId, 'UPDATE');
   const body = await parseBody(req, SaveLabResultSchema);
   const result = await LaboratoryService.saveResult(requestId, body, session.user.id);
   return ok(result, { message: 'Lab result saved successfully' });

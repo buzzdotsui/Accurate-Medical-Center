@@ -4,6 +4,7 @@ import React from "react";
 import { StatCard } from "@/components/ui/stat-card";
 import { Pill, Package, Clock, AlertTriangle, ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +19,11 @@ interface InventoryItem {
   id: string;
   stockQuantity: number;
   reorderLevel: number;
+}
+
+interface PharmacyStats {
+  dispensedToday: number;
+  pendingCount: number;
 }
 
 export default function PharmacyDashboard() {
@@ -39,6 +45,17 @@ export default function PharmacyDashboard() {
       if (!res.ok || !json.success) throw new Error(json?.error?.message ?? "Failed to load inventory");
       return json.data;
     },
+  });
+
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["pharmacy-stats"],
+    queryFn: async (): Promise<PharmacyStats> => {
+      const res = await fetch("/api/v1/pharmacy/stats", { credentials: "include" });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json?.error?.message ?? "Failed to load pharmacy stats");
+      return json.data;
+    },
+    staleTime: 30_000,
   });
 
   const pendingRx = prescriptions?.length;
@@ -66,20 +83,27 @@ export default function PharmacyDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Pending Rx" value={pendingRx !== undefined ? formatNumber(pendingRx) : "—"} icon={Clock} />
-        <StatCard title="Low Stock Items" value={lowStockCount !== undefined ? formatNumber(lowStockCount) : "—"} icon={AlertTriangle} />
-        <StatCard
-          title="Dispensed Today"
-          value="—"
-          description="Not yet tracked — requires per-dispense timestamps"
-          icon={Pill}
-        />
-        <StatCard
-          title="Revenue (Today)"
-          value="—"
-          description="Not yet tracked — requires per-service revenue categorization"
-          icon={Package}
-        />
+        {statsLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-xl" />
+          ))
+        ) : (
+          <>
+            <StatCard title="Pending Rx" value={pendingRx !== undefined ? formatNumber(pendingRx) : "—"} icon={Clock} />
+            <StatCard title="Low Stock Items" value={lowStockCount !== undefined ? formatNumber(lowStockCount) : "—"} icon={AlertTriangle} />
+            <StatCard
+              title="Dispensed Today"
+              value={stats?.dispensedToday !== undefined ? formatNumber(stats.dispensedToday) : "—"}
+              icon={Pill}
+            />
+            <StatCard
+              title="Revenue (Today)"
+              value="—"
+              description="Requires billing integration"
+              icon={Package}
+            />
+          </>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

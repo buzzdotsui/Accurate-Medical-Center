@@ -42,6 +42,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   // We need a branchId for the PatientService. Find the HQ or oldest branch.
   const defaultBranch = await prisma.branch.findFirst({
+    where: { isActive: true },
     orderBy: { createdAt: 'asc' },
   });
 

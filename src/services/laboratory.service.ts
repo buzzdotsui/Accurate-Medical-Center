@@ -3,6 +3,7 @@ import { SaveLabResultInput } from '@/lib/validations/laboratory';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
+import { logger } from '@/lib/utils/logger';
 
 export class LaboratoryService {
   /**
@@ -102,7 +103,9 @@ export class LaboratoryService {
         link: `/laboratory/requests/${request.id}`,
         resource: 'LAB_REQUEST',
         resourceId: request.id,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     if (request.visit.patient.userId) {
@@ -114,7 +117,9 @@ export class LaboratoryService {
         link: '/patient',
         resource: 'LAB_REQUEST',
         resourceId: request.id,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     return created;

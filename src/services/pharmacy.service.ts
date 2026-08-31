@@ -3,6 +3,7 @@ import { DispensePrescriptionInput } from '@/lib/validations/pharmacy';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
+import { logger } from '@/lib/utils/logger';
 
 export class PharmacyService {
   /**
@@ -112,7 +113,9 @@ export class PharmacyService {
         details: { status: data.status, itemCount: prescription.items.length }
       }).catch(() => {});
 
-      this.notifyPatientOfDispense(data.status, prescription.visit.patient.userId, updated.id).catch(() => {});
+      this.notifyPatientOfDispense(data.status, prescription.visit.patient.userId, updated.id).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
 
       return updated;
     }
@@ -135,9 +138,41 @@ export class PharmacyService {
       details: { status: data.status }
     }).catch(() => {});
 
-    this.notifyPatientOfDispense(data.status, prescription.visit.patient.userId, updated.id).catch(() => {});
+    this.notifyPatientOfDispense(data.status, prescription.visit.patient.userId, updated.id).catch((err: unknown) => {
+      logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+    });
 
     return updated;
+  }
+
+  /**
+   * Get dashboard stats: prescriptions dispensed today and currently pending.
+   * Uses the same branch-isolation pattern as getPendingPrescriptions.
+   */
+  static async getDashboardStats(branchId?: string) {
+    const today = new Date();
+    const startOfDay = new Date(today);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(today);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const [dispensedToday, pendingCount] = await Promise.all([
+      prisma.prescription.count({
+        where: {
+          status: 'DISPENSED',
+          updatedAt: { gte: startOfDay, lte: endOfDay },
+          ...(branchId ? { visit: { patient: { branchId } } } : {}),
+        },
+      }),
+      prisma.prescription.count({
+        where: {
+          status: { in: ['PENDING', 'PARTIAL'] },
+          ...(branchId ? { visit: { patient: { branchId } } } : {}),
+        },
+      }),
+    ]);
+
+    return { dispensedToday, pendingCount };
   }
 
   /**

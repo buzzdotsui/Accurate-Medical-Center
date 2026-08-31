@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@/lib/db/client';
+import { NotificationService } from '@/services/notification.service';
 
 /**
  * Better Auth configuration.
@@ -13,6 +14,34 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: false, // Don't auto sign in after registration (requires verification/approval)
+    sendResetPassword: async ({ user, url }: { user: { email: string; name: string }; url: string }) => {
+      try {
+        await NotificationService.sendEmail({
+          to: user.email,
+          subject: 'Reset Your Password — Accurate Medical Center',
+          html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #0f766e;">Password Reset Request</h2>
+          <p>Dear ${user.name || 'User'},</p>
+          <p>We received a request to reset the password for your account at Accurate Medical Center.</p>
+          <p>Click the link below to reset your password. This link expires in 1 hour.</p>
+          <p style="margin: 24px 0;">
+            <a href="${url}" style="background: #0f766e; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
+              Reset Password
+            </a>
+          </p>
+          <p style="font-size: 12px; color: #666;">If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>
+          <p style="font-size: 12px; color: #666;">This link expires in 1 hour.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 12px; color: #999;">Accurate Medical Center — Secure Healthcare Management</p>
+        </div>
+      `,
+        });
+      } catch (error) {
+        // Log but don't throw — Better Auth handles the token generation regardless of email delivery
+        console.error('[Auth] Failed to send password reset email:', error);
+      }
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

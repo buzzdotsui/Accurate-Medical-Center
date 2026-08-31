@@ -3,6 +3,7 @@ import { SaveRadiologyReportInput } from '@/lib/validations/radiology';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
+import { logger } from '@/lib/utils/logger';
 
 export class RadiologyService {
   /**
@@ -74,7 +75,7 @@ export class RadiologyService {
       // Log Audit
       await AuditService.log({
         userId: executorId,
-        userRole: 'RADIOLOGIST',
+        userRole: 'RADIOGRAPHER',
         action: 'SAVE_RADIOLOGY_REPORT',
         resource: 'RADIOLOGY_REPORT',
         resourceId: report.id,
@@ -95,7 +96,9 @@ export class RadiologyService {
         link: `/radiology/requests/${request.id}`,
         resource: 'RADIOLOGY_REQUEST',
         resourceId: request.id,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     if (request.visit.patient.userId) {
@@ -107,7 +110,9 @@ export class RadiologyService {
         link: '/patient',
         resource: 'RADIOLOGY_REQUEST',
         resourceId: request.id,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     return created;

@@ -37,7 +37,7 @@ export class HrService {
     // Audit Log
     await AuditService.log({
       userId: executorId,
-      userRole: 'HR_MANAGER',
+      userRole: 'ADMIN',
       action: 'ASSIGN_SHIFT',
       resource: 'SCHEDULE',
       resourceId: result.id,

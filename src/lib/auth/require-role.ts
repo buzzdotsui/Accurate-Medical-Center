@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/config';
 import { ROLES, type Role } from '@/config/roles';
+import { prisma } from '@/lib/db/client';
 
 /**
  * Server-side page guard for role-scoped dashboard route groups.
@@ -29,6 +30,17 @@ export async function requireRole(allowedRoles: Role[]) {
 
   if (role !== ROLES.SUPER_ADMIN && !allowedRoles.includes(role)) {
     redirect('/dashboard');
+  }
+
+  // Verify staff account is still active (mirrors getSessionUser behaviour)
+  if (role !== ROLES.SUPER_ADMIN && role !== ROLES.PATIENT) {
+    const staff = await prisma.staff.findUnique({
+      where: { userId: session.user.id as string },
+      select: { isActive: true },
+    });
+    if (staff && !staff.isActive) {
+      redirect('/login');
+    }
   }
 
   return session;

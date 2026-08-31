@@ -5,7 +5,7 @@ type TransactionClient = Omit<
   "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
 >;
 
-export type SequenceType = "patient" | "staff" | "appointment";
+export type SequenceType = "patient" | "staff" | "appointment" | "invoice";
 
 const SEQUENCE_CONFIG: Record<
   SequenceType,
@@ -24,6 +24,11 @@ const SEQUENCE_CONFIG: Record<
   appointment: {
     key: "seq_appointment",
     prefix: "AMC-APT-",
+    digits: 6,
+  },
+  invoice: {
+    key: "seq_invoice",
+    prefix: "AMC-INV-",
     digits: 6,
   },
 };
@@ -96,6 +101,10 @@ export class IdGeneratorService {
 
   static async generateAppointmentId(tx: TransactionClient): Promise<string> {
     return this.getNextId(tx, "appointment");
+  }
+
+  static async generateInvoiceId(tx: TransactionClient): Promise<string> {
+    return this.getNextId(tx, "invoice");
   }
 }
 

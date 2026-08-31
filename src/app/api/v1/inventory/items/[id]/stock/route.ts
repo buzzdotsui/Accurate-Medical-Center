@@ -19,7 +19,7 @@ export const POST = withRole(
   async (req, session, ctx: RouteContext) => {
     const medicineId = await getParam(ctx, 'id');
     const body = await parseBody(req, AdjustStockSchema);
-    const result = await InventoryService.adjustStock(medicineId, body, session.user.id);
+    const result = await InventoryService.adjustStock(medicineId, body, session.user.id, session.user.role);
     return ok(result, { message: 'Stock adjusted successfully' });
   }
 );

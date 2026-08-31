@@ -4,25 +4,34 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react";
+import { requestPasswordReset } from "@/lib/auth/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    
-    // In a real implementation, we would call the authClient.forgetPassword here
-    // await authClient.forgetPassword({ email, redirectTo: "/reset-password" });
-    
-    // Simulate API call for now
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 1000);
+
+    const { error: authError } = await requestPasswordReset({
+      email,
+      redirectTo: "/reset-password",
+    });
+
+    setLoading(false);
+
+    if (authError) {
+      // Don't reveal whether the email exists — show generic message
+      console.error('[Auth] forgetPassword error:', authError);
+    }
+
+    // Always show the success state to avoid email enumeration
+    setSubmitted(true);
   }
 
   if (submitted) {
@@ -37,7 +46,7 @@ export default function ForgotPasswordPage() {
               Check your email
             </h1>
             <p className="text-sm text-muted-foreground max-w-sm">
-              We have sent a password reset link to <span className="font-medium text-foreground">{email}</span>.
+              If an account exists for <span className="font-medium text-foreground">{email}</span>, you will receive a reset link shortly.
             </p>
           </div>
         </div>
@@ -82,6 +91,13 @@ export default function ForgotPasswordPage() {
             disabled={loading}
           />
         </div>
+
+        {error && (
+          <div className="flex items-center gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <p>{error}</p>
+          </div>
+        )}
 
         <Button type="submit" className="w-full h-11 text-base font-semibold" loading={loading}>
           Send reset link

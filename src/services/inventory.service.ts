@@ -5,9 +5,12 @@ import { AuditService } from './audit.service';
 
 export class InventoryService {
   /**
-   * Get all inventory items with supplier info
+   * Get all inventory items with supplier info.
+   * `branchId` is accepted for API consistency and future per-branch
+   * inventory support; the Medicine model is currently org-wide (no
+   * branchId column), so the param does not filter the query yet.
    */
-  static async getInventoryItems() {
+  static async getInventoryItems(_branchId?: string) {
     return await prisma.medicine.findMany({
       include: {
         inventoryTx: { include: { supplier: true }, take: 1 }
@@ -31,7 +34,7 @@ export class InventoryService {
   /**
    * Adjust stock for an item
    */
-  static async adjustStock(medicineId: string, data: AdjustStockInput, executorId: string) {
+  static async adjustStock(medicineId: string, data: AdjustStockInput, executorId: string, executorRole?: string) {
     const item = await prisma.medicine.findUnique({ where: { id: medicineId } });
     if (!item) throw new AppError('Item not found', 'NOT_FOUND', 404);
 
@@ -69,7 +72,7 @@ export class InventoryService {
       // Log Audit
       await AuditService.log({
         userId: executorId,
-        userRole: 'INVENTORY_MANAGER',
+        userRole: executorRole ?? 'ADMIN',
         action: 'ADJUST_STOCK',
         resource: 'MEDICINE',
         resourceId: item.id,

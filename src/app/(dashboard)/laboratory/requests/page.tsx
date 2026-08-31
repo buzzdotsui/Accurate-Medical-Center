@@ -7,15 +7,26 @@ import { FlaskConical, FileText } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
+interface LabRequest {
+  id: string;
+  requestId: string;
+  testName: string;
+  priority: string;
+  status: string;
+  createdAt: string;
+  category: { name: string };
+  visit: { patient: { firstName: string; lastName: string; patientId: string } };
+  doctor: { user: { name: string } };
+}
+
 export default function LabRequestsQueue() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['lab-requests'],
     queryFn: async () => {
-      // Mock data. Real app queries GET /api/v1/laboratory/requests
-      return [
-        { id: "LAB-001", patient: { name: "Mary Smith", id: "AMC-2026-0004" }, test: "Complete Blood Count", doctor: "Dr. Adams", priority: "STAT", time: "10:30 AM" },
-        { id: "LAB-002", patient: { name: "John Doe", id: "AMC-2026-0001" }, test: "Lipid Panel", doctor: "Dr. Lee", priority: "ROUTINE", time: "11:00 AM" },
-      ];
+      const res = await fetch('/api/v1/laboratory/requests');
+      if (!res.ok) throw new Error('Failed to fetch lab requests');
+      const json = await res.json();
+      return json.data as LabRequest[];
     }
   });
 
@@ -33,6 +44,12 @@ export default function LabRequestsQueue() {
           {isLoading ? (
             <div className="py-12 flex justify-center">
               <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <h3 className="text-lg font-medium text-destructive">Failed to load lab requests</h3>
+              <p className="text-muted-foreground mt-1">{(error as Error)?.message}</p>
+              <button onClick={() => refetch()} className="mt-4 text-sm text-primary underline">Retry</button>
             </div>
           ) : data?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -53,15 +70,15 @@ export default function LabRequestsQueue() {
                   </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
-                  {data?.map((req: any) => (
+                  {data?.map((req) => (
                     <tr key={req.id} className="border-b transition-colors hover:bg-muted/30 group">
-                      <td className="p-6 align-middle font-medium">{req.time}</td>
+                      <td className="p-6 align-middle font-medium">{new Date(req.createdAt).toLocaleTimeString()}</td>
                       <td className="p-6 align-middle">
-                        <div className="font-bold text-base">{req.patient.name}</div>
-                        <div className="text-xs text-muted-foreground">{req.patient.id}</div>
+                        <div className="font-bold text-base">{req.visit.patient.firstName + ' ' + req.visit.patient.lastName}</div>
+                        <div className="text-xs text-muted-foreground">{req.visit.patient.patientId}</div>
                       </td>
                       <td className="p-6 align-middle font-medium">
-                        {req.test}
+                        {req.testName}
                       </td>
                       <td className="p-6 align-middle">
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${

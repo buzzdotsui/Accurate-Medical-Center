@@ -4,6 +4,7 @@ import { AppError } from '@/lib/api/errors';
 import { generateAdmissionId } from '@/lib/utils/generate-id';
 import { NotificationService } from './notification.service';
 import { ROLES } from '@/config/roles';
+import { logger } from '@/lib/utils/logger';
 
 export class InpatientService {
   /**
@@ -138,7 +139,9 @@ export class InpatientService {
           link: '/patient',
           resource: 'ADMISSION',
           resourceId: admission.id,
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+        });
       }
 
       NotificationService.notifyRoleInBranch({
@@ -151,7 +154,9 @@ export class InpatientService {
         resource: 'ADMISSION',
         resourceId: admission.id,
         excludeUserId: executorId,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
 
       return admission;
     });
@@ -215,7 +220,9 @@ export class InpatientService {
           link: '/patient',
           resource: 'ADMISSION',
           resourceId: admission.id,
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+        });
       }
 
       return updated;

@@ -6,6 +6,7 @@ import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
 import { ROLES } from '@/config/roles';
+import { logger } from '@/lib/utils/logger';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   SCHEDULED: ['ARRIVED', 'CANCELLED', 'NO_SHOW', 'CHECKED_IN'],
@@ -67,14 +68,18 @@ export class AppointmentService {
     // Best-effort: a notification failure must never block appointment
     // creation.
     if (data.doctorId) {
-      this.notifyDoctorOfAppointment(data.doctorId, patient, appointment.date, appointment.id).catch(() => {});
+      this.notifyDoctorOfAppointment(data.doctorId, patient, appointment.date, appointment.id).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
     this.notifyPatientOfAppointment(
       data.patientId,
       'Appointment booked',
       `Your appointment on ${new Date(appointment.date).toLocaleString()} has been booked.`,
       appointment.id,
-    ).catch(() => {});
+    ).catch((err: unknown) => {
+      logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+    });
     NotificationService.notifyRoleInBranch({
       roles: [ROLES.RECEPTIONIST, ROLES.ADMIN],
       branchId: data.branchId,
@@ -85,7 +90,9 @@ export class AppointmentService {
       resource: 'APPOINTMENT',
       resourceId: appointment.id,
       excludeUserId: executorId,
-    }).catch(() => {});
+    }).catch((err: unknown) => {
+      logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+    });
 
     return appointment;
   }
@@ -215,7 +222,9 @@ export class AppointmentService {
       link: '/reception/appointments',
       resource: 'APPOINTMENT',
       resourceId: appointment.id,
-    }).catch(() => {});
+    }).catch((err: unknown) => {
+      logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+    });
 
     return appointment;
   }
@@ -270,7 +279,9 @@ export class AppointmentService {
         resource: 'VISIT',
         resourceId: result.visit.id,
         excludeUserId: executorId,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
 
       if (data.doctorId) {
         prisma.staff.findUnique({ where: { id: data.doctorId }, select: { userId: true } }).then((doctor) => {
@@ -283,7 +294,9 @@ export class AppointmentService {
             link: '/doctor/queue',
             resource: 'VISIT',
             resourceId: result.visit.id,
-          }).catch(() => {});
+          }).catch((err: unknown) => {
+            logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+          });
         }).catch(() => {});
       }
 
@@ -404,7 +417,9 @@ export class AppointmentService {
         resource: 'APPOINTMENT',
         resourceId: updated.id,
         excludeUserId: executorId,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
 
       if (appointment.doctorId) {
         prisma.staff.findUnique({ where: { id: appointment.doctorId }, select: { userId: true } }).then((doctor) => {
@@ -417,7 +432,9 @@ export class AppointmentService {
             link: '/doctor/queue',
             resource: 'APPOINTMENT',
             resourceId: updated.id,
-          }).catch(() => {});
+          }).catch((err: unknown) => {
+            logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+          });
         }).catch(() => {});
       }
     }
@@ -428,7 +445,9 @@ export class AppointmentService {
         'Appointment cancelled',
         'Your appointment has been cancelled.',
         updated.id,
-      ).catch(() => {});
+      ).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
 
       NotificationService.notifyRoleInBranch({
         roles: [ROLES.RECEPTIONIST, ROLES.ADMIN],
@@ -440,7 +459,9 @@ export class AppointmentService {
         resource: 'APPOINTMENT',
         resourceId: updated.id,
         excludeUserId: executorId,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
 
       if (appointment.doctorId) {
         prisma.staff.findUnique({ where: { id: appointment.doctorId }, select: { userId: true } }).then((doctor) => {
@@ -453,7 +474,9 @@ export class AppointmentService {
             link: '/doctor/queue',
             resource: 'APPOINTMENT',
             resourceId: updated.id,
-          }).catch(() => {});
+          }).catch((err: unknown) => {
+            logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+          });
         }).catch(() => {});
       }
     }
@@ -490,7 +513,9 @@ export class AppointmentService {
       'Appointment rescheduled',
       `Your appointment has been rescheduled to ${new Date(newDate).toLocaleString()}.`,
       updated.id,
-    ).catch(() => {});
+    ).catch((err: unknown) => {
+      logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+    });
 
     NotificationService.notifyRoleInBranch({
       roles: [ROLES.RECEPTIONIST, ROLES.ADMIN],
@@ -502,7 +527,9 @@ export class AppointmentService {
       resource: 'APPOINTMENT',
       resourceId: updated.id,
       excludeUserId: executorId,
-    }).catch(() => {});
+    }).catch((err: unknown) => {
+      logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+    });
 
     if (appointment.doctorId) {
       prisma.staff.findUnique({ where: { id: appointment.doctorId }, select: { userId: true } }).then((doctor) => {
@@ -515,7 +542,9 @@ export class AppointmentService {
           link: '/doctor/queue',
           resource: 'APPOINTMENT',
           resourceId: updated.id,
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+        });
       }).catch(() => {});
     }
 

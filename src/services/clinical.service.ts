@@ -6,12 +6,13 @@ import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
 import { ROLES } from '@/config/roles';
+import { logger } from '@/lib/utils/logger';
 
 export class ClinicalService {
   /**
    * Start a new patient visit (e.g. at triage or doctor's office)
    */
-  static async startVisit(data: z.infer<typeof StartVisitSchema>, executorId: string) {
+  static async startVisit(data: z.infer<typeof StartVisitSchema>, executorId: string, executorRole?: string) {
     const visitId = generateVisitId();
     
     const visit = await prisma.visit.create({
@@ -35,7 +36,7 @@ export class ClinicalService {
 
     await AuditService.log({
       userId: executorId,
-      userRole: 'CLINICAL',
+      userRole: executorRole ?? 'NURSE',
       action: 'START_VISIT',
       resource: 'VISIT',
       resourceId: visit.id,
@@ -60,7 +61,9 @@ export class ClinicalService {
         resource: 'VISIT',
         resourceId: visit.id,
         excludeUserId: executorId,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     if (data.doctorId) {
@@ -74,7 +77,9 @@ export class ClinicalService {
           link: '/doctor/queue',
           resource: 'VISIT',
           resourceId: visit.id,
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+        });
       }).catch(() => {});
     }
 
@@ -84,7 +89,7 @@ export class ClinicalService {
   /**
    * Record vitals for a visit
    */
-  static async recordVitals(visitId: string, vitals: z.infer<typeof RecordVitalsSchema>, executorId: string) {
+  static async recordVitals(visitId: string, vitals: z.infer<typeof RecordVitalsSchema>, executorId: string, executorRole?: string) {
     const visit = await prisma.visit.findUnique({ where: { id: visitId } });
     if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
 
@@ -96,7 +101,7 @@ export class ClinicalService {
 
     await AuditService.log({
       userId: executorId,
-      userRole: 'CLINICAL',
+      userRole: executorRole ?? 'NURSE',
       action: 'RECORD_VITALS',
       resource: 'VISIT',
       resourceId: visit.id,
@@ -108,7 +113,7 @@ export class ClinicalService {
   /**
    * Add a diagnosis to a visit
    */
-  static async addDiagnosis(visitId: string, data: z.infer<typeof AddDiagnosisSchema>, executorId: string) {
+  static async addDiagnosis(visitId: string, data: z.infer<typeof AddDiagnosisSchema>, executorId: string, executorRole?: string) {
     const visit = await prisma.visit.findUnique({ where: { id: visitId } });
     if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
 
@@ -124,7 +129,7 @@ export class ClinicalService {
 
     await AuditService.log({
       userId: executorId,
-      userRole: 'CLINICAL',
+      userRole: executorRole ?? 'DOCTOR',
       action: 'ADD_DIAGNOSIS',
       resource: 'DIAGNOSIS',
       resourceId: diagnosis.id,

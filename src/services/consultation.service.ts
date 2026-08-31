@@ -5,6 +5,7 @@ import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
 import { ROLES } from '@/config/roles';
 import { generatePrescriptionId, generateLabRequestId, generateRadiologyRequestId } from '@/lib/utils/generate-id';
+import { logger } from '@/lib/utils/logger';
 
 export class ConsultationService {
   static async saveConsultation(data: CreateConsultationInput, executorId: string) {
@@ -177,7 +178,9 @@ export class ConsultationService {
         link: '/patient',
         resource: 'VISIT',
         resourceId: data.visitId,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     if (result.prescriptionId) {
@@ -190,7 +193,9 @@ export class ConsultationService {
         link: '/pharmacy/prescriptions',
         resource: 'PRESCRIPTION',
         resourceId: result.prescriptionId,
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     if (result.labRequestIds.length > 0) {
@@ -203,7 +208,9 @@ export class ConsultationService {
         link: '/laboratory/requests',
         resource: 'LAB_REQUEST',
         resourceId: result.labRequestIds[0],
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     if (result.radiologyRequestIds.length > 0) {
@@ -216,7 +223,9 @@ export class ConsultationService {
         link: '/radiology/requests',
         resource: 'RADIOLOGY_REQUEST',
         resourceId: result.radiologyRequestIds[0],
-      }).catch(() => {});
+      }).catch((err: unknown) => {
+        logger.error('Notification dispatch failed', { error: err instanceof Error ? err.message : String(err) });
+      });
     }
 
     return result;

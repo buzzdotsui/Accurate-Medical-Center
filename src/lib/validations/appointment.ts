@@ -17,7 +17,7 @@ export const CreateAppointmentSchema = z.object({
 export type CreateAppointmentInput = z.infer<typeof CreateAppointmentSchema>;
 
 export const UpdateAppointmentStatusSchema = z.object({
-  status: z.enum(['SCHEDULED', 'ARRIVED', 'COMPLETED', 'CANCELLED', 'NO_SHOW']),
+  status: z.enum(['SCHEDULED', 'CHECKED_IN', 'ARRIVED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'IN_PROGRESS']),
 });
 
 export type UpdateAppointmentStatusInput = z.infer<typeof UpdateAppointmentStatusSchema>;

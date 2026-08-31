@@ -128,3 +128,24 @@ export function generatePrescriptionId(count?: number): string {
 export function generateReceiptId(count: number): string {
   return `REC-${String(count).padStart(6, "0")}`;
 }
+
+/** Generates a short Admission ID, e.g. ADM-20260830-A3F9 */
+export function generateAdmissionId(): string {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `ADM-${date}-${suffix}`;
+}
+
+/** Generates a short Lab Request ID, e.g. LAB-20260830-A3F9 */
+export function generateLabRequestId(): string {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `LAB-${date}-${suffix}`;
+}
+
+/** Generates a short Radiology Request ID, e.g. RAD-20260830-A3F9 */
+export function generateRadiologyRequestId(): string {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `RAD-${date}-${suffix}`;
+}

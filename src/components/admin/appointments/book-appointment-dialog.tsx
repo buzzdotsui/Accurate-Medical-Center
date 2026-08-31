@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,6 +60,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
   const [patientSearch, setPatientSearch] = useState("");
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
+  const [booked, setBooked] = React.useState<{ appointmentId: string; date: string } | null>(null);
 
   const {
     register,
@@ -135,7 +137,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
         const msg = json?.error?.message ?? "Failed to book appointment.";
         if (res.status === 403) {
           toast.error("Access Denied", { description: "You do not have permission to book appointments." });
-        } else if (res.status === 409) {
+        } else if (res.status === 400) {
           toast.error("Scheduling Conflict", { description: msg });
         } else {
           toast.error("Error", { description: msg });
@@ -143,12 +145,10 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
         return;
       }
 
-      toast.success("Appointment booked!", {
-        description: `Appointment scheduled for ${values.date}.`,
-      });
+      const appt = json.data;
+      setBooked({ appointmentId: appt.appointmentId, date: values.date });
       reset();
       setPatientSearch("");
-      onOpenChange(false);
       onSuccess();
     } catch {
       toast.error("Network error", { description: "Could not reach the server. Please try again." });
@@ -159,6 +159,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
     if (!isOpen) {
       reset();
       setPatientSearch("");
+      setBooked(null);
     }
     onOpenChange(isOpen);
   }
@@ -168,15 +169,51 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CalendarPlus className="w-5 h-5 text-primary" />
-            Book Appointment
-          </DialogTitle>
-          <DialogDescription>
-            Schedule an appointment for a registered patient. The patient and date are required.
-          </DialogDescription>
-        </DialogHeader>
+        {booked ? (
+          /* ── Success panel ─────────────────────────────────── */
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Appointment Booked
+              </DialogTitle>
+              <DialogDescription>
+                The appointment has been created and the audit trail has been recorded.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="my-4 rounded-xl border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30 p-5 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">Date</p>
+              <p className="text-base font-semibold text-foreground">{booked.date}</p>
+              <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                  Appointment ID
+                </p>
+                <p className="font-mono text-2xl font-bold tracking-widest text-primary">
+                  {booked.appointmentId}
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setBooked(null)}>Book Another</Button>
+              <Button onClick={() => handleClose(false)}>Done</Button>
+            </DialogFooter>
+          </>
+        ) : (
+          /* ── Form ──────────────────────────────────────────── */
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarPlus className="w-5 h-5 text-primary" />
+                Book Appointment
+              </DialogTitle>
+              <DialogDescription>
+                Schedule an appointment for a registered patient. The patient and date are required.
+              </DialogDescription>
+            </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
           {/* Patient search */}
@@ -281,6 +318,8 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
             </Button>
           </DialogFooter>
         </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

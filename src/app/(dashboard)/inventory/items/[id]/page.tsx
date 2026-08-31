@@ -11,28 +11,46 @@ import { ArrowLeft, Loader2, PackagePlus, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+
+interface InventoryItem {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  unit: string;
+  stockQuantity: number;
+  reorderLevel: number;
+  inventoryTx: Array<{ supplier: { name: string } | null }>;
+}
 
 export default function AdjustStock() {
   const router = useRouter();
   const params = useParams();
-  
-  // Mock data mapping to the selected SKU
-  const item = {
-    id: params.id as string,
-    name: "Paracetamol 500mg",
-    category: "TABLET",
-    stock: 5,
-    reorder: 50,
-    unit: "Pack",
-    supplier: "PharmaCorp Ltd"
-  };
+  const queryClient = useQueryClient();
+  const itemId = params.id as string;
+
+  const { data: items, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["inventory-items"],
+    queryFn: async (): Promise<InventoryItem[]> => {
+      const res = await fetch("/api/v1/inventory/items", { credentials: "include" });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message ?? "Failed to load inventory item");
+      }
+      return json.data;
+    },
+  });
+
+  const item = items?.find((i) => i.id === itemId);
 
   const form = useForm<AdjustStockInput>({
     resolver: zodResolver(AdjustStockSchema),
     defaultValues: {
       type: "IN",
-      quantity: 100,
+      quantity: 1,
       reference: "",
       notes: ""
     }
@@ -42,25 +60,51 @@ export default function AdjustStock() {
 
   const mutation = useMutation({
     mutationFn: async (data: AdjustStockInput) => {
-      const res = await fetch(`/api/v1/inventory/items/${item.id}/stock`, {
+      const res = await fetch(`/api/v1/inventory/items/${itemId}/stock`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to adjust stock");
+        throw new Error(json?.error?.message || "Failed to adjust stock");
       }
-      return res.json();
+      return json;
     },
     onSuccess: () => {
       toast.success("Stock adjustment logged successfully.");
+      queryClient.invalidateQueries({ queryKey: ["inventory-items"] });
       router.push("/inventory/items");
     },
     onError: (err: any) => {
       toast.error(err.message);
     }
   });
+
+  if (isLoading) {
+    return <LoadingState message="Loading item..." className="py-24" />;
+  }
+
+  if (isError) {
+    return (
+      <ErrorState
+        description={error instanceof Error ? error.message : "Failed to load inventory item"}
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
+  if (!item) {
+    return (
+      <ErrorState
+        title="Item not found"
+        description="This inventory item could not be found. It may have been removed."
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
+  const supplier = item.inventoryTx?.[0]?.supplier?.name ?? "—";
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500 pb-12">
@@ -70,7 +114,7 @@ export default function AdjustStock() {
         </Button>
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Adjust Stock</h1>
-          <p className="text-muted-foreground mt-1">SKU: {item.id}</p>
+          <p className="text-muted-foreground mt-1">SKU: {item.code}</p>
         </div>
       </div>
 
@@ -88,18 +132,18 @@ export default function AdjustStock() {
               <div className="grid grid-cols-2 gap-4 border-y py-4 my-2">
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase">Current Stock</label>
-                  <p className={`font-bold text-2xl ${item.stock <= item.reorder ? 'text-destructive' : 'text-foreground'}`}>
-                    {item.stock} <span className="text-sm font-normal text-muted-foreground">{item.unit}s</span>
+                  <p className={`font-bold text-2xl ${item.stockQuantity <= item.reorderLevel ? 'text-destructive' : 'text-foreground'}`}>
+                    {item.stockQuantity} <span className="text-sm font-normal text-muted-foreground">{item.unit}(s)</span>
                   </p>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase">Reorder Lvl</label>
-                  <p className="font-bold text-2xl text-muted-foreground">{item.reorder}</p>
+                  <p className="font-bold text-2xl text-muted-foreground">{item.reorderLevel}</p>
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Supplier</label>
-                <p className="font-medium text-foreground">{item.supplier}</p>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Last Supplier</label>
+                <p className="font-medium text-foreground">{supplier}</p>
               </div>
             </CardContent>
           </Card>
@@ -128,7 +172,7 @@ export default function AdjustStock() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Quantity ({item.unit}s)</label>
+                    <label className="text-sm font-medium text-foreground">Quantity ({item.unit}(s))</label>
                     <Input 
                       type="number"
                       {...form.register("quantity", { valueAsNumber: true })} 
@@ -138,11 +182,11 @@ export default function AdjustStock() {
                   </div>
                 </div>
 
-                {type === "OUT" && (
+                {type !== "IN" && (
                   <div className="p-4 bg-warning/10 border border-warning/20 rounded-md flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
                     <p className="text-sm text-warning-foreground font-medium">
-                      Ensure you verify the prescription or department requisition number before dispensing stock out of the main inventory.
+                      Ensure you verify the prescription or department requisition number before removing stock from the main inventory.
                     </p>
                   </div>
                 )}

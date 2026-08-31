@@ -1,30 +1,56 @@
 "use client";
 
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SaveLabResultSchema, type SaveLabResultInput } from "@/lib/validations/laboratory";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Save, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Loader2, Save, AlertTriangle, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { differenceInYears } from "date-fns";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+
+interface LabRequestDetail {
+  id: string;
+  requestId: string;
+  testName: string;
+  priority: string;
+  notes: string | null;
+  category: { name: string };
+  doctor: { user: { name: string } };
+  visit: {
+    patient: {
+      firstName: string;
+      lastName: string;
+      patientId: string;
+      gender: string | null;
+      dateOfBirth: string | null;
+    };
+  };
+}
 
 export default function InputLabResult() {
   const router = useRouter();
   const params = useParams();
-  
-  // Mock data mapping to the selected request
-  const request = {
-    id: params.id as string,
-    patient: { name: "Mary Smith", id: "AMC-2026-0004", age: 28, gender: "FEMALE" },
-    testName: "Complete Blood Count",
-    priority: "STAT",
-    notes: "Check for signs of infection"
-  };
+  const requestId = params.id as string;
+
+  const { data: request, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["laboratory-request", requestId],
+    queryFn: async (): Promise<LabRequestDetail> => {
+      const res = await fetch(`/api/v1/laboratory/requests/${requestId}`, { credentials: "include" });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message ?? "Failed to load lab request");
+      }
+      return json.data;
+    },
+  });
 
   const form = useForm<SaveLabResultInput>({
     resolver: zodResolver(SaveLabResultSchema) as any,
@@ -32,24 +58,30 @@ export default function InputLabResult() {
       findings: "",
       conclusion: "",
       referenceRange: "",
-      isAbnormal: false
+      isAbnormal: false,
+      attachments: []
     }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "attachments"
   });
 
   const isAbnormal = form.watch("isAbnormal");
 
   const mutation = useMutation({
     mutationFn: async (data: SaveLabResultInput) => {
-      const res = await fetch(`/api/v1/laboratory/requests/${request.id}/result`, {
+      const res = await fetch(`/api/v1/laboratory/requests/${requestId}/result`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to save lab result");
+        throw new Error(json?.error?.message || "Failed to save lab result");
       }
-      return res.json();
+      return json;
     },
     onSuccess: () => {
       toast.success("Lab result saved successfully and published to doctor.");
@@ -60,6 +92,22 @@ export default function InputLabResult() {
     }
   });
 
+  if (isLoading) {
+    return <LoadingState message="Loading lab request..." className="py-24" />;
+  }
+
+  if (isError || !request) {
+    return (
+      <ErrorState
+        description={error instanceof Error ? error.message : "Failed to load lab request"}
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
+  const patient = request.visit.patient;
+  const age = patient.dateOfBirth ? differenceInYears(new Date(), new Date(patient.dateOfBirth)) : null;
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500 pb-12">
       <div className="flex items-center gap-4">
@@ -68,7 +116,7 @@ export default function InputLabResult() {
         </Button>
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Input Lab Result</h1>
-          <p className="text-muted-foreground mt-1">Request ID: {request.id}</p>
+          <p className="text-muted-foreground mt-1">Request ID: {request.requestId}</p>
         </div>
       </div>
 
@@ -81,12 +129,22 @@ export default function InputLabResult() {
             <CardContent className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase">Patient</label>
-                <p className="font-medium">{request.patient.name} ({request.patient.gender}, {request.patient.age}y)</p>
-                <p className="text-sm text-muted-foreground">{request.patient.id}</p>
+                <p className="font-medium">
+                  {patient.firstName} {patient.lastName}
+                  {(patient.gender || age !== null) && (
+                    <> ({[patient.gender, age !== null ? `${age}y` : null].filter(Boolean).join(", ")})</>
+                  )}
+                </p>
+                <p className="text-sm text-muted-foreground">{patient.patientId}</p>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase">Test Requested</label>
                 <p className="font-medium text-primary">{request.testName}</p>
+                <p className="text-xs text-muted-foreground">{request.category.name}</p>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Requesting Doctor</label>
+                <p className="font-medium">{request.doctor.user.name}</p>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase">Priority</label>
@@ -135,6 +193,51 @@ export default function InputLabResult() {
                     className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     placeholder="Summarize the implications of these findings..."
                   />
+                </div>
+
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-foreground">Attachments (Optional)</label>
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ fileUrl: "", fileName: "", fileType: "" })}>
+                      <Plus className="w-4 h-4 mr-2" /> Add Attachment
+                    </Button>
+                  </div>
+
+                  {fields.length === 0 && (
+                    <p className="text-xs text-muted-foreground">No attachments linked. Paste a hosted file URL below to attach scanned reports, images, or PDFs.</p>
+                  )}
+
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="p-4 border rounded-lg bg-muted/20 relative group">
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10"
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+
+                      <div className="space-y-4 pr-8">
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium">File URL *</label>
+                          <Input {...form.register(`attachments.${index}.fileUrl`)} placeholder="https://storage.accurate.med/results/report.pdf" />
+                          {form.formState.errors.attachments?.[index]?.fileUrl && <p className="text-xs text-destructive">{form.formState.errors.attachments[index]?.fileUrl?.message}</p>}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-xs font-medium">File Name *</label>
+                            <Input {...form.register(`attachments.${index}.fileName`)} placeholder="e.g. cbc_result.pdf" />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-medium">File Type *</label>
+                            <Input {...form.register(`attachments.${index}.fileType`)} placeholder="e.g. PDF, JPG" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="flex items-center space-x-2 p-4 border rounded-md bg-background">

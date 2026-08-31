@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,6 +41,12 @@ interface RegisterPatientDialogProps {
 }
 
 export function RegisterPatientDialog({ open, onOpenChange, onSuccess }: RegisterPatientDialogProps) {
+  const [registered, setRegistered] = React.useState<{
+    patientId: string;
+    name: string;
+    id: string;
+  } | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -80,11 +87,12 @@ export function RegisterPatientDialog({ open, onOpenChange, onSuccess }: Registe
         return;
       }
 
-      toast.success("Patient registered!", {
-        description: `${values.firstName} ${values.lastName} has been registered successfully.`,
+      const patient = json.data;
+      setRegistered({
+        patientId: patient.patientId,
+        name: `${values.firstName} ${values.lastName}`,
+        id: patient.id,
       });
-      reset();
-      onOpenChange(false);
       onSuccess();
     } catch {
       toast.error("Network error", { description: "Could not reach the server. Please try again." });
@@ -94,6 +102,7 @@ export function RegisterPatientDialog({ open, onOpenChange, onSuccess }: Registe
   function handleClose(isOpen: boolean) {
     if (!isOpen) {
       reset();
+      setRegistered(null);
     }
     onOpenChange(isOpen);
   }
@@ -101,107 +110,153 @@ export function RegisterPatientDialog({ open, onOpenChange, onSuccess }: Registe
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-primary" />
-            Register Patient
-          </DialogTitle>
-          <DialogDescription>
-            Register a new patient in the system. At minimum, a first and last name are required.
-          </DialogDescription>
-        </DialogHeader>
+        {registered ? (
+          /* ── Success panel ─────────────────────────────────────────── */
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Patient Registered Successfully
+              </DialogTitle>
+              <DialogDescription>
+                The patient record has been created and the audit trail has been recorded.
+              </DialogDescription>
+            </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="First Name" htmlFor="pat-firstName" error={errors.firstName?.message} required>
-              <Input
-                id="pat-firstName"
-                placeholder="e.g. Chioma"
-                disabled={isSubmitting}
-                {...register("firstName")}
-              />
-            </FormField>
-            <FormField label="Last Name" htmlFor="pat-lastName" error={errors.lastName?.message} required>
-              <Input
-                id="pat-lastName"
-                placeholder="e.g. Nwosu"
-                disabled={isSubmitting}
-                {...register("lastName")}
-              />
-            </FormField>
-          </div>
+            <div className="my-4 rounded-xl border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30 p-5 text-center space-y-2">
+              <p className="text-sm text-muted-foreground">Patient Name</p>
+              <p className="text-lg font-semibold text-foreground">{registered.name}</p>
+              <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-800">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                  Patient ID — Please give this to the patient
+                </p>
+                <p className="font-mono text-2xl font-bold tracking-widest text-primary">
+                  {registered.patientId}
+                </p>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="Phone Number" htmlFor="pat-phone" error={errors.phone?.message}>
-              <Input
-                id="pat-phone"
-                type="tel"
-                placeholder="e.g. 08012345678"
-                disabled={isSubmitting}
-                {...register("phone")}
-              />
-            </FormField>
-            <FormField label="Email Address" htmlFor="pat-email" error={errors.email?.message}>
-              <Input
-                id="pat-email"
-                type="email"
-                placeholder="patient@email.com"
-                disabled={isSubmitting}
-                {...register("email")}
-              />
-            </FormField>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="Date of Birth" htmlFor="pat-dob" error={errors.dateOfBirth?.message}>
-              <Input
-                id="pat-dob"
-                type="date"
-                disabled={isSubmitting}
-                max={new Date().toISOString().split("T")[0]}
-                {...register("dateOfBirth")}
-              />
-            </FormField>
-            <FormField label="Gender" htmlFor="pat-gender" error={errors.gender?.message}>
-              <Select id="pat-gender" disabled={isSubmitting} {...register("gender")}>
-                <option value="">— Select —</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
-              </Select>
-            </FormField>
-          </div>
-
-          <FormField label="Blood Group" htmlFor="pat-bloodGroup" error={errors.bloodGroup?.message}>
-            <Select id="pat-bloodGroup" disabled={isSubmitting} {...register("bloodGroup")}>
-              <option value="">— Unknown —</option>
-              {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((g) => (
-                <option key={g} value={g}>{g}</option>
-              ))}
-            </Select>
-          </FormField>
-
-          <DialogFooter className="pt-4">
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => handleClose(false)}>
-                Cancel
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  reset();
+                  setRegistered(null);
+                }}
+              >
+                Register Another
               </Button>
-            </DialogClose>
-            <Button type="submit" disabled={isSubmitting} className="gap-2">
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Registering…
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-4 h-4" />
-                  Register Patient
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+              <Button onClick={() => handleClose(false)}>Done</Button>
+            </DialogFooter>
+          </>
+        ) : (
+          /* ── Registration form ─────────────────────────────────────── */
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-primary" />
+                Register Patient
+              </DialogTitle>
+              <DialogDescription>
+                Register a new patient in the system. At minimum, a first and last name are required.
+              </DialogDescription>
+            </DialogHeader>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="First Name" htmlFor="pat-firstName" error={errors.firstName?.message} required>
+                  <Input
+                    id="pat-firstName"
+                    placeholder="e.g. Chioma"
+                    disabled={isSubmitting}
+                    {...register("firstName")}
+                  />
+                </FormField>
+                <FormField label="Last Name" htmlFor="pat-lastName" error={errors.lastName?.message} required>
+                  <Input
+                    id="pat-lastName"
+                    placeholder="e.g. Nwosu"
+                    disabled={isSubmitting}
+                    {...register("lastName")}
+                  />
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Phone Number" htmlFor="pat-phone" error={errors.phone?.message}>
+                  <Input
+                    id="pat-phone"
+                    type="tel"
+                    placeholder="e.g. 08012345678"
+                    disabled={isSubmitting}
+                    {...register("phone")}
+                  />
+                </FormField>
+                <FormField label="Email Address" htmlFor="pat-email" error={errors.email?.message}>
+                  <Input
+                    id="pat-email"
+                    type="email"
+                    placeholder="patient@email.com"
+                    disabled={isSubmitting}
+                    {...register("email")}
+                  />
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Date of Birth" htmlFor="pat-dob" error={errors.dateOfBirth?.message}>
+                  <Input
+                    id="pat-dob"
+                    type="date"
+                    disabled={isSubmitting}
+                    max={new Date().toISOString().split("T")[0]}
+                    {...register("dateOfBirth")}
+                  />
+                </FormField>
+                <FormField label="Gender" htmlFor="pat-gender" error={errors.gender?.message}>
+                  <Select id="pat-gender" disabled={isSubmitting} {...register("gender")}>
+                    <option value="">— Select —</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </Select>
+                </FormField>
+              </div>
+
+              <FormField label="Blood Group" htmlFor="pat-bloodGroup" error={errors.bloodGroup?.message}>
+                <Select id="pat-bloodGroup" disabled={isSubmitting} {...register("bloodGroup")}>
+                  <option value="">— Unknown —</option>
+                  {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </Select>
+              </FormField>
+
+              <DialogFooter className="pt-4">
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => handleClose(false)}>
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit" disabled={isSubmitting} className="gap-2">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Registering…
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Register Patient
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

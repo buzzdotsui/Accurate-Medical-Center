@@ -4,6 +4,7 @@ import { generateVisitId, IdGeneratorService } from '@/lib/utils/generate-id';
 
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   SCHEDULED: ['ARRIVED', 'CANCELLED', 'NO_SHOW', 'CHECKED_IN'],
@@ -61,7 +62,33 @@ export class AppointmentService {
       details: { patientId: data.patientId, date: data.date, timeSlot: data.timeSlot }
     }).catch(() => {});
 
+    // Notify the assigned doctor, if any, that a new appointment was booked
+    // for them. Best-effort: a notification failure must never block
+    // appointment creation.
+    if (data.doctorId) {
+      this.notifyDoctorOfAppointment(data.doctorId, patient, appointment.date).catch(() => {});
+    }
+
     return appointment;
+  }
+
+  /**
+   * Look up the assigned doctor's User.id (Notification.userId references
+   * User, not Staff) and create an in-app ALERT notification.
+   */
+  private static async notifyDoctorOfAppointment(
+    doctorId: string,
+    patient: { firstName: string; lastName: string },
+    date: Date
+  ) {
+    const doctor = await prisma.staff.findUnique({ where: { id: doctorId }, select: { userId: true } });
+    if (!doctor) return;
+    await NotificationService.createNotification({
+      userId: doctor.userId,
+      title: 'New appointment scheduled',
+      body: `${patient.firstName} ${patient.lastName} has been scheduled for ${new Date(date).toLocaleString()}.`,
+      type: 'ALERT',
+    });
   }
 
   static async requestPublicAppointment(data: {

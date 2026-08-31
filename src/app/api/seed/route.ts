@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
+import { logger } from "@/lib/utils/logger";
+import { serverError } from "@/lib/api/response";
 
 /**
  * GET /api/seed
@@ -71,7 +73,10 @@ export async function GET() {
       },
     });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+    logger.error('Seed endpoint failed', {
+      error: error instanceof Error ? error.stack : String(error),
+      path: '/api/seed',
+    });
+    return serverError();
   }
 }

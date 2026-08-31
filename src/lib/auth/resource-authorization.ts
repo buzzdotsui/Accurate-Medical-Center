@@ -352,6 +352,62 @@ export async function verifyLabRequestAccess(
 }
 
 /**
+ * Verify radiology request access.
+ */
+export async function verifyRadiologyRequestAccess(
+  user: SessionUser,
+  requestId: string,
+  _action: 'READ' | 'UPDATE' = 'READ'
+): Promise<{ id: string; visitId: string }> {
+  if (user.role === ROLES.SUPER_ADMIN) {
+    const request = await prisma.radiologyRequest.findUnique({
+      where: { id: requestId },
+      select: { id: true, visitId: true },
+    });
+    if (!request) throw new AppError('Radiology request not found', 'NOT_FOUND', 404);
+    return request;
+  }
+
+  if (user.role === ROLES.PATIENT) {
+    const request = await prisma.radiologyRequest.findFirst({
+      where: {
+        id: requestId,
+        visit: { patient: { user: { id: user.id } } },
+      },
+      select: { id: true, visitId: true },
+    });
+    if (!request) {
+      throw new AppError(
+        'You do not have permission to access this radiology request.',
+        'FORBIDDEN',
+        403
+      );
+    }
+    return request;
+  }
+
+  if (!user.branchId) {
+    throw new AppError('User is not assigned to a branch.', 'FORBIDDEN', 403);
+  }
+
+  const request = await prisma.radiologyRequest.findUnique({
+    where: { id: requestId },
+    include: { visit: { include: { patient: true } } },
+  });
+  if (!request) throw new AppError('Radiology request not found', 'NOT_FOUND', 404);
+
+  if (request.visit.patient.branchId !== user.branchId) {
+    throw new AppError(
+      'Radiology request is not in your branch.',
+      'FORBIDDEN',
+      403
+    );
+  }
+
+  return { id: request.id, visitId: request.visitId };
+}
+
+/**
  * Filter query results to only include resources the user can access.
  * This is used for list operations where we return multiple items.
  */

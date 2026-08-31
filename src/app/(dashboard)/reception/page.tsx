@@ -7,9 +7,11 @@ import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { DataTable, Column } from "@/components/ui/data-table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ReceptionDashboard() {
   const today = new Date();
@@ -28,20 +30,29 @@ export default function ReceptionDashboard() {
   const { data: apptsData, isLoading: apptsLoading, error: apptsError, refetch: apptsRefetch } = useQuery({
     queryKey: ['dashboard_appointments_today'],
     queryFn: async () => {
-      // In a real scenario we might pass ?date=YYYY-MM-DD
       const res = await fetch(`/api/v1/appointments?take=10`);
       if (!res.ok) throw new Error('Failed to fetch appointments');
       return res.json();
     }
   });
 
+  // Fetch live queue stats from the appointment stats API
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard_queue_stats'],
+    queryFn: async () => {
+      const res = await fetch('/api/v1/appointments/stats');
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data;
+    },
+    staleTime: 30_000,
+  });
+
   const totalPatients = patientsData?.data?.total ?? "—";
   const appointments = apptsData?.data?.appointments || [];
   const todayAppointmentsCount = apptsData?.data?.total ?? "—";
-  
-  // Mock logic for checkins/queue for now, as those depend on visits API
-  const checkedInCount = "—";
-  const queueCount = "—";
+  const checkedInCount = statsLoading ? null : (statsData?.todayCheckedIn ?? 0);
+  const queueCount = statsLoading ? null : (statsData?.inQueue ?? 0);
 
   const apptColumns: Column<any>[] = [
     { accessorKey: "timeSlot", header: "Time" },
@@ -89,8 +100,28 @@ export default function ReceptionDashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Patients" value={totalPatients} icon={Users} />
         <StatCard title="Today's Appts" value={todayAppointmentsCount} icon={CalendarPlus} />
-        <StatCard title="Checked In" value={checkedInCount} icon={CheckCircle} />
-        <StatCard title="Waiting Queue" value={queueCount} icon={Clock} />
+        {checkedInCount === null ? (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Checked In</CardTitle>
+              <CheckCircle className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent><Skeleton className="h-8 w-16" /></CardContent>
+          </Card>
+        ) : (
+          <StatCard title="Checked In" value={checkedInCount} icon={CheckCircle} />
+        )}
+        {queueCount === null ? (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Waiting Queue</CardTitle>
+              <Clock className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent><Skeleton className="h-8 w-16" /></CardContent>
+          </Card>
+        ) : (
+          <StatCard title="Waiting Queue" value={queueCount} icon={Clock} />
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">

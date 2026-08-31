@@ -1,9 +1,11 @@
 "use client";
 
-import { Bell, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { GlobalSearch } from "@/components/layout/global-search";
+import { NotificationBell } from "@/components/layout/notification-bell";
+import { ROLES } from "@/config/roles";
 import type { User } from "better-auth";
 import type { Role } from "@/config/roles";
 import {
@@ -77,31 +79,14 @@ export function Topbar({ user, role }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-3 lg:gap-5">
-        {/* Global Search (CMD+K style) */}
-        <div className="relative hidden md:block group">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <input
-            type="text"
-            placeholder="Search patients, doctors..."
-            className="h-9 w-64 rounded-md border border-input bg-card px-9 py-1 text-sm shadow-sm transition-all focus:w-80 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
-          />
-          <kbd className="absolute right-2 top-2 pointer-events-none inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </div>
+        {/* Global Search (CMD+K style) — wired to GET /api/v1/search
+            (Stage 13). PATIENT sessions never see a search bar at all:
+            global search across hospital records is a staff capability. */}
+        {role !== ROLES.PATIENT && <GlobalSearch />}
 
-        {/* Notifications — UI placeholder, not yet implemented (Stage 3.5).
-            The red dot and onClick are intentionally absent until a Notification
-            model and API are added in a future stage. */}
-        <button
-          className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors cursor-not-allowed opacity-60"
-          title="Notifications — coming soon"
-          aria-label="Notifications (not yet available)"
-          disabled
-          type="button"
-        >
-          <Bell className="w-5 h-5" />
-        </button>
+        {/* Real in-app notifications (Stage 13) — backed by the
+            Notification model / NotificationService / /api/v1/notifications. */}
+        <NotificationBell />
 
         {/* User Profile */}
         <button className="flex items-center gap-2 p-0.5 rounded-full hover:bg-muted transition-colors border border-transparent hover:border-border">

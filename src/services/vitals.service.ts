@@ -3,18 +3,18 @@ import { SaveVitalsInput } from '@/lib/validations/vitals';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
 
-function calcBMI(weightKg?: number, heightCm?: number): number | undefined {
+export function calcBMI(weightKg?: number, heightCm?: number): number | undefined {
   if (!weightKg || !heightCm || heightCm <= 0) return undefined;
   const heightM = heightCm / 100;
   return Number((weightKg / (heightM * heightM)).toFixed(1));
 }
 
-function calcBSA(weightKg?: number, heightCm?: number): number | undefined {
+export function calcBSA(weightKg?: number, heightCm?: number): number | undefined {
   if (!weightKg || !heightCm) return undefined;
   return Number(Math.sqrt((weightKg * heightCm) / 3600).toFixed(2));
 }
 
-function classifyBP(bp?: string): string | undefined {
+export function classifyBP(bp?: string): string | undefined {
   if (!bp) return undefined;
   const parts = bp.split('/').map(Number);
   if (parts.length !== 2 || parts.some(isNaN)) return undefined;

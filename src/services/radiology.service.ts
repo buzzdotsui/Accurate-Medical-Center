@@ -2,15 +2,19 @@ import { prisma } from '@/lib/db/client';
 import { SaveRadiologyReportInput } from '@/lib/validations/radiology';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
 
 export class RadiologyService {
   /**
    * Get all active radiology requests
    */
-  static async getActiveRequests() {
+  static async getActiveRequests(branchId?: string) {
     return await prisma.radiologyRequest.findMany({
       where: {
-        status: { in: ['REQUESTED', 'SCANNED'] }
+        status: { in: ['REQUESTED', 'SCANNED'] },
+        // Branch isolation is enforced through the visit's patient, since
+        // RadiologyRequest has no direct branchId column.
+        ...(branchId ? { visit: { patient: { branchId } } } : {}),
       },
       include: {
         visit: {
@@ -33,13 +37,13 @@ export class RadiologyService {
   static async saveReport(requestId: string, data: SaveRadiologyReportInput, executorId: string) {
     const request = await prisma.radiologyRequest.findUnique({
       where: { id: requestId },
-      include: { visit: true }
+      include: { visit: true, doctor: { select: { userId: true } } }
     });
 
     if (!request) throw new AppError('Radiology Request not found', 'NOT_FOUND', 404);
     if (request.status === 'REPORTED') throw new AppError('Request is already reported', 'VALIDATION_ERROR', 400);
 
-    return await prisma.$transaction(async (tx) => {
+    const created = await prisma.$transaction(async (tx) => {
       // Create Report
       const report = await tx.radiologyReport.create({
         data: {
@@ -76,5 +80,18 @@ export class RadiologyService {
 
       return report;
     });
+
+    // Notify the requesting doctor that the report is ready. Best-effort;
+    // never fails the radiology report save.
+    if (request.doctor?.userId) {
+      NotificationService.createNotification({
+        userId: request.doctor.userId,
+        title: 'Radiology report ready',
+        body: `Report for ${request.scanType} - ${request.region} (${request.requestId}) is now available.`,
+        type: 'ALERT',
+      }).catch(() => {});
+    }
+
+    return created;
   }
 }

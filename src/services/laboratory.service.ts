@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/client';
 import { SaveLabResultInput } from '@/lib/validations/laboratory';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';
+import { NotificationService } from './notification.service';
 
 export class LaboratoryService {
   /**
@@ -12,7 +13,12 @@ export class LaboratoryService {
     return await prisma.labRequest.findMany({
       where: {
         status: { in: ['REQUESTED', 'SAMPLED', 'ANALYZING'] },
-        ...(branchId ? { branchId } : {}),
+        // LabRequest has no direct branchId column — branch isolation is
+        // enforced through the visit's patient (visit.patient.branchId).
+        // A raw `branchId` filter here is not a valid LabRequestWhereInput
+        // field and causes Prisma to throw an "Unknown argument" runtime
+        // error for every branch-scoped caller.
+        ...(branchId ? { visit: { patient: { branchId } } } : {}),
       },
       include: {
         visit: {
@@ -36,13 +42,13 @@ export class LaboratoryService {
   static async saveResult(requestId: string, data: SaveLabResultInput, executorId: string) {
     const request = await prisma.labRequest.findUnique({
       where: { id: requestId },
-      include: { visit: true }
+      include: { visit: true, doctor: { select: { userId: true } } }
     });
 
     if (!request) throw new AppError('Lab Request not found', 'NOT_FOUND', 404);
     if (request.status === 'COMPLETED') throw new AppError('Lab Request is already completed', 'VALIDATION_ERROR', 400);
 
-    return await prisma.$transaction(async (tx) => {
+    const created = await prisma.$transaction(async (tx) => {
       // Create the result
       const result = await tx.labResult.create({
         data: {
@@ -51,8 +57,16 @@ export class LaboratoryService {
           conclusion: data.conclusion,
           referenceRange: data.referenceRange,
           isAbnormal: data.isAbnormal,
-          performedBy: executorId
-        }
+          performedBy: executorId,
+          attachments: {
+            create: data.attachments?.map(att => ({
+              fileUrl: att.fileUrl,
+              fileName: att.fileName,
+              fileType: att.fileType
+            })) || []
+          }
+        },
+        include: { attachments: true }
       });
 
       // Mark request as COMPLETED
@@ -73,5 +87,18 @@ export class LaboratoryService {
 
       return result;
     });
+
+    // Notify the requesting doctor that the result is ready. Best-effort;
+    // never fails the lab result save.
+    if (request.doctor?.userId) {
+      NotificationService.createNotification({
+        userId: request.doctor.userId,
+        title: 'Lab result ready',
+        body: `Result for ${request.testName} (${request.requestId}) is now available.`,
+        type: 'ALERT',
+      }).catch(() => {});
+    }
+
+    return created;
   }
 }

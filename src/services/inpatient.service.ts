@@ -1,14 +1,17 @@
 import { prisma } from '@/lib/db/client';
-import { AdmitPatientInput } from '@/lib/validations/inpatient';
+import { AdmitPatientInput, DischargePatientInput } from '@/lib/validations/inpatient';
 import { AppError } from '@/lib/api/errors';
-import { AuditService } from './audit.service';
+import { generateAdmissionId } from '@/lib/utils/generate-id';
 
 export class InpatientService {
   /**
-   * Get all wards and their bed statuses
+   * Get all wards and their bed statuses.
+   * When `branchId` is provided (i.e. caller is not SUPER_ADMIN), results
+   * are scoped to wards belonging to that branch only.
    */
-  static async getWardsOverview() {
+  static async getWardsOverview(branchId?: string) {
     return await prisma.ward.findMany({
+      where: branchId ? { branchId } : undefined,
       include: {
         rooms: {
           include: {
@@ -27,11 +30,17 @@ export class InpatientService {
   }
 
   /**
-   * Get all active admissions
+   * Get all active admissions.
+   * When `branchId` is provided, results are scoped to admissions for
+   * patients registered in that branch (Admission has no direct branchId
+   * column, so isolation is enforced through the patient relation).
    */
-  static async getActiveAdmissions() {
+  static async getActiveAdmissions(branchId?: string) {
     return await prisma.admission.findMany({
-      where: { status: 'ADMITTED' },
+      where: {
+        status: 'ADMITTED',
+        ...(branchId ? { patient: { branchId } } : {}),
+      },
       include: {
         patient: true,
         bed: { include: { room: { include: { ward: true } } } },
@@ -42,20 +51,53 @@ export class InpatientService {
   }
 
   /**
-   * Admit a patient and allocate a bed
+   * Admit a patient and allocate a bed.
+   *
+   * `branchId`, when provided (non-SUPER_ADMIN caller), must match both the
+   * patient's branch and the bed's ward's branch — this prevents a staff
+   * member from one branch admitting a patient into, or using a bed
+   * belonging to, a different branch.
    */
-  static async admitPatient(data: AdmitPatientInput, executorId: string) {
-    const bed = await prisma.bed.findUnique({ where: { id: data.bedId } });
+  static async admitPatient(data: AdmitPatientInput, executorId: string, branchId?: string) {
+    const bed = await prisma.bed.findUnique({
+      where: { id: data.bedId },
+      include: { room: { include: { ward: true } } },
+    });
     if (!bed) throw new AppError('Bed not found', 'NOT_FOUND', 404);
     if (bed.status !== 'AVAILABLE') throw new AppError('Bed is not available', 'VALIDATION_ERROR', 400);
+    if (branchId && bed.room.ward.branchId !== branchId) {
+      throw new AppError('Bed does not belong to your branch', 'FORBIDDEN', 403);
+    }
+
+    const patient = await prisma.patient.findUnique({ where: { id: data.patientId } });
+    if (!patient || patient.deletedAt) throw new AppError('Patient not found', 'NOT_FOUND', 404);
+    if (branchId && patient.branchId !== branchId) {
+      throw new AppError('Patient does not belong to your branch', 'FORBIDDEN', 403);
+    }
+
+    // The admitting doctor must be a real, active Staff record with the
+    // DOCTOR role — never a client-supplied placeholder. This was previously
+    // hardcoded to the literal string 'mock-doctor', which would violate the
+    // Admission.doctorId foreign key constraint on every admission attempt.
+    const doctor = await prisma.staff.findUnique({
+      where: { id: data.doctorId },
+      include: { user: { select: { role: true } } },
+    });
+    if (!doctor || !doctor.isActive) throw new AppError('Admitting doctor not found or inactive', 'NOT_FOUND', 404);
+    if (doctor.user.role !== 'DOCTOR' && doctor.user.role !== 'SUPER_ADMIN') {
+      throw new AppError('Admitting staff member must be a doctor', 'VALIDATION_ERROR', 400);
+    }
+    if (branchId && doctor.branchId !== branchId) {
+      throw new AppError('Admitting doctor does not belong to your branch', 'FORBIDDEN', 403);
+    }
 
     return await prisma.$transaction(async (tx) => {
       // Create admission
       const admission = await tx.admission.create({
         data: {
-          admissionId: `ADM-${Date.now()}`,
+          admissionId: generateAdmissionId(),
           patientId: data.patientId,
-          doctorId: 'mock-doctor', // Add doctorId to AdmitPatientInput if needed
+          doctorId: data.doctorId,
           bedId: data.bedId,
           reason: data.reason,
           status: 'ADMITTED'
@@ -68,17 +110,70 @@ export class InpatientService {
         data: { status: 'OCCUPIED' }
       });
 
-      // Audit Log
-      await AuditService.log({
-        userId: executorId,
-        userRole: 'ADMIN', // Or specific ward manager role
-        action: 'ADMIT_PATIENT',
-        resource: 'ADMISSION',
-        resourceId: admission.id,
-        details: { patientId: data.patientId, bedId: data.bedId }
+      // Audit Log — written via `tx` so it rolls back with the transaction.
+      await tx.auditLog.create({
+        data: {
+          userId: executorId,
+          userRole: 'STAFF',
+          action: 'ADMIT_PATIENT',
+          resource: 'ADMISSION',
+          resourceId: admission.id,
+          details: { patientId: data.patientId, bedId: data.bedId, doctorId: data.doctorId },
+          branchId: patient.branchId,
+        },
       });
 
       return admission;
+    });
+  }
+
+  /**
+   * Discharge a patient: closes the admission and frees the bed.
+   * `branchId`, when provided, must match the admission's patient branch.
+   */
+  static async dischargePatient(admissionId: string, data: DischargePatientInput, executorId: string, branchId?: string) {
+    const admission = await prisma.admission.findUnique({
+      where: { id: admissionId },
+      include: { patient: true, bed: true },
+    });
+    if (!admission) throw new AppError('Admission not found', 'NOT_FOUND', 404);
+    if (admission.status !== 'ADMITTED') {
+      throw new AppError('Admission is not currently active', 'VALIDATION_ERROR', 400);
+    }
+    if (branchId && admission.patient.branchId !== branchId) {
+      throw new AppError('Admission does not belong to your branch', 'FORBIDDEN', 403);
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      const updated = await tx.admission.update({
+        where: { id: admissionId },
+        data: {
+          status: 'DISCHARGED',
+          dischargedAt: new Date(),
+          dischargeSummary: data.dischargeNotes ?? null,
+        },
+      });
+
+      if (admission.bedId) {
+        await tx.bed.update({
+          where: { id: admission.bedId },
+          data: { status: 'AVAILABLE' },
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          userId: executorId,
+          userRole: 'STAFF',
+          action: 'DISCHARGE_PATIENT',
+          resource: 'ADMISSION',
+          resourceId: admission.id,
+          details: { patientId: admission.patientId, bedId: admission.bedId },
+          branchId: admission.patient.branchId,
+        },
+      });
+
+      return updated;
     });
   }
 }

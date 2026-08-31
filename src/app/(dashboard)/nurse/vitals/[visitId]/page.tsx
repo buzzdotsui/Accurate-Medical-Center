@@ -11,12 +11,35 @@ import { ArrowLeft, Loader2, Save } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+
+interface VisitPatientDetail {
+  id: string;
+  visitId: string;
+  patient: {
+    firstName: string;
+    lastName: string;
+    patientId: string;
+  };
+}
 
 export default function RecordVitals() {
   const router = useRouter();
   const params = useParams();
-  
+  const visitId = params.visitId as string;
+
+  const { data: visit, isLoading: isVisitLoading, isError: isVisitError, error: visitError } = useQuery({
+    queryKey: ["visit", visitId],
+    queryFn: async (): Promise<VisitPatientDetail> => {
+      const res = await fetch(`/api/v1/clinical/visits/${visitId}`, { credentials: "include" });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message ?? "Failed to load visit");
+      }
+      return json.data;
+    },
+  });
+
   const form = useForm<SaveVitalsInput>({
     resolver: zodResolver(SaveVitalsSchema) as any,
     defaultValues: {
@@ -39,17 +62,17 @@ export default function RecordVitals() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to save vitals");
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message ?? "Failed to save vitals");
       }
-      return res.json();
+      return json;
     },
     onSuccess: () => {
       toast.success("Vitals recorded successfully. Patient is ready for doctor.");
       router.push("/nurse/queue");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(err.message);
     }
   });
@@ -62,7 +85,13 @@ export default function RecordVitals() {
         </Button>
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Record Vitals</h1>
-          <p className="text-muted-foreground mt-1">Patient: Mary Smith (AMC-2026-0004)</p>
+          <p className="text-muted-foreground mt-1">
+            {isVisitLoading
+              ? "Loading patient..."
+              : isVisitError
+              ? (visitError instanceof Error ? visitError.message : "Failed to load patient")
+              : `Patient: ${visit?.patient.firstName} ${visit?.patient.lastName} (${visit?.patient.patientId})`}
+          </p>
         </div>
       </div>
 

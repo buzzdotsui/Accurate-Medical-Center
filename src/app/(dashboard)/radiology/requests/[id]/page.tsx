@@ -11,22 +11,47 @@ import { ArrowLeft, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { differenceInYears } from "date-fns";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+
+interface RadiologyRequestDetail {
+  id: string;
+  requestId: string;
+  scanType: string;
+  region: string;
+  priority: string;
+  clinicalNotes: string | null;
+  status: string;
+  doctor: { user: { name: string } };
+  visit: {
+    patient: {
+      firstName: string;
+      lastName: string;
+      patientId: string;
+      gender: string | null;
+      dateOfBirth: string | null;
+    };
+  };
+}
 
 export default function SubmitRadiologyReport() {
   const router = useRouter();
   const params = useParams();
-  
-  // Mock data mapping to the selected request
-  const request = {
-    id: params.id as string,
-    patient: { name: "Mary Smith", id: "AMC-2026-0004", age: 28, gender: "FEMALE" },
-    scanType: "CT Scan",
-    region: "Chest",
-    priority: "STAT",
-    clinicalNotes: "R/O Pulmonary Embolism",
-    status: "SCANNED" // Images already taken, pending report
-  };
+  const requestId = params.id as string;
+
+  const { data: request, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["radiology-request", requestId],
+    queryFn: async (): Promise<RadiologyRequestDetail> => {
+      const res = await fetch(`/api/v1/radiology/requests/${requestId}`, { credentials: "include" });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message ?? "Failed to load radiology request");
+      }
+      return json.data;
+    },
+  });
 
   const form = useForm<SaveRadiologyReportInput>({
     resolver: zodResolver(SaveRadiologyReportSchema),
@@ -44,16 +69,16 @@ export default function SubmitRadiologyReport() {
 
   const mutation = useMutation({
     mutationFn: async (data: SaveRadiologyReportInput) => {
-      const res = await fetch(`/api/v1/radiology/requests/${request.id}/report`, {
+      const res = await fetch(`/api/v1/radiology/requests/${requestId}/report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to save radiology report");
+        throw new Error(json?.error?.message || "Failed to save radiology report");
       }
-      return res.json();
+      return json;
     },
     onSuccess: () => {
       toast.success("Radiology report saved and published.");
@@ -64,6 +89,22 @@ export default function SubmitRadiologyReport() {
     }
   });
 
+  if (isLoading) {
+    return <LoadingState message="Loading radiology request..." className="py-24" />;
+  }
+
+  if (isError || !request) {
+    return (
+      <ErrorState
+        description={error instanceof Error ? error.message : "Failed to load radiology request"}
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
+  const patient = request.visit.patient;
+  const age = patient.dateOfBirth ? differenceInYears(new Date(), new Date(patient.dateOfBirth)) : null;
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-500 pb-12">
       <div className="flex items-center gap-4">
@@ -72,7 +113,7 @@ export default function SubmitRadiologyReport() {
         </Button>
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Diagnostic Report</h1>
-          <p className="text-muted-foreground mt-1">Request ID: {request.id}</p>
+          <p className="text-muted-foreground mt-1">Request ID: {request.requestId}</p>
         </div>
       </div>
 
@@ -85,12 +126,21 @@ export default function SubmitRadiologyReport() {
             <CardContent className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase">Patient</label>
-                <p className="font-medium">{request.patient.name} ({request.patient.gender}, {request.patient.age}y)</p>
-                <p className="text-sm text-muted-foreground">{request.patient.id}</p>
+                <p className="font-medium">
+                  {patient.firstName} {patient.lastName}
+                  {(patient.gender || age !== null) && (
+                    <> ({[patient.gender, age !== null ? `${age}y` : null].filter(Boolean).join(", ")})</>
+                  )}
+                </p>
+                <p className="text-sm text-muted-foreground">{patient.patientId}</p>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase">Modality & Region</label>
                 <p className="font-medium text-primary">{request.scanType} - {request.region}</p>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Requesting Doctor</label>
+                <p className="font-medium">{request.doctor.user.name}</p>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase">Priority</label>

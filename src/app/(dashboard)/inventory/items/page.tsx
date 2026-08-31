@@ -3,21 +3,35 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Search, Plus, Boxes } from "lucide-react";
+import { Boxes } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { formatCurrency } from "@/lib/utils/format";
+import { LoadingState } from "@/components/ui/loading-state";
+import { ErrorState } from "@/components/ui/error-state";
+
+interface InventoryItem {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  unit: string;
+  price: string | number;
+  stockQuantity: number;
+  reorderLevel: number;
+}
 
 export default function InventoryCatalog() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['inventory-items'],
-    queryFn: async () => {
-      // Mock data for UI
-      return [
-        { id: "MED-104", name: "Paracetamol 500mg", category: "TABLET", stock: 5, reorder: 50, unit: "Pack", price: 2.50 },
-        { id: "MED-305", name: "Insulin Regular", category: "INJECTION", stock: 0, reorder: 15, unit: "Vial", price: 45.00 },
-        { id: "CON-022", name: "Surgical Gloves", category: "CONSUMABLE", stock: 150, reorder: 50, unit: "Box", price: 12.00 },
-      ];
-    }
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["inventory-items"],
+    queryFn: async (): Promise<InventoryItem[]> => {
+      const res = await fetch("/api/v1/inventory/items", { credentials: "include" });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message ?? "Failed to load inventory items");
+      }
+      return json.data;
+    },
   });
 
   return (
@@ -27,21 +41,23 @@ export default function InventoryCatalog() {
           <h1 className="text-3xl font-heading font-bold text-foreground">Inventory Catalog</h1>
           <p className="text-muted-foreground mt-1">Manage all hospital stock, prices, and categories.</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" /> Add New SKU
-        </Button>
       </div>
 
       <Card className="border-none shadow-sm ring-1 ring-border/50">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="py-12 flex justify-center">
-              <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-            </div>
+            <LoadingState message="Loading inventory..." className="py-12" />
+          ) : isError ? (
+            <ErrorState
+              description={error instanceof Error ? error.message : "Failed to load inventory items"}
+              onRetry={() => refetch()}
+              className="border-none bg-transparent"
+            />
           ) : data?.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Boxes className="w-12 h-12 text-muted-foreground/30 mb-4" />
               <h3 className="text-lg font-medium">No items found</h3>
+              <p className="text-muted-foreground mt-1">Medicine and consumable items will appear here once added.</p>
             </div>
           ) : (
             <div className="relative w-full overflow-auto">
@@ -56,8 +72,8 @@ export default function InventoryCatalog() {
                   </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
-                  {data?.map((item: any) => {
-                    const isLow = item.stock <= item.reorder;
+                  {data?.map((item) => {
+                    const isLow = item.stockQuantity <= item.reorderLevel;
                     return (
                       <tr key={item.id} className="border-b transition-colors hover:bg-muted/30 group">
                         <td className="p-6 align-middle">
@@ -65,7 +81,7 @@ export default function InventoryCatalog() {
                             {item.name}
                             {isLow && <span className="w-2 h-2 rounded-full bg-destructive" title="Low Stock"></span>}
                           </div>
-                          <div className="text-xs text-muted-foreground">{item.id}</div>
+                          <div className="text-xs text-muted-foreground">{item.code}</div>
                         </td>
                         <td className="p-6 align-middle">
                           <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-muted text-muted-foreground">
@@ -74,12 +90,12 @@ export default function InventoryCatalog() {
                         </td>
                         <td className="p-6 align-middle">
                           <div className={`font-bold text-lg ${isLow ? 'text-destructive' : 'text-foreground'}`}>
-                            {item.stock} <span className="text-xs font-normal text-muted-foreground">{item.unit}s</span>
+                            {item.stockQuantity} <span className="text-xs font-normal text-muted-foreground">{item.unit}(s)</span>
                           </div>
-                          <div className="text-xs text-muted-foreground">Reorder: {item.reorder}</div>
+                          <div className="text-xs text-muted-foreground">Reorder: {item.reorderLevel}</div>
                         </td>
                         <td className="p-6 align-middle font-medium">
-                          ${item.price.toFixed(2)}
+                          {formatCurrency(Number(item.price))}
                         </td>
                         <td className="p-6 align-middle text-right">
                           <Button variant="outline" asChild className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">

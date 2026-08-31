@@ -7,7 +7,7 @@
 
 const BASE_URL = 'http://localhost:3000';
 const email = 'admin@accuratemedical.com';
-const password = 'Admin123!';
+const password = 'Admin123!!';
 const adminName = 'System Administrator';
 
 async function main() {

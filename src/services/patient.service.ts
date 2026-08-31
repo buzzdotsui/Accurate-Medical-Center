@@ -101,6 +101,58 @@ export class PatientService {
     return await prisma.$transaction((tx) => this.createPatientInTx(tx, data));
   }
 
+  /**
+   * Self-healing lookup for the currently authenticated PATIENT user.
+   *
+   * Registration is a two-step process at the client (see
+   * `src/app/(auth)/register/page.tsx`): create the Better Auth account,
+   * then POST `/api/v1/patients/self-register` to create the Patient row.
+   * If that second step fails (network blip, tab closed, etc.) the user is
+   * left with a valid login but no Patient profile, and nothing previously
+   * retried it — every self-service endpoint just threw a 404 forever.
+   *
+   * This is the single place that closes that gap: it returns the existing
+   * profile if one exists, and otherwise creates exactly one (via the same
+   * authoritative `createPatient` routine used by self-register) using the
+   * account's own name/email. Safe to call on every patient-facing read —
+   * it never duplicates or overwrites an existing profile.
+   */
+  static async ensureSelfProfile(user: { id: string; email: string; name: string }) {
+    const existing = await prisma.patient.findFirst({
+      where: { userId: user.id, deletedAt: null },
+    });
+    if (existing) return existing;
+
+    const defaultBranch = await prisma.branch.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (!defaultBranch) {
+      throw new AppError(
+        'System is not fully configured (no active branch found).',
+        'BAD_REQUEST',
+        400
+      );
+    }
+
+    const nameParts = (user.name || 'Patient').trim().split(/\s+/);
+    const firstName = nameParts[0] || 'Patient';
+    const lastName = nameParts.slice(1).join(' ') || 'Patient';
+
+    return this.createPatient({
+      firstName,
+      lastName,
+      email: user.email,
+      branchId: defaultBranch.id,
+      userId: user.id,
+      auditContext: {
+        userId: user.id,
+        userRole: 'PATIENT',
+        source: 'AUTO_HEALED_SELF_PROFILE',
+      },
+    });
+  }
+
   static async getPatient(identifier: string, branchId?: string) {
     const patient = await prisma.patient.findFirst({
       where: {

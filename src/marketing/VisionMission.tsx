@@ -26,7 +26,7 @@ function VisionPanel() {
       viewport={{ once: true, amount: 0.2 }}
       variants={staggerContainerSlow}
       aria-labelledby="vision-heading"
-      className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-12 lg:px-14 py-17 sm:py-[88px] lg:py-[104px] overflow-hidden"
+      className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-10 lg:px-12 py-10 sm:py-12 lg:py-14 overflow-hidden"
       style={{
         backgroundColor: "#000000",
         boxShadow:
@@ -69,7 +69,7 @@ function VisionPanel() {
 
       <motion.p
         variants={fadeUpSmall}
-        className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-8 relative z-10"
+        className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-4 relative z-10"
         style={{ color: "rgba(244,242,245,0.4)" }}
       >
         01
@@ -82,7 +82,7 @@ function VisionPanel() {
       <motion.h3
         variants={fadeUp}
         id="vision-heading"
-        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight mb-10"
+        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold italic leading-[1.1] relative z-10 tracking-tight mb-4"
         style={{
           fontFamily: "var(--font-playfair-display)",
           color: "#f4f2f5",
@@ -94,10 +94,10 @@ function VisionPanel() {
 
       <motion.p
         variants={fadeUp}
-        className="text-[15px] sm:text-[17px] lg:text-lg font-medium italic leading-[1.8] max-w-xs sm:max-w-sm relative z-10"
+        className="text-[16px] sm:text-[18px] lg:text-[19px] font-medium italic leading-[1.65] max-w-xs sm:max-w-sm relative z-10"
         style={{
           fontFamily: "var(--font-playfair-display)",
-          color: "rgba(244,242,245,0.88)",
+          color: "rgba(244,242,245,0.94)",
         }}
       >
         {siteConfig.vision}
@@ -114,7 +114,7 @@ function MissionPanel() {
       viewport={{ once: true, amount: 0.2 }}
       variants={staggerContainerSlow}
       aria-labelledby="mission-heading"
-      className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-12 lg:px-14 py-17 sm:py-[88px] lg:py-[104px] overflow-hidden"
+      className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-10 lg:px-12 py-10 sm:py-12 lg:py-14 overflow-hidden"
       style={{
         backgroundColor: "#000000",
         boxShadow:
@@ -157,7 +157,7 @@ function MissionPanel() {
 
       <motion.p
         variants={fadeUpSmall}
-        className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-8 relative z-10"
+        className="text-[10px] font-semibold uppercase tracking-[0.34em] mb-4 relative z-10"
         style={{ color: "rgba(244,242,245,0.4)" }}
       >
         02
@@ -170,7 +170,7 @@ function MissionPanel() {
       <motion.h3
         variants={fadeUp}
         id="mission-heading"
-        className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-bold italic leading-[1.06] relative z-10 tracking-tight mb-10"
+        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold italic leading-[1.1] relative z-10 tracking-tight mb-5"
         style={{
           fontFamily: "var(--font-playfair-display)",
           color: "#f4f2f5",
@@ -189,7 +189,7 @@ function MissionPanel() {
           <motion.li key={i} variants={fadeUpSmall}>
             {i > 0 && (
               <div
-                className="h-px mx-auto mb-[18px] mt-[18px] max-w-[230px] sm:max-w-none"
+                className="h-px mx-auto my-2.5 max-w-[230px] sm:max-w-none"
                 style={{
                   background:
                     "linear-gradient(90deg, transparent, rgba(244,242,245,0.085), transparent)",
@@ -198,10 +198,9 @@ function MissionPanel() {
               />
             )}
             <p
-              className="text-sm sm:text-[15.5px] lg:text-base font-medium italic leading-[1.82]"
+              className="font-sans not-italic text-[14.5px] sm:text-[15.5px] lg:text-[16px] font-medium leading-[1.55]"
               style={{
-                fontFamily: "var(--font-playfair-display)",
-                color: "rgba(244,242,245,0.85)",
+                color: "rgba(244,242,245,0.92)",
               }}
             >
               {item}
@@ -217,7 +216,7 @@ export function VisionMission() {
   return (
     <section
       id="vision-mission"
-      className="py-26 sm:py-[136px] lg:py-[168px] relative overflow-hidden"
+      className="py-14 sm:py-20 lg:py-24 relative overflow-hidden"
       aria-labelledby="vm-heading"
       style={{ backgroundColor: "#000000" }}
     >
@@ -253,7 +252,7 @@ export function VisionMission() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.85 }}
-          className="text-center mb-17 sm:mb-[76px] lg:mb-[92px]"
+          className="text-center mb-8 sm:mb-10 lg:mb-12"
         >
           <span
             className="inline-flex items-center gap-3 px-[22px] py-[10px] rounded-full text-[10px] font-semibold uppercase tracking-[0.3em]"
@@ -273,7 +272,7 @@ export function VisionMission() {
           </span>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6.5 sm:gap-8 lg:gap-10">
+        <div className="grid md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">
           <VisionPanel />
           <MissionPanel />
         </div>

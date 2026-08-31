@@ -2,7 +2,7 @@ import { withRole } from '@/lib/api/middleware';
 import { ok } from '@/lib/api/response';
 import { ROLES } from '@/config/roles';
 import { prisma } from '@/lib/db/client';
-import { AppError } from '@/lib/api/errors';
+import { PatientService } from '@/services/patient.service';
 
 /**
  * GET /api/v1/patients/self/dashboard
@@ -15,19 +15,9 @@ import { AppError } from '@/lib/api/errors';
 export const GET = withRole([ROLES.PATIENT], async (_req, session) => {
   const { user } = session;
 
-  // Resolve the patient record from the authenticated user
-  const patient = await prisma.patient.findFirst({
-    where: { userId: user.id, deletedAt: null },
-    select: { id: true },
-  });
-
-  if (!patient) {
-    throw new AppError(
-      'Patient profile not found. Please contact reception.',
-      'NOT_FOUND',
-      404
-    );
-  }
+  // Resolve the patient record from the authenticated user, self-healing
+  // (creating it) if self-registration previously never completed it.
+  const patient = await PatientService.ensureSelfProfile(user);
 
   const patientId = patient.id;
 

@@ -4,8 +4,7 @@ import { BillingService } from '@/services/billing.service';
 import { ok } from '@/lib/api/response';
 import { buildBranchFilter } from '@/lib/auth/resource-authorization';
 import { ROLES } from '@/config/roles';
-import { AppError } from '@/lib/api/errors';
-import { prisma } from '@/lib/db/client';
+import { PatientService } from '@/services/patient.service';
 
 /**
  * GET /api/v1/billing/invoices
@@ -19,15 +18,11 @@ import { prisma } from '@/lib/db/client';
 export const GET = withAuth(async (req, session) => {
   const branchFilter = buildBranchFilter(session.user);
   
-  // Patients can only see their own invoices
+  // Patients can only see their own invoices. Self-heals a missing
+  // Patient profile instead of permanently 404ing a user whose
+  // self-registration never completed (see PatientService.ensureSelfProfile).
   if (session.user.role === ROLES.PATIENT) {
-    const patient = await prisma.patient.findFirst({
-      where: { user: { id: session.user.id } },
-      select: { id: true },
-    });
-    if (!patient) {
-      throw new AppError('Patient profile not found.', 'NOT_FOUND', 404);
-    }
+    const patient = await PatientService.ensureSelfProfile(session.user);
     const invoices = await BillingService.getInvoicesByPatient(patient.id);
     return ok(invoices);
   }

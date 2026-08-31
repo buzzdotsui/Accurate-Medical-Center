@@ -5,9 +5,8 @@ import { AppointmentService } from '@/services/appointment.service';
 import { ok, created } from '@/lib/api/response';
 import { z } from 'zod';
 import { ROLES } from '@/config/roles';
-import { AppError } from '@/lib/api/errors';
 import { buildBranchFilter, resolveBranchId } from '@/lib/auth/resource-authorization';
-import { prisma } from '@/lib/db/client';
+import { PatientService } from '@/services/patient.service';
 
 const ListAppointmentsQuerySchema = z.object({
   branchId: z.string().optional(),
@@ -33,19 +32,11 @@ export const GET = withAuth(async (req, session) => {
   const query = parseQuery(req, ListAppointmentsQuerySchema);
   const branchFilter = buildBranchFilter(session.user);
   
-  // Patients can only see their own appointments
+  // Patients can only see their own appointments. Self-heals a missing
+  // Patient profile (see PatientService.ensureSelfProfile) instead of
+  // permanently 404ing a user whose self-registration never completed.
   if (session.user.role === ROLES.PATIENT) {
-    const patient = await prisma.patient.findFirst({
-      where: { user: { id: session.user.id } },
-      select: { id: true },
-    });
-    if (!patient) {
-      throw new AppError(
-        'Patient profile not found.',
-        'NOT_FOUND',
-        404
-      );
-    }
+    const patient = await PatientService.ensureSelfProfile(session.user);
     query.patientId = patient.id;
   }
   

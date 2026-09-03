@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 
 interface MediaPreloaderContextType {
   registerAsset: (id: string) => void;
@@ -20,19 +20,24 @@ export function useMediaPreloader() {
 
 export function MediaPreloaderProvider({ children }: { children: React.ReactNode }) {
   const [assets, setAssets] = useState<Record<string, boolean>>({});
-  
-  // We determine readiness based on all registered priority assets being true
   const [isReady, setIsReady] = useState(false);
+  // Track which IDs are registered as *critical* blocking assets.
+  // Only IDs added via registerAsset() contribute to the isReady gate.
+  const criticalIdsRef = useRef<Set<string>>(new Set());
 
+  // isReady fires when every CRITICAL registered asset is true.
   useEffect(() => {
-    const keys = Object.keys(assets);
-    if (keys.length > 0 && keys.every(key => assets[key])) {
+    const criticalIds = Array.from(criticalIdsRef.current);
+    if (criticalIds.length === 0) return;
+    const allReady = criticalIds.every(id => assets[id] === true);
+    if (allReady) {
       const id = setTimeout(() => setIsReady(true), 0);
       return () => clearTimeout(id);
     }
   }, [assets]);
 
   const registerAsset = useCallback((id: string) => {
+    criticalIdsRef.current.add(id);
     setAssets(prev => {
       if (prev[id] !== undefined) return prev;
       return { ...prev, [id]: false };

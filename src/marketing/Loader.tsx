@@ -5,25 +5,28 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useMediaPreloader } from "./MediaPreloaderContext";
 
+// Fallback: if critical media takes longer than 5 s, reveal the site anyway.
+// Rationale: hero preload="metadata" fetches only a small header segment
+// (~50-150 KB). On a 3G connection (~1 Mbps) this completes in <1.5 s.
+// 5 s gives a generous 3× buffer before we bail out.
+const FALLBACK_MS = 5000;
+
 export function Loader() {
   const { isReady } = useMediaPreloader();
   const [isVisible, setIsVisible] = useState(true);
-  const [showFallback, setShowFallback] = useState(false);
 
+  // Primary path: all critical assets ready → hide with a short transition delay.
   useEffect(() => {
     if (isReady) {
-      // Small delay to ensure smooth transition after videos fire canplay
       const timer = setTimeout(() => setIsVisible(false), 300);
       return () => clearTimeout(timer);
     }
   }, [isReady]);
 
+  // Deterministic fallback: page is ALWAYS revealed after FALLBACK_MS.
+  // This guarantees no media failure can permanently block the site.
   useEffect(() => {
-    // Fallback: If media takes longer than 8 seconds, just reveal the site.
-    const fallbackTimer = setTimeout(() => {
-      setShowFallback(true);
-      setIsVisible(false);
-    }, 8000);
+    const fallbackTimer = setTimeout(() => setIsVisible(false), FALLBACK_MS);
     return () => clearTimeout(fallbackTimer);
   }, []);
 

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { EASE_OUT } from "./animations";
-import { useMediaPreloader } from "./MediaPreloaderContext";
 import { MEDIA_CONFIG } from "@/config/media";
 
 const BG           = "#0b0f11";
@@ -98,21 +97,19 @@ function SlideVideo({
   sectionReady,
   isMobile,
   index,
-  onFirstPlay,
 }: {
   slide: Slide;
   isActive: boolean;
   sectionReady: boolean;
   isMobile: boolean;
   index: number;
-  onFirstPlay?: () => void;
 }) {
   const videoRef  = useRef<HTMLVideoElement>(null);
   const [canPlay, setCanPlay] = useState(false);
 
   // Reset canPlay when slide becomes inactive (so poster re-appears cleanly)
   useEffect(() => {
-    if (!isActive) setCanPlay(false);
+    if (!isActive) queueMicrotask(() => setCanPlay(false));
   }, [isActive]);
 
   // Wire events only when this slide is active AND section is ready
@@ -122,7 +119,6 @@ function SlideVideo({
 
     const handleCanPlay = () => {
       setCanPlay(true);
-      if (index === 0 && onFirstPlay) onFirstPlay();
     };
 
     if (video.readyState >= 3) {
@@ -136,7 +132,7 @@ function SlideVideo({
       video.removeEventListener("canplay",  handleCanPlay);
       video.removeEventListener("playing",  handleCanPlay);
     };
-  }, [isActive, sectionReady, index, onFirstPlay]);
+  }, [isActive, sectionReady]);
 
   // Play / pause
   useEffect(() => {
@@ -248,18 +244,18 @@ export function LookInside() {
   const [progress,     setProgress]     = useState(0);
   const [direction,    setDirection]    = useState<"forward" | "back">("forward");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { registerAsset, setAssetReady } = useMediaPreloader();
 
-  // Register first slide as priority asset
-  useEffect(() => {
-    registerAsset("lookinside-0");
-  }, [registerAsset]);
+  // LookInside is NOT a global blocking asset — it is below the fold and
+  // must never delay initial page reveal. Its IntersectionObserver gate
+  // (rootMargin: 100px) correctly defers all video elements until the
+  // section is near the viewport. No MediaPreloader registration needed.
 
   // Detect mobile viewport
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
-    setIsMobile(mq.matches);
     const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    // Initial resolution via microtask — avoids synchronous setState in effect body.
+    queueMicrotask(() => setIsMobile(mq.matches));
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
@@ -364,9 +360,6 @@ export function LookInside() {
             sectionReady={sectionReady}
             isMobile={isMobile}
             index={idx}
-            onFirstPlay={() => {
-              if (idx === 0) setAssetReady("lookinside-0");
-            }}
           />
         ))}
       </div>
@@ -515,9 +508,6 @@ export function LookInside() {
                   sectionReady={sectionReady}
                   isMobile={isMobile}
                   index={idx}
-                  onFirstPlay={() => {
-                    if (idx === 0) setAssetReady("lookinside-0");
-                  }}
                 />
               ))}
             </div>

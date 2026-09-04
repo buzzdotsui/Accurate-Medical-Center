@@ -92,6 +92,20 @@ const SERVICES = [
   },
 ];
 
+const APPOINTMENT_SERVICE_BY_MARKETING_TITLE: Record<string, string> = {
+  "Psychological Therapy": "Psychological Therapy",
+  "Infertility Care": "Infertility Care",
+  "Addiction Care": "Addiction Care",
+  "Pregnancy Delivery": "Pregnancy & Maternal Care",
+  "Outpatient Clinic Services": "Outpatient Clinic",
+  "Surgery": "Surgical Services",
+  "Admissions": "Outpatient Clinic",
+  "Ultrasound Scan": "Ultrasound Scan",
+  "X-ray Services": "X-Ray Services",
+  "Laboratories": "Laboratory Services",
+  "Ambulance Services": "Ambulance Services",
+};
+
 export function Services() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
@@ -135,7 +149,7 @@ export function Services() {
             const isHovered = hoveredIdx === idx;
 
             return (
-              <Link href={`/book-appointment?service=${encodeURIComponent(srv.title)}`} key={srv.id} passHref legacyBehavior>
+              <Link href={`/book-appointment?service=${encodeURIComponent(APPOINTMENT_SERVICE_BY_MARKETING_TITLE[srv.title])}`} key={srv.id} passHref legacyBehavior>
                 <motion.a
                   initial="hidden"
                   whileInView="visible"

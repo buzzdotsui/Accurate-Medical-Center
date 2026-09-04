@@ -109,7 +109,7 @@ export function Contact() {
         if (field in INITIAL && !nextErrors[field]) nextErrors[field] = issue.message;
       }
       setErrors(nextErrors);
-      setFormError("Please review the highlighted fields and try again.");
+      setFormError(Object.values(nextErrors).find(Boolean) ?? "Please correct the highlighted fields.");
       return;
     }
 

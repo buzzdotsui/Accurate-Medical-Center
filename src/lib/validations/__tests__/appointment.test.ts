@@ -88,6 +88,20 @@ describe("PublicAppointmentRequestSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts optional email addresses when empty or valid", () => {
+    const validRequest = {
+      firstName: "Jane",
+      lastName: "Doe",
+      phone: "+23490493337959",
+      service: "Outpatient Clinic",
+      preferredDate: "2099-01-01",
+      website: "",
+    };
+
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, email: "" }).success).toBe(true);
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, email: "example@gmail.com" }).success).toBe(true);
+  });
+
   it("rejects a request missing a required phone number", () => {
     const result = PublicAppointmentRequestSchema.safeParse({
       firstName: "Jane",
@@ -112,5 +126,20 @@ describe("PublicAppointmentRequestSchema", () => {
     expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, preferredDate: "2099-02-30" }).success).toBe(false);
     expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, service: "Unknown Service" }).success).toBe(false);
     expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, website: "spam.example" }).success).toBe(false);
+  });
+
+  it("rejects malformed email addresses and oversized public fields", () => {
+    const validRequest = {
+      firstName: "Jane",
+      lastName: "Doe",
+      phone: "+23490493337959",
+      service: "Outpatient Clinic",
+      preferredDate: "2099-01-01",
+      website: "",
+    };
+
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, email: "not-an-email" }).success).toBe(false);
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, firstName: "J".repeat(101) }).success).toBe(false);
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, notes: "N".repeat(1_001) }).success).toBe(false);
   });
 });

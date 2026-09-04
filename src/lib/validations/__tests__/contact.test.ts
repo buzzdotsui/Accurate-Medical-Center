@@ -25,6 +25,10 @@ describe("ContactFormSchema", () => {
     expect(ContactFormSchema.safeParse({ ...validContact, phone: "+23490493337959" }).success).toBe(true);
   });
 
+  it("accepts an empty optional email address", () => {
+    expect(ContactFormSchema.safeParse({ ...validContact, email: "" }).success).toBe(true);
+  });
+
   it("rejects malformed, oversized, and unexpected submissions", () => {
     expect(ContactFormSchema.safeParse({ ...validContact, email: "not-an-email" }).success).toBe(false);
     expect(ContactFormSchema.safeParse({ ...validContact, message: "   " }).success).toBe(false);

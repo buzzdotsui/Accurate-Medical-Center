@@ -75,7 +75,8 @@ export default function BookingForm() {
       }).safeParse(formData);
       if (!validation.success) {
         setValidationErrors(validation.error.issues);
-        setError("Please review the highlighted personal details.");
+        const firstFieldIssue = validation.error.issues.find((issue) => issue.path[0] in formData);
+        setError(firstFieldIssue?.message ?? "Please correct the highlighted personal details.");
         return;
       }
     }
@@ -97,7 +98,8 @@ export default function BookingForm() {
     });
     if (!validation.success) {
       setValidationErrors(validation.error.issues);
-      setError("Please review the highlighted fields and try again.");
+      const firstFieldIssue = validation.error.issues.find((issue) => issue.path[0] in formData);
+      setError(firstFieldIssue?.message ?? "Please correct the highlighted fields.");
       return;
     }
 

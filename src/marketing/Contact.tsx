@@ -90,7 +90,7 @@ export function Contact() {
   };
 
   const inputCls =
-    "w-full rounded-xl px-4 py-3.5 text-[14px] transition-all duration-300 border focus:outline-none focus:ring-2 placeholder:opacity-35";
+    "w-full rounded-xl border px-4 py-3.5 text-[14px] transition-[background-color,border-color,box-shadow,color] duration-300 focus:outline-none focus:ring-2 placeholder:opacity-35";
   const inputStyle: React.CSSProperties = {
     backgroundColor: "rgba(255,255,255,0.7)",
     borderColor: "rgba(3,22,26,0.09)",
@@ -188,7 +188,7 @@ export function Contact() {
                 initial="rest"
                 whileHover="hover"
                 whileTap="tap"
-                className="group inline-flex items-center gap-4 px-6 py-5 rounded-2xl mb-10 sm:mb-12 w-full sm:w-auto"
+                className="group mb-10 inline-flex w-full items-center gap-4 rounded-2xl px-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:mb-12 sm:w-auto"
                 style={{
                   backgroundColor: "#03161a",
                   color: "#f4f2f5",
@@ -374,7 +374,7 @@ export function Contact() {
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
-                  className="text-sm underline underline-offset-4 transition-colors hover:text-[#03161a] mt-3"
+                  className="mt-3 text-sm underline underline-offset-4 transition-colors hover:text-[#03161a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
                   style={{ color: "rgba(3,22,26,0.5)" }}
                 >
                   Send another message
@@ -514,7 +514,7 @@ export function Contact() {
                   initial="rest"
                   whileHover="hover"
                   whileTap="tap"
-                  className="group relative inline-flex items-center justify-center gap-2.5 w-full py-[18px] rounded-2xl text-[14px] font-semibold disabled:opacity-60 disabled:cursor-not-allowed overflow-hidden"
+                  className="group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl py-[18px] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
                   style={{ backgroundColor: "#03161a", color: "#f4f2f5" }}
                 >
                   <span
@@ -550,7 +550,7 @@ export function Contact() {
                 >
                   <a
                     href={`tel:${phone}`}
-                    className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-[13px] font-medium border transition-all duration-300 hover:bg-[#03161a]/[0.03]"
+                    className="flex items-center justify-center gap-2 rounded-xl border py-3.5 text-[13px] font-medium transition-colors duration-300 hover:bg-[#03161a]/[0.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
                     style={{
                       borderColor: "rgba(3,22,26,0.1)",
                       color: "rgba(3,22,26,0.75)",
@@ -566,7 +566,7 @@ export function Contact() {
                     href={`https://wa.me/${whatsapp}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 py-3.5 rounded-xl text-[13px] font-medium border transition-all duration-300 hover:bg-[#03161a]/[0.03]"
+                    className="flex items-center justify-center gap-2 rounded-xl border py-3.5 text-[13px] font-medium transition-colors duration-300 hover:bg-[#03161a]/[0.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
                     style={{
                       borderColor: "rgba(3,22,26,0.1)",
                       color: "rgba(3,22,26,0.75)",

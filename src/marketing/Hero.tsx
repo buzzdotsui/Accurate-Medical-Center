@@ -129,7 +129,10 @@ export default function Hero() {
   }, [reducedMotion, setAssetReady]);
 
   const scrollToNext = () => {
-    document.querySelector("#vision")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.querySelector("#vision")?.scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
   };
 
   // Derived only after isMobile is resolved. Null means "not yet determined".
@@ -138,12 +141,12 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden"
+      className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden sm:min-h-screen"
       style={{ backgroundColor: "#03161a" }}
       aria-label="Hero, Accurate Medical Center"
     >
       <motion.div
-        style={{ y: yBg }}
+        style={reducedMotion ? undefined : { y: yBg }}
         className="absolute inset-0 w-full h-[118%] -top-[9%]"
         aria-hidden
       >
@@ -213,7 +216,7 @@ export default function Hero() {
       />
 
       <motion.div
-        style={{ y: yContent, opacity: opacityContent }}
+        style={reducedMotion ? undefined : { y: yContent, opacity: opacityContent }}
         variants={heroStagger}
         initial="hidden"
         animate="visible"
@@ -221,14 +224,14 @@ export default function Hero() {
       >
         <motion.h1
           variants={fadeUp}
-          className="text-4xl sm:text-[3.75rem] lg:text-[5.5rem] xl:text-[6.5rem] font-bold italic leading-[1.03] tracking-tight mb-8 sm:mb-10"
+          className="mb-8 max-w-5xl text-[clamp(2.25rem,6vw,6.5rem)] font-bold italic leading-[1.03] tracking-tight sm:mb-10"
           style={{
             fontFamily: "var(--font-playfair-display)",
             color: "#f4f2f5",
             textShadow: "0 10px 40px rgba(3,22,26,0.7), 0 2px 10px rgba(3,22,26,0.5)",
           }}
         >
-          Leading Infertility &<br className="hidden sm:block" /> Addiction Care<br className="hidden sm:block" /> in South-West Nigeria
+          Leading Infertility & Addiction Care in South-West Nigeria
         </motion.h1>
 
         <motion.p
@@ -248,7 +251,7 @@ export default function Hero() {
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="group relative overflow-hidden inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-[18px] rounded-full text-sm sm:text-[15px] font-semibold"
+              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
               style={{
                 backgroundColor: "#03161a",
                 color: "#f4f2f5",
@@ -264,7 +267,7 @@ export default function Hero() {
                 }}
               />
               <Calendar
-                className="relative z-10 w-[18px] h-[18px] sm:w-5 sm:h-5 shrink-0 transition-transform duration-400 ease-out group-hover:scale-110 group-hover:-rotate-6"
+                className="relative z-10 h-[18px] w-[18px] shrink-0 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-6 sm:h-5 sm:w-5"
                 aria-hidden
               />
               <span className="relative z-10 tracking-wide">Book an Appointment</span>
@@ -275,13 +278,16 @@ export default function Hero() {
             href="#services"
             onClick={(e) => {
               e.preventDefault();
-              document.querySelector("#services")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              document.querySelector("#services")?.scrollIntoView({
+                behavior: reducedMotion ? "auto" : "smooth",
+                block: "start",
+              });
             }}
             variants={ctaLift}
             initial="rest"
             whileHover="hover"
             whileTap="tap"
-            className="group inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-[18px] rounded-full text-sm sm:text-[15px] font-semibold"
+            className="group inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
             style={{
               color: "#f4f2f5",
               backgroundColor: "rgba(244,242,245,0.06)",
@@ -308,8 +314,8 @@ export default function Hero() {
       >
         <span className="text-[10px] tracking-[0.32em] uppercase font-semibold">Scroll</span>
         <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2.2, ease: "easeInOut", repeat: Infinity, repeatType: "loop" as const, delay: 3 }}
+          animate={reducedMotion ? { y: 0 } : { y: [0, 6, 0] }}
+          transition={reducedMotion ? { duration: 0 } : { duration: 2.2, ease: "easeInOut", repeat: Infinity, repeatType: "loop" as const, delay: 3 }}
         >
           <ChevronDown className="w-5 h-5" aria-hidden />
         </motion.div>

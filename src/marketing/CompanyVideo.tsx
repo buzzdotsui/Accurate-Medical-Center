@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX, Maximize } from "lucide-react";
 import { fadeUp } from "./animations";
 import { MEDIA_CONFIG } from "@/config/media";
@@ -11,6 +11,7 @@ const COMPANY = MEDIA_CONFIG.videos.company;
 export function CompanyVideo() {
   const sectionRef  = useRef<HTMLElement>(null);
   const videoRef    = useRef<HTMLVideoElement>(null);
+  const reducedMotion = useReducedMotion();
 
   // Intersection state — section loaded into DOM but video not yet
   const [shouldLoad, setShouldLoad] = useState(false);
@@ -38,7 +39,7 @@ export function CompanyVideo() {
   // Wire video events once the element is in the DOM
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !shouldLoad) return;
+    if (!video || !shouldLoad || reducedMotion) return;
 
     const handleCanPlay    = () => setCanPlay(true);
     const handlePlay       = () => {}; // state already set via canplay
@@ -55,15 +56,15 @@ export function CompanyVideo() {
       video.removeEventListener("play",         handlePlay);
       video.removeEventListener("volumechange", handleVolumeChange);
     };
-  }, [shouldLoad]);
+  }, [shouldLoad, reducedMotion]);
 
   // Play once enough data is buffered
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !canPlay) return;
+    if (!video || !canPlay || reducedMotion) return;
     const p = video.play();
     if (p && typeof p.catch === "function") p.catch(() => {});
-  }, [canPlay]);
+  }, [canPlay, reducedMotion]);
 
   const toggleMute = useCallback(() => {
     if (videoRef.current) {
@@ -111,7 +112,7 @@ export function CompanyVideo() {
             <img
               src={COMPANY.posterUrl}
               alt="Accurate Medical Center — Company Video"
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${canPlay ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${canPlay && !reducedMotion ? "opacity-0 pointer-events-none" : "opacity-100"}`}
               loading="lazy"
               decoding="async"
             />
@@ -123,7 +124,7 @@ export function CompanyVideo() {
               actual video data streams progressively when play() is called.
               The 32 MB company video is NEVER downloaded on initial page load.
             */}
-            {shouldLoad && (
+            {shouldLoad && !reducedMotion && (
               <video
                 ref={videoRef}
                 src={COMPANY.desktopUrl}
@@ -136,11 +137,12 @@ export function CompanyVideo() {
             )}
 
             {/* Controls — visible on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-6">
+            {shouldLoad && !reducedMotion && (
+            <div className="absolute inset-0 flex items-end justify-between bg-gradient-to-t from-black/60 via-transparent to-transparent p-6 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
               <div className="flex gap-4">
                 <button
                   onClick={toggleMute}
-                  className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-full p-3 transition-all"
+                  className="rounded-full border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   aria-label={isMuted ? "Unmute video" : "Mute video"}
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -149,13 +151,14 @@ export function CompanyVideo() {
               <div>
                 <button
                   onClick={toggleFullscreen}
-                  className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white rounded-full p-3 transition-all"
+                  className="rounded-full border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   aria-label="Fullscreen"
                 >
                   <Maximize className="w-5 h-5" />
                 </button>
               </div>
             </div>
+            )}
           </div>
         </motion.div>
       </div>

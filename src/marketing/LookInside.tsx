@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { EASE_OUT } from "./animations";
 import { MEDIA_CONFIG } from "@/config/media";
@@ -96,12 +96,14 @@ function SlideVideo({
   isActive,
   sectionReady,
   isMobile,
+  reducedMotion,
   index,
 }: {
   slide: Slide;
   isActive: boolean;
   sectionReady: boolean;
   isMobile: boolean;
+  reducedMotion: boolean | null;
   index: number;
 }) {
   const videoRef  = useRef<HTMLVideoElement>(null);
@@ -170,7 +172,7 @@ function SlideVideo({
         2. This slide is the ACTIVE slide.
         All other slides show the poster image above. Zero wasted network requests.
       */}
-      {sectionReady && isActive && (
+      {sectionReady && isActive && !reducedMotion && (
         <video
           ref={videoRef}
           src={videoSrc}
@@ -199,17 +201,16 @@ function SlideIndicators({
   prefix: string;
 }) {
   return (
-    <div className="flex gap-1.5" role="tablist" aria-label="Experience slide selector">
+    <div className="flex gap-1.5" role="group" aria-label="Experience slide selector">
       {SLIDES.map((s, i) => (
         <button
           key={s.id}
-          role="tab"
-          aria-selected={i === index}
+          aria-pressed={i === index}
           aria-label={`Slide ${s.num} — ${s.title}`}
           onClick={() => goTo(i, i > index ? "forward" : "back")}
-          className="relative h-[3px] rounded-full overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40 transition-all duration-300"
+          className="relative h-[3px] w-7 origin-left overflow-hidden rounded-full transition-[background-color,transform] duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
           style={{
-            width: i === index ? 28 : 12,
+            transform: `scaleX(${i === index ? 1 : 12 / 28})`,
             backgroundColor: i === index ? "transparent" : "rgba(244,242,245,0.12)",
           }}
         >
@@ -234,6 +235,7 @@ function SlideIndicators({
 export function LookInside() {
   const sectionRef   = useRef<HTMLElement>(null);
   const sectionInView = useInView(sectionRef, { once: false, amount: 0.2 });
+  const reducedMotion = useReducedMotion();
 
   // sectionReady: true once section is within 100px — gating ALL video elements
   const [sectionReady, setSectionReady] = useState(false);
@@ -301,7 +303,7 @@ export function LookInside() {
   const goPrev = useCallback(() => goTo(targetIndex - 1, "back"),    [goTo, targetIndex]);
 
   useEffect(() => {
-    if (!sectionInView) { clearTimer(); return; }
+    if (!sectionInView || reducedMotion) { clearTimer(); return; }
     clearTimer();
     timerRef.current = setInterval(() => {
       setProgress((p) => {
@@ -317,7 +319,7 @@ export function LookInside() {
       });
     }, TICK_MS);
     return clearTimer;
-  }, [sectionInView, clearTimer, targetIndex, visibleIndex]);
+  }, [sectionInView, reducedMotion, clearTimer, targetIndex, visibleIndex]);
 
   const current = pad(visibleIndex + 1);
   const total   = pad(SLIDE_COUNT);
@@ -359,6 +361,7 @@ export function LookInside() {
             isActive={idx === visibleIndex}
             sectionReady={sectionReady}
             isMobile={isMobile}
+            reducedMotion={reducedMotion}
             index={idx}
           />
         ))}
@@ -507,6 +510,7 @@ export function LookInside() {
                   isActive={idx === visibleIndex}
                   sectionReady={sectionReady}
                   isMobile={isMobile}
+                  reducedMotion={reducedMotion}
                   index={idx}
                 />
               ))}

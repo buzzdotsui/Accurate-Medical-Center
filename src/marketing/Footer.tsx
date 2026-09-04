@@ -34,7 +34,12 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   const scrollToTop = () => {
-    document.getElementById("home")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("home")?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
   };
 
   return (
@@ -195,7 +200,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all duration-320 text-white/52 hover:text-white"
+                  className="flex h-[38px] w-[38px] items-center justify-center rounded-full text-white/52 transition-colors duration-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                   style={{ backgroundColor: "rgba(244,242,245,0.055)" }}
                   aria-label={`Follow us on ${social.label}`}
                   onMouseEnter={(e) => {
@@ -225,12 +230,12 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-[13.5px] transition-colors duration-200 hover:text-white group flex items-center gap-2.5"
+                    className="group flex items-center gap-2.5 text-[13.5px] transition-colors duration-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                     style={{ color: "rgba(244,242,245,0.54)" }}
                   >
                     <span
                       aria-hidden
-                      className="w-0 h-px bg-white/30 transition-all duration-300 ease-out group-hover:w-4 rounded-full"
+                      className="h-px w-4 origin-left scale-x-0 rounded-full bg-white/30 transition-transform duration-300 ease-out group-hover:scale-x-100"
                     />
                     {link.label}
                   </Link>
@@ -251,12 +256,12 @@ export function Footer() {
                 <li key={service}>
                   <Link
                     href={`/book-appointment?service=${encodeURIComponent(service)}`}
-                    className="text-[13.5px] transition-colors duration-200 hover:text-white group flex items-center gap-2.5"
+                    className="group flex items-center gap-2.5 text-[13.5px] transition-colors duration-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                     style={{ color: "rgba(244,242,245,0.54)" }}
                   >
                     <span
                       aria-hidden
-                      className="w-0 h-px bg-white/30 transition-all duration-300 ease-out group-hover:w-4 rounded-full"
+                      className="h-px w-4 origin-left scale-x-0 rounded-full bg-white/30 transition-transform duration-300 ease-out group-hover:scale-x-100"
                     />
                     {service}
                   </Link>
@@ -326,12 +331,12 @@ export function Footer() {
 
           <button
             onClick={scrollToTop}
-            className="flex items-center gap-2 font-medium transition-all duration-300 hover:text-white group"
+            className="group flex items-center gap-2 font-medium transition-colors duration-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
             style={{ color: "rgba(244,242,245,0.54)" }}
             aria-label="Scroll back to the top of the page"
           >
             Back to top
-            <span className="relative inline-flex items-center justify-center w-[34px] h-[34px] rounded-full transition-all duration-300 group-hover:-translate-y-0.5"
+            <span className="relative inline-flex items-center justify-center w-[34px] h-[34px] rounded-full transition-transform duration-300 group-hover:-translate-y-0.5"
               style={{ backgroundColor: "rgba(244,242,245,0.06)" }}
             >
               <ArrowUp className="w-4 h-4" />

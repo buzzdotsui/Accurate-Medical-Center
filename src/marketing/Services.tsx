@@ -146,7 +146,9 @@ export function Services() {
                   }}
                   onMouseEnter={() => setHoveredIdx(idx)}
                   onMouseLeave={() => setHoveredIdx(null)}
-                  className="group relative flex flex-col md:flex-row items-start md:items-center py-10 sm:py-14 border-b transition-colors duration-500 cursor-pointer overflow-hidden block"
+                  onFocus={() => setHoveredIdx(idx)}
+                  onBlur={() => setHoveredIdx(null)}
+                  className="group relative block cursor-pointer overflow-hidden border-b py-10 transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:py-14 md:flex md:items-center"
                   style={{ borderColor: BORDER }}
                 >
                 {/* Hover Background Reveal */}
@@ -165,7 +167,7 @@ export function Services() {
                     </span>
                     <div className="flex items-center gap-6">
                       <div 
-                        className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300"
+                        className="flex h-12 w-12 items-center justify-center rounded-full transition-[background-color,border-color] duration-300"
                         style={{ 
                           backgroundColor: isHovered ? LEMON : "transparent",
                           border: isHovered ? "1px solid transparent" : `1px solid ${BORDER}`
@@ -184,7 +186,7 @@ export function Services() {
                       {srv.desc}
                     </p>
                     <ArrowRight 
-                      className="hidden lg:block w-6 h-6 transition-all duration-500" 
+                      className="hidden h-6 w-6 lg:block transition-[opacity,transform] duration-500" 
                       style={{ 
                         color: CHARCOAL, 
                         opacity: isHovered ? 1 : 0, 
@@ -212,7 +214,7 @@ export function Services() {
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="group relative inline-flex items-center justify-center gap-3 px-8 py-[18px] rounded-full text-[15px] font-semibold overflow-hidden"
+              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-[18px] text-[15px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
               style={{
                 backgroundColor: CHARCOAL,
                 color: "#fff",

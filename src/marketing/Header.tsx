@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { Calendar, X, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,6 +26,7 @@ const NAV_LINKS = [
 export function Header() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -54,6 +55,12 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const focusTimer = window.setTimeout(() => closeButtonRef.current?.focus(), 0);
+    return () => window.clearTimeout(focusTimer);
+  }, [menuOpen]);
+
   const scrollTo = useCallback((href: string) => {
     setMenuOpen(false);
     if (pathname !== "/") {
@@ -62,7 +69,14 @@ export function Header() {
     }
     requestAnimationFrame(() => {
       const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (el) {
+        el.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        });
+      }
     });
   }, [pathname, router]);
 
@@ -127,10 +141,10 @@ export function Header() {
                 <button
                   key={link.href + link.label}
                   onClick={() => scrollTo(link.href)}
-                  className="group relative text-[13px] font-medium tracking-[0.08em] uppercase text-[#f4f2f5]/65 hover:text-[#f4f2f5] transition-colors duration-300 focus-visible:outline-none"
+                  className="group relative text-[13px] font-medium tracking-[0.08em] uppercase text-[#f4f2f5]/65 transition-colors duration-300 hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                 >
                   {link.label}
-                  <span className="absolute -bottom-1.5 left-0 w-0 h-[1.5px] bg-[#f4f2f5] transition-all duration-400 ease-out group-hover:w-full rounded-full" style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
+                  <span className="absolute -bottom-1.5 left-0 h-[1.5px] w-full origin-left scale-x-0 rounded-full bg-[#f4f2f5] transition-transform duration-300 ease-out group-hover:scale-x-100" style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
                 </button>
               ))}
             </nav>
@@ -138,7 +152,7 @@ export function Header() {
             <div className="hidden lg:flex items-center gap-6">
               <Link
                 href="/register"
-                className="text-[12px] font-medium tracking-wider uppercase text-[#f4f2f5]/40 hover:text-[#f4f2f5] transition-colors"
+                className="text-[12px] font-medium tracking-wider uppercase text-[#f4f2f5]/40 transition-colors hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                 aria-label="Portal Login"
               >
                 Portal
@@ -149,7 +163,7 @@ export function Header() {
                   initial="rest"
                   whileHover="hover"
                   whileTap="tap"
-                  className="relative inline-flex items-center gap-2.5 px-[26px] py-[11px] rounded-full text-[13px] font-semibold tracking-wide overflow-hidden group"
+                  className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-[26px] py-[11px] text-[13px] font-semibold tracking-wide focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                   style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 28px rgba(3,22,26,0.25)" }}
                 >
                   <span
@@ -167,7 +181,7 @@ export function Header() {
             </div>
 
             <button
-              className={`lg:hidden p-2.5 rounded-xl text-[#f4f2f5] transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 ${
+              className={`lg:hidden p-2.5 rounded-xl text-[#f4f2f5] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 ${
                 scrolled ? "hover:bg-white/10" : "hover:bg-black/20"
               }`}
               onClick={() => setMenuOpen(true)}
@@ -231,6 +245,7 @@ export function Header() {
                   </div>
                 </div>
                 <button
+                  ref={closeButtonRef}
                   onClick={() => setMenuOpen(false)}
                   className="p-2 -mr-2 rounded-xl text-[#f4f2f5]/55 hover:text-white hover:bg-white/10 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
                   aria-label="Close menu"
@@ -251,12 +266,12 @@ export function Header() {
                     key={link.href + link.label}
                     variants={fadeUpSmall}
                     onClick={() => scrollTo(link.href)}
-                    className="group flex items-center justify-between text-left text-[23px] font-medium text-[#f4f2f5]/78 hover:text-white transition-colors py-4 border-b border-white/[0.05]"
+                    className="group flex items-center justify-between border-b border-white/[0.05] py-4 text-left text-[23px] font-medium text-[#f4f2f5]/78 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                   >
                     <span className="tracking-tight">{link.label}</span>
                     <span
                       aria-hidden
-                      className="w-6 h-px bg-[#f4f2f5]/28 transition-all duration-300 ease-out group-hover:w-10 group-hover:bg-[#f4f2f5]/55"
+                      className="h-px w-10 origin-left scale-x-[0.6] bg-[#f4f2f5]/28 transition-[transform,background-color] duration-300 ease-out group-hover:scale-x-100 group-hover:bg-[#f4f2f5]/55"
                     />
                   </motion.button>
                 ))}
@@ -272,7 +287,7 @@ export function Header() {
                 <Link
                   href="/book-appointment"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl text-sm font-semibold transition-transform active:scale-[0.98] hover:brightness-[0.98]"
+                  className="flex w-full items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-semibold transition-transform hover:brightness-[0.98] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                   style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 10px 32px rgba(3,22,26,0.2)" }}
                 >
                   <Calendar className="w-5 h-5" aria-hidden="true" />
@@ -282,7 +297,7 @@ export function Header() {
                 <Link
                   href="/register"
                   onClick={() => setMenuOpen(false)}
-                  className="text-center text-[11px] font-medium tracking-[0.1em] uppercase text-[#f4f2f5]/40 hover:text-[#f4f2f5] transition-colors py-2"
+                  className="py-2 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[#f4f2f5]/40 transition-colors hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                   aria-label="Portal Login"
                 >
                   Portal

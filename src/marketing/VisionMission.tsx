@@ -16,6 +16,14 @@ const MISSION_ITEMS: readonly string[] = [
   "Deliver expert online consultations to patients beyond Akure.",
 ] as const;
 
+const panelStatementClassName =
+  "max-w-xs text-[16px] font-medium italic leading-[1.65] sm:max-w-sm sm:text-[18px] lg:text-[19px]";
+
+const panelStatementStyle = {
+  fontFamily: "var(--font-playfair-display)",
+  color: "rgba(244,242,245,0.94)",
+} as const;
+
 // Ornamental dividers removed
 
 function VisionPanel() {
@@ -94,11 +102,8 @@ function VisionPanel() {
 
       <motion.p
         variants={fadeUp}
-        className="text-[16px] sm:text-[18px] lg:text-[19px] font-medium italic leading-[1.65] max-w-xs sm:max-w-sm relative z-10"
-        style={{
-          fontFamily: "var(--font-playfair-display)",
-          color: "rgba(244,242,245,0.94)",
-        }}
+        className={`${panelStatementClassName} relative z-10`}
+        style={panelStatementStyle}
       >
         {siteConfig.vision}
       </motion.p>
@@ -198,10 +203,8 @@ function MissionPanel() {
               />
             )}
             <p
-              className="font-sans not-italic text-[14.5px] sm:text-[15.5px] lg:text-[16px] font-medium leading-[1.55]"
-              style={{
-                color: "rgba(244,242,245,0.92)",
-              }}
+              className={`${panelStatementClassName} mx-auto`}
+              style={panelStatementStyle}
             >
               {item}
             </p>

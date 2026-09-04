@@ -21,6 +21,10 @@ describe("ContactFormSchema", () => {
     expect(result.message).toBe("I would like to ask about your clinic hours.");
   });
 
+  it("accepts legitimate international phone-number characters without a trailing asterisk", () => {
+    expect(ContactFormSchema.safeParse({ ...validContact, phone: "+23490493337959" }).success).toBe(true);
+  });
+
   it("rejects malformed, oversized, and unexpected submissions", () => {
     expect(ContactFormSchema.safeParse({ ...validContact, email: "not-an-email" }).success).toBe(false);
     expect(ContactFormSchema.safeParse({ ...validContact, message: "   " }).success).toBe(false);

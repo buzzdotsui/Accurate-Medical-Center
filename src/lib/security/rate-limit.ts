@@ -48,19 +48,35 @@ export const contactRateLimit = redis
     })
   : null;
 
+/** Public appointment-request limiter: five submissions per ten minutes per IP. */
+export const appointmentRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '10 m'),
+      analytics: true,
+      prefix: '@upstash/ratelimit/appointment',
+    })
+  : null;
+
 /**
  * Helper to execute a rate limit check and throw a standard AppError if exceeded.
  */
-export async function checkRateLimit(ip: string = '127.0.0.1', type: 'global' | 'auth' | 'contact' = 'global') {
+export async function checkRateLimit(ip: string = '127.0.0.1', type: 'global' | 'auth' | 'contact' | 'appointment' = 'global') {
   if (!redis) {
-    // Public contact delivery must never run without its abuse protection.
-    if (type === 'contact') {
-      throw new AppError('Contact rate limiting is not configured.', 'SERVICE_UNAVAILABLE', 503);
+    // Public form delivery must never run without its abuse protection.
+    if (type === 'contact' || type === 'appointment') {
+      throw new AppError('Public form rate limiting is not configured.', 'SERVICE_UNAVAILABLE', 503);
     }
     return; // Other existing endpoints retain their local-development behaviour.
   }
 
-  const limiter = type === 'auth' ? authRateLimit : type === 'contact' ? contactRateLimit : globalRateLimit;
+  const limiter = type === 'auth'
+    ? authRateLimit
+    : type === 'contact'
+      ? contactRateLimit
+      : type === 'appointment'
+        ? appointmentRateLimit
+        : globalRateLimit;
   if (!limiter) return;
 
   const { success } = await limiter.limit(ip);

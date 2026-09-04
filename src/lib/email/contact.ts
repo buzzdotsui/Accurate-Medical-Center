@@ -5,9 +5,9 @@ import { Resend } from "resend";
 import { logger } from "@/lib/utils/logger";
 import type { ContactFormData } from "@/lib/validations/contact";
 
-class ContactEmailConfigurationError extends Error {}
+export class ContactEmailConfigurationError extends Error {}
 
-function getContactEmailConfiguration() {
+export function getContactEmailConfiguration() {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   const to = process.env.CONTACT_EMAIL_TO;
@@ -34,13 +34,17 @@ function getSubmissionDate(date: Date) {
   return `${value("year")}${value("month")}${value("day")}`;
 }
 
-export function generateContactSubmissionId(now = new Date()) {
+export function generatePublicFormSubmissionId(prefix: "AMC" | "AMC-APT", now = new Date()) {
   let suffix = "";
   for (let index = 0; index < 6; index += 1) {
     suffix += SUBMISSION_ID_ALPHABET[randomInt(SUBMISSION_ID_ALPHABET.length)];
   }
 
-  return `AMC-${getSubmissionDate(now)}-${suffix}`;
+  return `${prefix}-${getSubmissionDate(now)}-${suffix}`;
+}
+
+export function generateContactSubmissionId(now = new Date()) {
+  return generatePublicFormSubmissionId("AMC", now);
 }
 
 export async function sendContactEmail(contact: ContactFormData, submissionId: string) {
@@ -94,5 +98,3 @@ export async function sendContactEmail(contact: ContactFormData, submissionId: s
 
   return data;
 }
-
-export { ContactEmailConfigurationError };

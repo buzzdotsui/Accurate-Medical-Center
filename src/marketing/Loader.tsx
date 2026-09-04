@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useMediaPreloader } from "./MediaPreloaderContext";
 
 // Fallback: if critical media takes longer than 5 s, reveal the site anyway.
@@ -12,6 +13,7 @@ import { useMediaPreloader } from "./MediaPreloaderContext";
 const FALLBACK_MS = 5000;
 
 export function Loader() {
+  const pathname = usePathname();
   const { isReady } = useMediaPreloader();
   const [isVisible, setIsVisible] = useState(true);
 
@@ -29,6 +31,8 @@ export function Loader() {
     const fallbackTimer = setTimeout(() => setIsVisible(false), FALLBACK_MS);
     return () => clearTimeout(fallbackTimer);
   }, []);
+
+  if (pathname !== "/") return null;
 
   return (
     <AnimatePresence>

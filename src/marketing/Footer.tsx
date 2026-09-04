@@ -287,8 +287,7 @@ export function Footer() {
                   className="text-[13.5px] leading-[1.78]"
                   style={{ color: "rgba(244,242,245,0.66)" }}
                 >
-                  First Floor, Olukayode House, Oshinle Street / Oluwatuyi Road, Akure,
-                  Ondo State.
+                  {siteConfig.contact.address.full}
                 </span>
               </li>
               <li className="flex items-center gap-3.5 gap-[14px]">

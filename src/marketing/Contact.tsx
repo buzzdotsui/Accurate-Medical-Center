@@ -14,10 +14,11 @@ import {
   EASE_OUT,
 } from "./animations";
 
-const phone    = "07039092836";
-const whatsapp = "07039092836";
-const display  = "07039092836";
-const email    = "immediateaccuratediagnostics@yahoo.com";
+const { contact } = siteConfig;
+const phone = contact.phone.primary;
+const whatsapp = contact.phone.whatsapp;
+const display = contact.phone.displayPrimary;
+const email = contact.email.general;
 interface FormState { name: string; phone: string; email: string; message: string; }
 const INITIAL: FormState = { name: "", phone: "", email: "", message: "" };
 type FormErrors = Partial<Record<keyof FormState, string>>;
@@ -274,17 +275,7 @@ export function Contact() {
               <motion.div variants={fadeUpSmall}>
                 <InfoRow icon={MapPin} label="Hospital Address">
                   <span>
-                    First Floor, Olukayode House,
-                    <br />
-                    Oshinle Street / Oluwatuyi Road, Akure
-                    <br />
-                    <span
-                      className="text-[12.5px] block mt-1"
-                      style={{ color: "rgba(3,22,26,0.5)" }}
-                    >
-                      Beside FCMB Bank at Oshinle Roundabout, off Hospital Road
-                    </span>
-                    <span className="block mt-1">Ondo State, Nigeria</span>
+                    {contact.address.full}
                   </span>
                 </InfoRow>
               </motion.div>
@@ -361,7 +352,7 @@ export function Contact() {
             >
               <iframe
                 title="Accurate Medical Center location on Google Maps"
-                src="https://maps.google.com/maps?q=Olukayode+House+Oshinle+Akure+Ondo&z=15&output=embed"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(contact.address.full)}&z=15&output=embed`}
                 width="100%"
                 height="100%"
                 style={{
@@ -427,7 +418,7 @@ export function Contact() {
                   className="text-sm sm:text-[15px] max-w-xs leading-[1.7]"
                   style={{ color: "rgba(3,22,26,0.6)" }}
                 >
-                  Your enquiry has been received. We will get back to you as soon as possible.
+                  Your message has been submitted successfully. We will get back to you as soon as possible.
                   {submissionId && <><br />Your Submission ID is <strong>{submissionId}</strong>.</>}
                 </p>
                 <button

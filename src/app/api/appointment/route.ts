@@ -8,15 +8,18 @@ import {
 } from "@/lib/api/public-form";
 import {
   ContactEmailConfigurationError,
-  generateContactSubmissionId,
-  sendContactEmail,
 } from "@/lib/email/contact";
+import {
+  generateAppointmentSubmissionId,
+  sendAppointmentEmail,
+} from "@/lib/email/appointment";
 import { checkRateLimit } from "@/lib/security/rate-limit";
-import { ContactFormSchema } from "@/lib/validations/contact";
+import { PublicAppointmentRequestSchema } from "@/lib/validations/appointment";
 import { logger } from "@/lib/utils/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -41,44 +44,56 @@ export async function POST(request: NextRequest) {
   }
   const payloadRecord = payload as Record<string, unknown>;
 
-  // A filled honeypot is rejected without revealing the anti-spam mechanism.
   if (typeof payloadRecord.website === "string" && payloadRecord.website.length > 0) {
     return error("BAD_REQUEST", "Please review the form and try again.", 400);
   }
 
-  const parsed = ContactFormSchema.safeParse(payload);
+  const parsed = PublicAppointmentRequestSchema.safeParse(payload);
   if (!parsed.success) {
     return error("VALIDATION_ERROR", "Please review the form and try again.", 422);
   }
 
+  const todayParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Lagos",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const datePart = (type: Intl.DateTimeFormatPartTypes) =>
+    todayParts.find((part) => part.type === type)?.value;
+  const today = `${datePart("year")}-${datePart("month")}-${datePart("day")}`;
+  if (parsed.data.preferredDate < today) {
+    return error("VALIDATION_ERROR", "Please choose a preferred date that is not in the past.", 422);
+  }
+
   const ip = getClientIp(request);
   try {
-    await checkRateLimit(ip, "contact");
+    await checkRateLimit(ip, "appointment");
   } catch (rateLimitError) {
     if (rateLimitError instanceof AppError && rateLimitError.statusCode === 429) {
-      return tooManyRequests("Please wait a few minutes before sending another message.");
+      return tooManyRequests("Please wait a few minutes before submitting another appointment request.");
     }
 
-    logger.error("Contact rate limit check failed", {
+    logger.error("Appointment rate limit check failed", {
       error: rateLimitError instanceof Error ? rateLimitError.message : "Unknown error",
     });
-    return error("SERVICE_UNAVAILABLE", "The contact service is temporarily unavailable.", 503);
+    return error("SERVICE_UNAVAILABLE", "The appointment service is temporarily unavailable.", 503);
   }
 
   try {
-    const submissionId = generateContactSubmissionId();
-    await sendContactEmail(parsed.data, submissionId);
-    return ok({ status: "sent", submissionId });
+    const submissionId = generateAppointmentSubmissionId();
+    await sendAppointmentEmail(parsed.data, submissionId);
+    return ok({ status: "submitted", submissionId });
   } catch (sendError) {
-    logger.error("Contact message could not be sent", {
+    logger.error("Appointment request could not be sent", {
       error: sendError instanceof Error ? sendError.message : "Unknown error",
       ip,
     });
 
     if (sendError instanceof ContactEmailConfigurationError) {
-      return error("SERVICE_UNAVAILABLE", "The contact service is temporarily unavailable. Please call us directly.", 503);
+      return error("SERVICE_UNAVAILABLE", "The appointment service is temporarily unavailable. Please call us directly.", 503);
     }
 
-    return error("EMAIL_SEND_FAILED", "We could not send your message right now. Please try again or call us directly.", 502);
+    return error("EMAIL_SEND_FAILED", "We could not submit your appointment request right now. Please try again or call us directly.", 502);
   }
 }

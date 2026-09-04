@@ -80,9 +80,10 @@ describe("PublicAppointmentRequestSchema", () => {
     const result = PublicAppointmentRequestSchema.safeParse({
       firstName: "Jane",
       lastName: "Doe",
-      phone: "08012345678",
-      service: "General Checkup",
-      preferredDate: new Date().toISOString(),
+      phone: "+23490493337959",
+      service: "Outpatient Clinic",
+      preferredDate: "2099-01-01",
+      website: "",
     });
     expect(result.success).toBe(true);
   });
@@ -92,9 +93,24 @@ describe("PublicAppointmentRequestSchema", () => {
       firstName: "Jane",
       lastName: "Doe",
       phone: "123",
-      service: "General Checkup",
-      preferredDate: new Date().toISOString(),
+      service: "Outpatient Clinic",
+      preferredDate: "2099-01-01",
     });
     expect(result.success).toBe(false);
+  });
+
+  it("rejects malformed dates, unknown services, and populated honeypots", () => {
+    const validRequest = {
+      firstName: "Jane",
+      lastName: "Doe",
+      phone: "+23490493337959",
+      service: "Outpatient Clinic",
+      preferredDate: "2099-01-01",
+      website: "",
+    };
+
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, preferredDate: "2099-02-30" }).success).toBe(false);
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, service: "Unknown Service" }).success).toBe(false);
+    expect(PublicAppointmentRequestSchema.safeParse({ ...validRequest, website: "spam.example" }).success).toBe(false);
   });
 });

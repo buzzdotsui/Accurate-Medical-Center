@@ -94,17 +94,17 @@ function pad(n: number) {
 function SlideVideo({
   slide,
   isActive,
+  isPrepared,
   sectionReady,
   isMobile,
   reducedMotion,
-  index,
 }: {
   slide: Slide;
   isActive: boolean;
+  isPrepared: boolean;
   sectionReady: boolean;
-  isMobile: boolean;
+  isMobile: boolean | null;
   reducedMotion: boolean | null;
-  index: number;
 }) {
   const videoRef  = useRef<HTMLVideoElement>(null);
   const [canPlay, setCanPlay] = useState(false);
@@ -150,21 +150,26 @@ function SlideVideo({
   }, [isActive, canPlay]);
 
   const videoSrc = isMobile ? slide.mobileUrl : slide.desktopUrl;
+  const shouldRenderPoster = sectionReady && (isActive || (!reducedMotion && isPrepared));
+  const shouldMountVideo = sectionReady && !reducedMotion && isMobile !== null && (isActive || isPrepared);
 
   return (
     <div
       className={`absolute inset-0 transition-opacity duration-[800ms] ease-out ${isActive ? "opacity-100 z-10" : "opacity-0 z-0"}`}
     >
       {/* Poster — always rendered, fades out once video is playing */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={slide.posterUrl}
-        alt=""
-        aria-hidden
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${canPlay ? "opacity-0" : "opacity-100"}`}
-        loading={index === 0 ? "eager" : "lazy"}
-        decoding="async"
-      />
+      {shouldRenderPoster && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={slide.posterUrl}
+          alt=""
+          aria-hidden
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${canPlay ? "opacity-0" : "opacity-100"}`}
+          loading="eager"
+          fetchPriority={isActive ? "high" : "low"}
+          decoding="async"
+        />
+      )}
 
       {/*
         Video element is ONLY mounted when:
@@ -172,16 +177,19 @@ function SlideVideo({
         2. This slide is the ACTIVE slide.
         All other slides show the poster image above. Zero wasted network requests.
       */}
-      {sectionReady && isActive && !reducedMotion && (
+      {shouldMountVideo && (
         <video
-          ref={videoRef}
+          ref={isActive ? videoRef : undefined}
           src={videoSrc}
           muted
           loop
           playsInline
           preload="metadata"
           tabIndex={-1}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${canPlay ? "opacity-100" : "opacity-0"}`}
+          aria-hidden={!isActive}
+          className={isActive
+            ? `absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${canPlay ? "opacity-100" : "opacity-0"}`
+            : "absolute h-px w-px opacity-0 pointer-events-none"}
         />
       )}
     </div>
@@ -239,7 +247,8 @@ export function LookInside() {
 
   // sectionReady: true once section is within 100px — gating ALL video elements
   const [sectionReady, setSectionReady] = useState(false);
-  const [isMobile, setIsMobile]         = useState(false);
+  const [isMobile, setIsMobile]         = useState<boolean | null>(null);
+  const [isDesktop, setIsDesktop]       = useState<boolean | null>(null);
 
   const [targetIndex,  setTargetIndex]  = useState(0);
   const [visibleIndex, setVisibleIndex] = useState(0);
@@ -254,12 +263,21 @@ export function LookInside() {
 
   // Detect mobile viewport
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    const mobileQuery = window.matchMedia("(max-width: 1023px)");
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const onMobileChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    const onDesktopChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     // Initial resolution via microtask — avoids synchronous setState in effect body.
-    queueMicrotask(() => setIsMobile(mq.matches));
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    queueMicrotask(() => {
+      setIsMobile(mobileQuery.matches);
+      setIsDesktop(desktopQuery.matches);
+    });
+    mobileQuery.addEventListener("change", onMobileChange);
+    desktopQuery.addEventListener("change", onDesktopChange);
+    return () => {
+      mobileQuery.removeEventListener("change", onMobileChange);
+      desktopQuery.removeEventListener("change", onDesktopChange);
+    };
   }, []);
 
   // Section-level intersection — unlock video elements when section is near
@@ -281,6 +299,7 @@ export function LookInside() {
   }, [sectionReady]);
 
   const slide = SLIDES[visibleIndex];
+  const preparedIndex = (visibleIndex + 1) % SLIDE_COUNT;
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
@@ -359,10 +378,10 @@ export function LookInside() {
             key={s.id}
             slide={s}
             isActive={idx === visibleIndex}
+            isPrepared={idx === preparedIndex}
             sectionReady={sectionReady}
             isMobile={isMobile}
             reducedMotion={reducedMotion}
-            index={idx}
           />
         ))}
       </div>
@@ -460,7 +479,7 @@ export function LookInside() {
         {/* RIGHT: portrait video */}
         <div className="relative flex items-center justify-center px-12 xl:px-16 py-16 xl:py-20" style={{ backgroundColor: VIDEO_BG }}>
           <div className="relative w-full max-w-[340px] xl:max-w-[380px]">
-            {VideoPanel}
+            {isDesktop === true && VideoPanel}
             <motion.div
               key={`lemon-${visibleIndex}`}
               aria-hidden
@@ -503,15 +522,15 @@ export function LookInside() {
               style={{ background: "radial-gradient(ellipse 90% 80% at 50% 20%, transparent 0%, rgba(8,9,10,0.15) 80%, rgba(8,9,10,0.5) 100%)" }}
             />
             <div className="absolute inset-0" style={{ backgroundColor: VIDEO_BG }}>
-              {SLIDES.map((s, idx) => (
+              {isDesktop === false && SLIDES.map((s, idx) => (
                 <SlideVideo
                   key={`m-${s.id}`}
                   slide={s}
                   isActive={idx === visibleIndex}
+                  isPrepared={idx === preparedIndex}
                   sectionReady={sectionReady}
                   isMobile={isMobile}
                   reducedMotion={reducedMotion}
-                  index={idx}
                 />
               ))}
             </div>

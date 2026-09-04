@@ -15,6 +15,7 @@ const HERO_POSTER_URL  = MEDIA_CONFIG.videos.hero.posterUrl;
 
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const posterRef = useRef<HTMLImageElement>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
 
   // isMobile starts as null — "undetermined" — so we render NO video element
@@ -38,8 +39,12 @@ export default function Hero() {
   // the video element mounts. This way the Loader is already waiting before
   // any race conditions can occur.
   useEffect(() => {
-    registerAsset("hero-video");
+    registerAsset("hero-poster");
   }, [registerAsset]);
+
+  useEffect(() => {
+    if (posterRef.current?.complete) setAssetReady("hero-poster");
+  }, [setAssetReady]);
 
   // Step 2 — Detect viewport + user preferences once on mount.
   // isMobile is set from null → true/false here. Only AFTER this resolves
@@ -94,15 +99,14 @@ export default function Hero() {
     // resolve immediately.
     if (v.readyState >= 3) {
       setIsVideoReady(true);
-      setAssetReady("hero-video");
       return;
     }
 
     const onMeta  = () => { v.playbackRate = 0.75; };
-    const onReady = () => { setIsVideoReady(true); setAssetReady("hero-video"); };
+    const onReady = () => { setIsVideoReady(true); };
     const onError = () => {
-      // Media failure: surface the page rather than leaving it blocked.
-      setAssetReady("hero-video");
+      // Keep the poster visible if the optional background video fails.
+      setIsVideoReady(false);
     };
 
     v.addEventListener("loadedmetadata", onMeta);
@@ -118,15 +122,7 @@ export default function Hero() {
     };
   // isMobile is included so this re-wires if the viewport crosses the
   // breakpoint threshold while the page is open (rare but correct).
-  }, [isMobile, reducedMotion, setAssetReady]);
-
-  // Reduced-motion: no video, but hero-video must still be marked ready
-  // so the Loader is not permanently blocked.
-  useEffect(() => {
-    if (reducedMotion) {
-      setAssetReady("hero-video");
-    }
-  }, [reducedMotion, setAssetReady]);
+  }, [isMobile, reducedMotion]);
 
   const scrollToNext = () => {
     document.querySelector("#vision")?.scrollIntoView({
@@ -157,12 +153,15 @@ export default function Hero() {
         */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          ref={posterRef}
           src={HERO_POSTER_URL}
           alt=""
           aria-hidden
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1100ms] ease-out ${isVideoReady && !reducedMotion ? "opacity-0" : "opacity-100"}`}
           fetchPriority="high"
           decoding="async"
+          onLoad={() => setAssetReady("hero-poster")}
+          onError={() => setAssetReady("hero-poster")}
         />
 
         {/*

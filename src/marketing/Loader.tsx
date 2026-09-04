@@ -52,9 +52,9 @@ export function Loader() {
               <Image
                 src="/marketing/images/logo.jpeg"
                 alt="Accurate Medical Center"
-                fill
-                className="object-contain"
-                priority
+                width={64}
+                height={64}
+                className="h-full w-full object-contain"
               />
             </div>
             

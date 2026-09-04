@@ -3,7 +3,9 @@ import { Redis } from '@upstash/redis';
 import { AppError } from '@/lib/api/errors';
 
 // Initialize Redis only if URLs are provided (graceful degradation)
-const redisUrl = process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL;
+const configuredRedisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL;
+// @upstash/redis is an HTTPS REST client; the local Redis TCP URL is not compatible.
+const redisUrl = configuredRedisUrl?.startsWith('https://') ? configuredRedisUrl : undefined;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 const redis = (redisUrl && redisToken) 
@@ -36,13 +38,29 @@ export const authRateLimit = redis
     })
   : null;
 
+/** Public contact form limiter: five submissions per ten minutes per IP. */
+export const contactRateLimit = redis
+  ? new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '10 m'),
+      analytics: true,
+      prefix: '@upstash/ratelimit/contact',
+    })
+  : null;
+
 /**
  * Helper to execute a rate limit check and throw a standard AppError if exceeded.
  */
-export async function checkRateLimit(ip: string = '127.0.0.1', type: 'global' | 'auth' = 'global') {
-  if (!redis) return; // Skip if Redis is not configured (e.g., local dev without Redis)
+export async function checkRateLimit(ip: string = '127.0.0.1', type: 'global' | 'auth' | 'contact' = 'global') {
+  if (!redis) {
+    // Public contact delivery must never run without its abuse protection.
+    if (type === 'contact') {
+      throw new AppError('Contact rate limiting is not configured.', 'SERVICE_UNAVAILABLE', 503);
+    }
+    return; // Other existing endpoints retain their local-development behaviour.
+  }
 
-  const limiter = type === 'auth' ? authRateLimit : globalRateLimit;
+  const limiter = type === 'auth' ? authRateLimit : type === 'contact' ? contactRateLimit : globalRateLimit;
   if (!limiter) return;
 
   const { success } = await limiter.limit(ip);

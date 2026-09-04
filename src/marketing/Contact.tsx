@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle, Calendar } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { ContactFormSchema } from "@/lib/validations/contact";
 import { motion } from "framer-motion";
 import {
   fadeUp,
@@ -17,9 +18,15 @@ const phone    = "07039092836";
 const whatsapp = "07039092836";
 const display  = "07039092836";
 const email    = "immediateaccuratediagnostics@yahoo.com";
-
 interface FormState { name: string; phone: string; email: string; message: string; }
 const INITIAL: FormState = { name: "", phone: "", email: "", message: "" };
+type FormErrors = Partial<Record<keyof FormState, string>>;
+
+interface ContactApiResponse {
+  success: boolean;
+  data?: { status?: string; submissionId?: string };
+  error?: { message?: string };
+}
 
 function InfoRow({
   icon: Icon,
@@ -68,25 +75,70 @@ export function Contact() {
   const [form,      setForm]      = useState<FormState>(INITIAL);
   const [submitted, setSubmitted] = useState(false);
   const [loading,   setLoading]   = useState(false);
+  const [errors,    setErrors]    = useState<FormErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const isSubmitting = useRef(false);
+  const statusRef = useRef<HTMLDivElement>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  useEffect(() => {
+    if (submitted || formError) statusRef.current?.focus();
+  }, [formError, submitted]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const field = e.target.name as keyof FormState;
+    setForm((current) => ({ ...current, [field]: e.target.value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting.current) return;
+
+    const submittedForm = new FormData(e.currentTarget);
+    const website = submittedForm.get("website");
+    const validation = ContactFormSchema.safeParse({
+      ...form,
+      website: typeof website === "string" ? website : "",
+    });
+    if (!validation.success) {
+      const nextErrors: FormErrors = {};
+      for (const issue of validation.error.issues) {
+        const field = issue.path[0] as keyof FormState;
+        if (field in INITIAL && !nextErrors[field]) nextErrors[field] = issue.message;
+      }
+      setErrors(nextErrors);
+      setFormError("Please review the highlighted fields and try again.");
+      return;
+    }
+
+    isSubmitting.current = true;
     setLoading(true);
-    const subject = encodeURIComponent(
-      `Enquiry from ${form.name} via Accurate Medical Center Website`,
-    );
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nPhone: ${form.phone}\nEmail: ${form.email}\n\nMessage:\n${form.message}`,
-    );
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-    setTimeout(() => {
-      setLoading(false);
+    setErrors({});
+    setFormError(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(validation.data),
+      });
+      const result = (await response.json().catch(() => null)) as ContactApiResponse | null;
+
+      if (!response.ok || !result?.success || !result.data?.submissionId) {
+        setFormError(result?.error?.message || "We couldn't send your message right now. Please try again.");
+        return;
+      }
+
+      setSubmissionId(result.data.submissionId);
       setSubmitted(true);
       setForm(INITIAL);
-    }, 800);
+    } catch {
+      setFormError("We couldn't send your message right now. Please try again.");
+    } finally {
+      isSubmitting.current = false;
+      setLoading(false);
+    }
   };
 
   const inputCls =
@@ -349,7 +401,13 @@ export function Contact() {
             />
 
             {submitted ? (
-              <div className="flex flex-col items-center justify-center h-full gap-5 py-14 sm:py-20 text-center">
+              <div
+                ref={statusRef}
+                tabIndex={-1}
+                role="status"
+                aria-live="polite"
+                className="flex flex-col items-center justify-center h-full gap-5 py-14 sm:py-20 text-center focus:outline-none"
+              >
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -369,11 +427,16 @@ export function Contact() {
                   className="text-sm sm:text-[15px] max-w-xs leading-[1.7]"
                   style={{ color: "rgba(3,22,26,0.6)" }}
                 >
-                  Your email client should have opened with a pre-filled message.
-                  We will get back to you as soon as possible.
+                  Your enquiry has been received. We will get back to you as soon as possible.
+                  {submissionId && <><br />Your Submission ID is <strong>{submissionId}</strong>.</>}
                 </p>
                 <button
-                  onClick={() => setSubmitted(false)}
+                  onClick={() => {
+                    setSubmitted(false);
+                    setSubmissionId(null);
+                    setFormError(null);
+                    setErrors({});
+                  }}
                   className="mt-3 text-sm underline underline-offset-4 transition-colors hover:text-[#03161a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
                   style={{ color: "rgba(3,22,26,0.5)" }}
                 >
@@ -385,6 +448,7 @@ export function Contact() {
                 onSubmit={handleSubmit}
                 noValidate
                 aria-label="Contact form"
+                aria-busy={loading}
                 className="flex flex-col gap-6"
               >
                 <div className="flex items-center gap-3 mb-2">
@@ -415,6 +479,20 @@ export function Contact() {
                   </div>
                 </div>
 
+                {formError && (
+                  <div
+                    ref={statusRef}
+                    tabIndex={-1}
+                    role="alert"
+                    className="rounded-xl border px-4 py-3 text-sm focus:outline-none"
+                    style={{ borderColor: "rgba(185,28,28,0.35)", color: "#991b1b", backgroundColor: "rgba(254,242,242,0.8)" }}
+                  >
+                    {formError}
+                  </div>
+                )}
+
+                <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[10000px] h-px w-px overflow-hidden" />
+
                 <div>
                   <label
                     htmlFor="contact-name"
@@ -435,9 +513,12 @@ export function Contact() {
                     value={form.name}
                     onChange={handleChange}
                     placeholder="e.g. Adebayo Okafor"
+                    aria-invalid={Boolean(errors.name)}
+                    aria-describedby={errors.name ? "contact-name-error" : undefined}
                     className={inputCls}
                     style={inputStyle}
                   />
+                  {errors.name && <p id="contact-name-error" className="mt-2 text-xs text-red-700">{errors.name}</p>}
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-5">
@@ -457,9 +538,12 @@ export function Contact() {
                       value={form.phone}
                       onChange={handleChange}
                       placeholder="0800 000 0000"
+                      aria-invalid={Boolean(errors.phone)}
+                      aria-describedby={errors.phone ? "contact-phone-error" : undefined}
                       className={inputCls}
                       style={inputStyle}
                     />
+                    {errors.phone && <p id="contact-phone-error" className="mt-2 text-xs text-red-700">{errors.phone}</p>}
                   </div>
                   <div>
                     <label
@@ -477,9 +561,12 @@ export function Contact() {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="you@example.com"
+                      aria-invalid={Boolean(errors.email)}
+                      aria-describedby={errors.email ? "contact-email-error" : undefined}
                       className={inputCls}
                       style={inputStyle}
                     />
+                    {errors.email && <p id="contact-email-error" className="mt-2 text-xs text-red-700">{errors.email}</p>}
                   </div>
                 </div>
 
@@ -502,9 +589,12 @@ export function Contact() {
                     value={form.message}
                     onChange={handleChange}
                     placeholder="Tell us how we can help you."
+                    aria-invalid={Boolean(errors.message)}
+                    aria-describedby={errors.message ? "contact-message-error" : undefined}
                     className={`${inputCls} resize-none`}
                     style={inputStyle}
                   />
+                  {errors.message && <p id="contact-message-error" className="mt-2 text-xs text-red-700">{errors.message}</p>}
                 </div>
 
                 <motion.button
@@ -531,7 +621,7 @@ export function Contact() {
                         className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin relative z-10"
                         aria-hidden
                       />
-                      <span className="relative z-10">Opening email client…</span>
+                      <span className="relative z-10">Sending message...</span>
                     </>
                   ) : (
                     <>

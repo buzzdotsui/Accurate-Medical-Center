@@ -109,10 +109,10 @@ export function Header() {
                 <Image
                   src="/marketing/images/logo.jpeg"
                   alt="Accurate Medical Center logo"
-                  width={58}
-                  height={58}
-                  className="object-contain transition-transform duration-500 group-hover:scale-[1.05]"
-                  priority
+                  width={64}
+                  height={64}
+                  className="h-[58px] w-[58px] object-contain transition-transform duration-500 group-hover:scale-[1.05]"
+                  preload
                 />
               </div>
               <div className="hidden sm:flex flex-col leading-tight">

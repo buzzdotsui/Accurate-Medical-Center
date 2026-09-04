@@ -25,12 +25,16 @@ type CarouselVideoConfig = VideoConfig & {
   id: string;
 };
 
-function videoConfig(publicId: string, opts: { posterWidth?: number; videoWidth?: number; mobileWidth?: number } = {}): VideoConfig {
-  const { posterWidth = 1280, videoWidth = 1920, mobileWidth = 854 } = opts;
+function videoConfig(
+  publicId: string,
+  opts: { posterWidth?: number; videoWidth?: number; mobileWidth?: number; removeAudio?: boolean } = {},
+): VideoConfig {
+  const { posterWidth = 1280, videoWidth = 1920, mobileWidth = 854, removeAudio = false } = opts;
+  const audioTransform = removeAudio ? ",ac_none" : "";
   return {
     publicId,
-    desktopUrl: `${BASE}/w_${videoWidth},c_limit,f_auto,q_auto:good,vc_auto/${publicId}`,
-    mobileUrl:  `${BASE}/w_${mobileWidth},c_limit,f_auto,q_auto:eco,vc_auto/${publicId}`,
+    desktopUrl: `${BASE}/w_${videoWidth},c_limit,f_auto,q_auto:good,vc_auto${audioTransform}/${publicId}`,
+    mobileUrl:  `${BASE}/w_${mobileWidth},c_limit,f_auto,q_auto:eco,vc_auto${audioTransform}/${publicId}`,
     posterUrl:  `${BASE}/so_0,w_${posterWidth},f_auto,q_auto:good/${publicId}.jpg`,
   };
 }
@@ -38,7 +42,7 @@ function videoConfig(publicId: string, opts: { posterWidth?: number; videoWidth?
 function carouselConfig(id: string, publicId: string): CarouselVideoConfig {
   return {
     id,
-    ...videoConfig(publicId, { posterWidth: 720, videoWidth: 720, mobileWidth: 480 }),
+    ...videoConfig(publicId, { posterWidth: 720, videoWidth: 720, mobileWidth: 480, removeAudio: true }),
   };
 }
 
@@ -51,6 +55,7 @@ export const MEDIA_CONFIG = {
       posterWidth: 1280,
       videoWidth: 1920,
       mobileWidth: 854,
+      removeAudio: true,
     }),
 
     company: videoConfig("accurate-medical/company-video", {

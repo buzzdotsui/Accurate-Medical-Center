@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db/client';
-import { CreatePatientInput, UpdatePatientInput } from '@/lib/validations/patient';
+import { UpdatePatientInput } from '@/lib/validations/patient';
 import { IdGeneratorService } from '@/lib/utils/generate-id';
 import { AppError } from '@/lib/api/errors';
 import { AuditService } from './audit.service';

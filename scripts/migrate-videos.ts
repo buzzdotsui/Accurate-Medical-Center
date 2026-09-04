@@ -1,10 +1,11 @@
 import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 
 // Load environment variables for Cloudinary
-require('dotenv').config({ path: '.env.local' });
-require('dotenv').config();
+dotenv.config({ path: '.env.local' });
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -59,9 +59,9 @@ interface CreateStaffDialogProps {
 }
 
 export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaffDialogProps) {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loadingDepts, setLoadingDepts] = useState(false);
+  const [departments, setDepartments] = useState<Department[] | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const loadingDepts = open && departments === null;
 
   const {
     register,
@@ -76,12 +76,16 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
   // Fetch departments when dialog opens
   useEffect(() => {
     if (!open) return;
-    setLoadingDepts(true);
-    fetch("/api/v1/settings/departments")
+    const controller = new AbortController();
+    fetch("/api/v1/settings/departments", { signal: controller.signal })
       .then((r) => r.json())
-      .then((data) => setDepartments(data?.data ?? []))
-      .catch(() => setDepartments([]))
-      .finally(() => setLoadingDepts(false));
+      .then((data) => {
+        if (!controller.signal.aborted) setDepartments(data?.data ?? []);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setDepartments([]);
+      });
+    return () => controller.abort();
   }, [open]);
 
   async function onSubmit(values: ClientCreateStaffInput) {
@@ -123,6 +127,7 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
   function handleClose(isOpen: boolean) {
     if (!isOpen) {
       reset();
+      setDepartments(null);
     }
     onOpenChange(isOpen);
   }
@@ -204,7 +209,7 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
           <FormField label="Department" htmlFor="staff-department" error={errors.departmentId?.message}>
             <Select id="staff-department" disabled={isSubmitting || loadingDepts} {...register("departmentId")}>
               <option value="">— No Department —</option>
-              {departments.map((d) => (
+              {(departments ?? []).map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.name}
                 </option>

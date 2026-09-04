@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useState, useCallback } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -61,16 +61,15 @@ function formatNaira(value: number): string {
 }
 
 export function CreateInvoiceDialog({ open, onOpenChange, onSuccess }: CreateInvoiceDialogProps) {
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<Patient[] | null>(null);
   const [patientSearch, setPatientSearch] = useState("");
-  const [loadingPatients, setLoadingPatients] = useState(false);
   const [created, setCreated] = useState<{ invoiceId: string; totalAmount: number } | null>(null);
+  const loadingPatients = open && patients === null;
 
   const {
     register,
     handleSubmit,
     control,
-    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ClientCreateInvoiceInput>({
@@ -84,35 +83,37 @@ export function CreateInvoiceDialog({ open, onOpenChange, onSuccess }: CreateInv
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
-  const items = watch("items");
-  const discount = watch("discount") ?? 0;
-  const tax = watch("tax") ?? 0;
+  const items = useWatch({ control, name: "items" });
+  const discount = useWatch({ control, name: "discount" }) ?? 0;
+  const tax = useWatch({ control, name: "tax" }) ?? 0;
   const subTotal = (items ?? []).reduce(
     (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0),
     0
   );
   const total = subTotal - Number(discount || 0) + Number(tax || 0);
 
-  const searchPatients = useCallback((search: string) => {
-    setLoadingPatients(true);
+  const searchPatients = useCallback((search: string, signal?: AbortSignal) => {
     const params = new URLSearchParams({ take: "20" });
     if (search.trim()) params.set("search", search.trim());
-    fetch(`/api/v1/patients?${params.toString()}`)
+    fetch(`/api/v1/patients?${params.toString()}`, { signal })
       .then((r) => r.json())
-      .then((data) => setPatients(data?.data?.patients ?? []))
-      .catch(() => setPatients([]))
-      .finally(() => setLoadingPatients(false));
+      .then((data) => {
+        if (!signal?.aborted) setPatients(data?.data?.patients ?? []);
+      })
+      .catch(() => {
+        if (!signal?.aborted) setPatients([]);
+      });
   }, []);
 
   useEffect(() => {
     if (!open) return;
-    searchPatients("");
-  }, [open, searchPatients]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => searchPatients(patientSearch), 400);
-    return () => clearTimeout(timer);
-  }, [patientSearch, searchPatients]);
+    const controller = new AbortController();
+    const timer = setTimeout(() => searchPatients(patientSearch, controller.signal), 400);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [open, patientSearch, searchPatients]);
 
   async function onSubmit(values: ClientCreateInvoiceInput) {
     try {
@@ -141,6 +142,7 @@ export function CreateInvoiceDialog({ open, onOpenChange, onSuccess }: CreateInv
     if (!isOpen) {
       reset({ items: [{ description: "", quantity: 1, unitPrice: 0 }], discount: 0, tax: 0 });
       setPatientSearch("");
+      setPatients(null);
       setCreated(null);
     }
     onOpenChange(isOpen);
@@ -201,7 +203,7 @@ export function CreateInvoiceDialog({ open, onOpenChange, onSuccess }: CreateInv
                   </div>
                   <Select id="inv-patientId" disabled={isSubmitting || loadingPatients} {...register("patientId")}>
                     <option value="">{loadingPatients ? "Loading patients…" : "— Select Patient —"}</option>
-                    {patients.map((p) => (
+                    {(patients ?? []).map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.firstName} {p.lastName} ({p.patientId})
                       </option>

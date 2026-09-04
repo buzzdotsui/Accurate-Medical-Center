@@ -55,12 +55,12 @@ interface BookAppointmentDialogProps {
 }
 
 export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookAppointmentDialogProps) {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [doctors, setDoctors] = useState<StaffMember[]>([]);
+  const [patients, setPatients] = useState<Patient[] | null>(null);
+  const [doctors, setDoctors] = useState<StaffMember[] | null>(null);
   const [patientSearch, setPatientSearch] = useState("");
-  const [loadingPatients, setLoadingPatients] = useState(false);
-  const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [booked, setBooked] = React.useState<{ appointmentId: string; date: string } | null>(null);
+  const loadingPatients = open && patients === null;
+  const loadingDoctors = open && doctors === null;
 
   const {
     register,
@@ -73,25 +73,28 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
   });
 
   // Debounced patient search
-  const searchPatients = useCallback((search: string) => {
-    setLoadingPatients(true);
+  const searchPatients = useCallback((search: string, signal?: AbortSignal) => {
     const params = new URLSearchParams({ take: "20" });
     if (search.trim()) params.set("search", search.trim());
-    fetch(`/api/v1/patients?${params.toString()}`)
-      .then((r) => r.json())
-      .then((data) => setPatients(data?.data?.patients ?? []))
-      .catch(() => setPatients([]))
-      .finally(() => setLoadingPatients(false));
-  }, []);
-
-  // Load initial patients and doctors when dialog opens
-  useEffect(() => {
-    if (!open) return;
-    searchPatients("");
-    setLoadingDoctors(true);
-    fetch("/api/v1/hr/staff")
+    fetch(`/api/v1/patients?${params.toString()}`, { signal })
       .then((r) => r.json())
       .then((data) => {
+        if (!signal?.aborted) setPatients(data?.data?.patients ?? []);
+      })
+      .catch(() => {
+        if (!signal?.aborted) setPatients([]);
+      });
+  }, []);
+
+  // Load doctors when the dialog opens. Patient loading is driven by the
+  // debounced search effect below, including its initial empty search.
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    fetch("/api/v1/hr/staff", { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        if (controller.signal.aborted) return;
         const staff: StaffMember[] = data?.data ?? [];
         // Only clinical staff that can be a doctor/care giver
         const clinical = staff.filter((s) =>
@@ -99,15 +102,22 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
         );
         setDoctors(clinical);
       })
-      .catch(() => setDoctors([]))
-      .finally(() => setLoadingDoctors(false));
-  }, [open, searchPatients]);
+      .catch(() => {
+        if (!controller.signal.aborted) setDoctors([]);
+      });
+    return () => controller.abort();
+  }, [open]);
 
   // Debounce patient search input
   useEffect(() => {
-    const timer = setTimeout(() => searchPatients(patientSearch), 400);
-    return () => clearTimeout(timer);
-  }, [patientSearch, searchPatients]);
+    if (!open) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => searchPatients(patientSearch, controller.signal), 400);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [open, patientSearch, searchPatients]);
 
   async function onSubmit(values: ClientBookAppointmentInput) {
     try {
@@ -159,6 +169,8 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
     if (!isOpen) {
       reset();
       setPatientSearch("");
+      setPatients(null);
+      setDoctors(null);
       setBooked(null);
     }
     onOpenChange(isOpen);
@@ -238,7 +250,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
                 <option value="">
                   {loadingPatients ? "Loading patients…" : "— Select Patient —"}
                 </option>
-                {patients.map((p) => (
+                {(patients ?? []).map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.firstName} {p.lastName} ({p.patientId})
                   </option>
@@ -253,7 +265,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
               <option value="">
                 {loadingDoctors ? "Loading staff…" : "— No preference —"}
               </option>
-              {doctors.map((s) => (
+              {(doctors ?? []).map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.user.name} · {s.department?.name ?? s.user.role}
                 </option>

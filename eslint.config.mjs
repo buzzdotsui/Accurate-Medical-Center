@@ -29,6 +29,24 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // These tracked operational scripts are invoked directly by Node in this
+    // CommonJS project; changing the application-wide module system solely for
+    // them would make their documented invocation incompatible.
+    files: [
+      "audit_script.js",
+      "check_db.js",
+      "check_db_pg.js",
+      "scripts/download-fonts.js",
+      "upload_consultation.js",
+      "upload_consultation_compressed.js",
+      "upload_consultation_trimmed.js",
+      "verify_network.js",
+    ],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

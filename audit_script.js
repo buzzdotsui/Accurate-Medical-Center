@@ -1,5 +1,4 @@
 const { chromium } = require('playwright');
-const fs = require('fs');
 
 (async () => {
   console.log("Starting functional end-to-end audit...");

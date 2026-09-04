@@ -158,7 +158,7 @@ export class AppointmentService {
     const { PatientService } = await import('./patient.service');
 
     // 1. Deduplicate patient safely (non-transactional read is fine here)
-    let patient = await PatientService.findExistingPatient({
+    const patient = await PatientService.findExistingPatient({
       phone: data.phone,
       email: data.email,
       branchId: data.branchId,

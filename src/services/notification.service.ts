@@ -6,7 +6,20 @@ import { ROLES, type Role } from '@/config/roles';
 // Optionally fallback to Nodemailer for local development
 // import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key');
+export class NotificationEmailConfigurationError extends Error {}
+
+function getNotificationEmailConfiguration() {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+
+  if (!apiKey || !from) {
+    throw new NotificationEmailConfigurationError(
+      'Notification email service is not configured.',
+    );
+  }
+
+  return { apiKey, from };
+}
 
 export interface SendEmailParams {
   to: string | string[];
@@ -48,16 +61,18 @@ export class NotificationService {
    * Send an email using Resend
    */
   static async sendEmail(params: SendEmailParams) {
+    const { apiKey, from } = getNotificationEmailConfiguration();
+
     try {
-      const response = await resend.emails.send({
-        from: params.from || 'Accurate Medical <no-reply@accuratemedical.com>',
+      const response = await new Resend(apiKey).emails.send({
+        from: params.from || from,
         to: params.to,
         subject: params.subject,
         html: params.html,
       });
       return response;
     } catch (error) {
-      logger.error('Failed to send email via Resend', { error, params });
+      logger.error('Failed to send email via Resend', { error });
       return null;
     }
   }

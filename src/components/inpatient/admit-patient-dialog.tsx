@@ -76,13 +76,13 @@ interface AdmitPatientDialogProps {
 }
 
 export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatientDialogProps) {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [doctors, setDoctors] = useState<StaffMember[]>([]);
-  const [availableBeds, setAvailableBeds] = useState<AvailableBedOption[]>([]);
+  const [patients, setPatients] = useState<Patient[] | null>(null);
+  const [doctors, setDoctors] = useState<StaffMember[] | null>(null);
+  const [availableBeds, setAvailableBeds] = useState<AvailableBedOption[] | null>(null);
   const [patientSearch, setPatientSearch] = useState("");
-  const [loadingPatients, setLoadingPatients] = useState(false);
-  const [loadingDoctors, setLoadingDoctors] = useState(false);
-  const [loadingBeds, setLoadingBeds] = useState(false);
+  const loadingPatients = open && patients === null;
+  const loadingDoctors = open && doctors === null;
+  const loadingBeds = open && availableBeds === null;
 
   const {
     register,
@@ -93,36 +93,40 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
     resolver: zodResolver(AdmitPatientClientSchema),
   });
 
-  const searchPatients = useCallback((search: string) => {
-    setLoadingPatients(true);
+  const searchPatients = useCallback((search: string, signal?: AbortSignal) => {
     const params = new URLSearchParams({ take: "20" });
     if (search.trim()) params.set("search", search.trim());
-    fetch(`/api/v1/patients?${params.toString()}`)
-      .then((r) => r.json())
-      .then((data) => setPatients(data?.data?.patients ?? []))
-      .catch(() => setPatients([]))
-      .finally(() => setLoadingPatients(false));
-  }, []);
-
-  // Load patients, doctors, and available beds when the dialog opens.
-  useEffect(() => {
-    if (!open) return;
-    searchPatients("");
-
-    setLoadingDoctors(true);
-    fetch("/api/v1/hr/staff")
+    fetch(`/api/v1/patients?${params.toString()}`, { signal })
       .then((r) => r.json())
       .then((data) => {
+        if (!signal?.aborted) setPatients(data?.data?.patients ?? []);
+      })
+      .catch(() => {
+        if (!signal?.aborted) setPatients([]);
+      });
+  }, []);
+
+  // Load doctors and beds when the dialog opens. Patient loading is driven by
+  // the debounced search effect below, including its initial empty search.
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+
+    fetch("/api/v1/hr/staff", { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        if (controller.signal.aborted) return;
         const staff: StaffMember[] = data?.data ?? [];
         setDoctors(staff.filter((s) => s.user.role === "DOCTOR"));
       })
-      .catch(() => setDoctors([]))
-      .finally(() => setLoadingDoctors(false));
+      .catch(() => {
+        if (!controller.signal.aborted) setDoctors([]);
+      });
 
-    setLoadingBeds(true);
-    fetch("/api/v1/inpatient/wards")
+    fetch("/api/v1/inpatient/wards", { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
+        if (controller.signal.aborted) return;
         const wards: Ward[] = data?.data ?? [];
         const beds: AvailableBedOption[] = [];
         for (const ward of wards) {
@@ -139,15 +143,21 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
         }
         setAvailableBeds(beds);
       })
-      .catch(() => setAvailableBeds([]))
-      .finally(() => setLoadingBeds(false));
-  }, [open, searchPatients]);
+      .catch(() => {
+        if (!controller.signal.aborted) setAvailableBeds([]);
+      });
+    return () => controller.abort();
+  }, [open]);
 
   // Debounce patient search input
   useEffect(() => {
     if (!open) return;
-    const timer = setTimeout(() => searchPatients(patientSearch), 400);
-    return () => clearTimeout(timer);
+    const controller = new AbortController();
+    const timer = setTimeout(() => searchPatients(patientSearch, controller.signal), 400);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [patientSearch, searchPatients, open]);
 
   async function onSubmit(values: AdmitPatientClientInput) {
@@ -182,6 +192,9 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
     if (!isOpen) {
       reset();
       setPatientSearch("");
+      setPatients(null);
+      setDoctors(null);
+      setAvailableBeds(null);
     }
     onOpenChange(isOpen);
   }
@@ -222,7 +235,7 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
                 <option value="">
                   {loadingPatients ? "Loading patients…" : "— Select Patient —"}
                 </option>
-                {patients.map((p) => (
+                {(patients ?? []).map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.firstName} {p.lastName} ({p.patientId})
                   </option>
@@ -237,11 +250,11 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
               <option value="">
                 {loadingDoctors
                   ? "Loading doctors…"
-                  : doctors.length === 0
+                  : (doctors ?? []).length === 0
                   ? "No doctors available"
                   : "— Select Doctor —"}
               </option>
-              {doctors.map((d) => (
+              {(doctors ?? []).map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.user.name} {d.department?.name ? `· ${d.department.name}` : ""}
                 </option>
@@ -255,11 +268,11 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
               <option value="">
                 {loadingBeds
                   ? "Loading beds…"
-                  : availableBeds.length === 0
+                  : (availableBeds ?? []).length === 0
                   ? "No available beds"
                   : "— Select Bed —"}
               </option>
-              {availableBeds.map((b) => (
+              {(availableBeds ?? []).map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.label}
                 </option>

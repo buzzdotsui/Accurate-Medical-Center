@@ -9,8 +9,8 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/accurate_medical?schema=public
       - REDIS_URL=redis://redis:6379
-      - BETTER_AUTH_SECRET=generate_a_secure_secret_for_production
-      - BETTER_AUTH_URL=http://localhost:3000
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in your environment}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:-http://localhost:3000}
       - ALLOW_SEED=true
     depends_on:
       db:

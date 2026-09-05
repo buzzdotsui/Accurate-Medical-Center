@@ -6,6 +6,7 @@ import { Calendar, X, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { BrandLockup } from "./BrandLockup";
 import {
   EASE,
   backdrop,
@@ -144,25 +145,7 @@ export function Header() {
                   preload
                 />
               </div>
-              <div className="hidden sm:flex flex-col leading-tight">
-                <span
-                  className="text-[15px] sm:text-[16px] font-bold tracking-[0.04em] uppercase"
-                  style={{
-                    fontFamily: "var(--font-playfair-display)",
-                    fontStyle: "italic",
-                    color: "#f4f2f5",
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  Accurate
-                </span>
-                <span
-                  className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em]"
-                  style={{ color: "rgba(244,242,245,0.55)" }}
-                >
-                  Medical Center
-                </span>
-              </div>
+              <BrandLockup size="header" className="hidden text-[#f4f2f5] sm:flex" />
             </button>
 
             <nav className="hidden lg:flex items-center gap-11" aria-label="Main navigation">
@@ -266,14 +249,7 @@ export function Header() {
                     height={46}
                     className="rounded-lg object-contain"
                   />
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-[#f4f2f5]/55">
-                      Accurate
-                    </span>
-                    <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-[#f4f2f5]/40">
-                      Medical Center
-                    </span>
-                  </div>
+                  <BrandLockup size="compact" className="text-[#f4f2f5]" />
                 </div>
                 <button
                   ref={closeButtonRef}

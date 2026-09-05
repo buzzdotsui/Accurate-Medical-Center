@@ -67,7 +67,7 @@ function CountUp({ target, duration = 1500, suffix = "" }: { target: number, dur
       ref={ref}
       className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
       style={{
-        fontFamily: "var(--font-playfair-display)",
+        fontFamily: "var(--font-playfair)",
         color: INK,
       }}
     >
@@ -101,7 +101,7 @@ function CountUp247() {
       ref={ref}
       className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
       style={{
-        fontFamily: "var(--font-playfair-display)",
+        fontFamily: "var(--font-playfair)",
         color: LEMON,
         textShadow: "0 6px 24px rgba(3,22,26,0.22)",
       }}
@@ -257,7 +257,7 @@ export function About() {
             id="about-heading"
             className="text-[2.5rem] sm:text-5xl lg:text-[4.75rem] font-bold italic leading-[1.05] tracking-tight"
             style={{
-              fontFamily: "var(--font-playfair-display)",
+              fontFamily: "var(--font-playfair)",
               color: INK,
             }}
           >

@@ -420,7 +420,7 @@ export function LookInside() {
             <h2
               id="experience-heading"
               className="text-[2.6rem] xl:text-[3.2rem] font-bold italic leading-[1.05] tracking-tight mb-5"
-              style={{ fontFamily: "var(--font-playfair-display)", color: TEXT }}
+              style={{ fontFamily: "var(--font-playfair)", color: TEXT }}
             >
               A Look Inside<br />Accurate Medical<br />Center
             </h2>
@@ -501,7 +501,7 @@ export function LookInside() {
           <h2
             id="experience-heading-mobile"
             className="text-[1.9rem] sm:text-[2.4rem] font-bold italic leading-[1.06] tracking-tight"
-            style={{ fontFamily: "var(--font-playfair-display)", color: TEXT }}
+            style={{ fontFamily: "var(--font-playfair)", color: TEXT }}
           >
             A Look Inside Accurate Medical Center
           </h2>

@@ -136,7 +136,7 @@ export function Services() {
           <motion.h2
             variants={fadeUpFast}
             className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05]"
-            style={{ fontFamily: "var(--font-playfair-display)", color: CHARCOAL }}
+            style={{ fontFamily: "var(--font-playfair)", color: CHARCOAL }}
           >
             Specialized Care <br className="hidden sm:block" />
             <span style={{ fontStyle: "italic", fontWeight: 400 }}>tailored to your needs.</span>
@@ -153,16 +153,14 @@ export function Services() {
                 <motion.a
                   initial="hidden"
                   whileInView="visible"
+                  whileTap={{ scale: 0.995 }}
                   viewport={{ once: true, margin: "-50px" }}
-                  variants={{
-                    hidden: { opacity: 0, y: 30 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
-                  }}
+                  variants={fadeUp}
                   onMouseEnter={() => setHoveredIdx(idx)}
                   onMouseLeave={() => setHoveredIdx(null)}
                   onFocus={() => setHoveredIdx(idx)}
                   onBlur={() => setHoveredIdx(null)}
-                  className="group relative block cursor-pointer overflow-hidden border-b py-10 transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:py-14 md:flex md:items-center"
+                  className="group relative block min-h-20 cursor-pointer overflow-hidden border-b py-10 transition-[background-color,border-color,transform] duration-300 active:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:py-14 md:flex md:items-center"
                   style={{ borderColor: BORDER }}
                 >
                 {/* Hover Background Reveal */}
@@ -187,7 +185,7 @@ export function Services() {
                           border: isHovered ? "1px solid transparent" : `1px solid ${BORDER}`
                         }}
                       >
-                        <Icon strokeWidth={1.5} className="w-5 h-5 transition-colors duration-300" style={{ color: CHARCOAL }} />
+                        <Icon strokeWidth={1.5} className="h-5 w-5 transition-[color,transform] duration-300 group-hover:-translate-y-0.5" style={{ color: CHARCOAL }} />
                       </div>
                       <h3 className="text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight">
                         {srv.title}

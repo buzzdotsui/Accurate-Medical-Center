@@ -196,7 +196,7 @@ export function Contact() {
             id="contact-heading"
             className="text-4xl sm:text-5xl lg:text-[4.25rem] font-bold italic leading-[1.06] tracking-tight mb-6"
             style={{
-              fontFamily: "var(--font-playfair-display)",
+              fontFamily: "var(--font-playfair)",
               color: "#03161a",
             }}
           >

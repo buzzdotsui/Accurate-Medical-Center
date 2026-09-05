@@ -249,10 +249,10 @@ export function VisionMission() {
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          variants={fadeUpSmall}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.85 }}
           className="text-center mb-8 sm:mb-10 lg:mb-12"
         >
           <span

@@ -6,6 +6,7 @@ import { MapPin, Mail, ArrowUp, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { fadeUpSmall, fadeUp, EASE } from "./animations";
+import { BrandLockup } from "./BrandLockup";
 
 const NAV_LINKS = [
   { label: "Home",        href: "/" },
@@ -118,20 +119,7 @@ export function Footer() {
                   className="object-contain transition-transform duration-500 group-hover:scale-[1.04]"
                 />
               </div>
-              <div className="flex flex-col leading-tight">
-                <span
-                  className="font-bold text-[15.5px] tracking-tight"
-                  style={{ color: "#f4f2f5" }}
-                >
-                  Accurate Medical
-                </span>
-                <span
-                  className="font-bold text-[15.5px] tracking-tight"
-                  style={{ color: "#f4f2f5" }}
-                >
-                  Center
-                </span>
-              </div>
+              <BrandLockup size="footer" className="text-[#f4f2f5]" />
             </div>
             <p
               className="text-[13.5px] leading-[1.8] max-w-xs"

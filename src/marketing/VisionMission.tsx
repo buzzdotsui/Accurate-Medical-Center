@@ -17,7 +17,7 @@ const MISSION_ITEMS: readonly string[] = [
 ] as const;
 
 const panelStatementClassName =
-  "max-w-xs text-[16px] font-medium italic leading-[1.65] sm:max-w-sm sm:text-[18px] lg:text-[19px]";
+  "max-w-xs text-[16px] font-semibold leading-[1.65] sm:max-w-sm sm:text-[18px] lg:text-[19px]";
 
 const panelStatementStyle = {
   fontFamily: "var(--font-playfair)",
@@ -92,7 +92,7 @@ function VisionPanel() {
       <motion.h3
         variants={fadeUp}
         id="vision-heading"
-        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold italic leading-[1.1] relative z-10 tracking-tight mb-4"
+        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold leading-[1.1] relative z-10 tracking-tight mb-4"
         style={{
           fontFamily: "var(--font-playfair)",
           color: "#f4f2f5",
@@ -173,7 +173,7 @@ function MissionPanel() {
       <motion.h3
         variants={fadeUp}
         id="mission-heading"
-        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold italic leading-[1.1] relative z-10 tracking-tight mb-5"
+        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold leading-[1.1] relative z-10 tracking-tight mb-5"
         style={{
           fontFamily: "var(--font-playfair)",
           color: "#f4f2f5",

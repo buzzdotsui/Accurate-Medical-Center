@@ -139,7 +139,7 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-heading: 'Plus Jakarta Sans', var(--font-sans);
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  /* Marketing: elegant italic serif for headings/Vision/Mission panels */
+  /* Marketing: elegant serif for headings and institutional statements */
   --font-playfair: var(--font-playfair-display), 'Playfair Display', Georgia, 'Times New Roman', serif;
 
   /* Define standard keyframes native to Tailwind v4, replacing the need for tailwindcss-animate plugin */

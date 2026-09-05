@@ -65,7 +65,7 @@ function CountUp({ target, duration = 1500, suffix = "" }: { target: number, dur
   return (
     <span
       ref={ref}
-      className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
+      className="text-[2.5rem] sm:text-[3.25rem] font-extrabold leading-none tabular-nums"
       style={{
         fontFamily: "var(--font-playfair)",
         color: INK,
@@ -99,7 +99,7 @@ function CountUp247() {
   return (
     <span
       ref={ref}
-      className="text-[2.5rem] sm:text-[3.25rem] font-bold italic leading-none tabular-nums"
+      className="text-[2.5rem] sm:text-[3.25rem] font-extrabold leading-none tabular-nums"
       style={{
         fontFamily: "var(--font-playfair)",
         color: LEMON,
@@ -255,7 +255,7 @@ export function About() {
           <motion.h2
             variants={fadeUp}
             id="about-heading"
-            className="text-[2.5rem] sm:text-5xl lg:text-[4.75rem] font-bold italic leading-[1.05] tracking-tight"
+            className="text-[2.5rem] sm:text-5xl lg:text-[4.75rem] font-bold leading-[1.05] tracking-tight"
             style={{
               fontFamily: "var(--font-playfair)",
               color: INK,

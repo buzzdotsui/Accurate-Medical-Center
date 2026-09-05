@@ -5,7 +5,6 @@ type BrandLockupProps = {
 
 const primaryStyle = {
   fontFamily: "var(--font-playfair)",
-  fontStyle: "italic",
   fontWeight: 700,
   letterSpacing: "-0.02em",
 } as const;

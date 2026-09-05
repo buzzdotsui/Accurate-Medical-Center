@@ -139,7 +139,7 @@ export function Services() {
             style={{ fontFamily: "var(--font-playfair)", color: CHARCOAL }}
           >
             Specialized Care <br className="hidden sm:block" />
-            <span style={{ fontStyle: "italic", fontWeight: 400 }}>tailored to your needs.</span>
+            <span className="font-semibold">tailored to your needs.</span>
           </motion.h2>
         </motion.div>
 

@@ -125,7 +125,7 @@ export default function Hero() {
   }, [isMobile, reducedMotion]);
 
   const scrollToNext = () => {
-    document.querySelector("#vision")?.scrollIntoView({
+    document.querySelector("#vision-mission")?.scrollIntoView({
       behavior: reducedMotion ? "auto" : "smooth",
       block: "start",
     });

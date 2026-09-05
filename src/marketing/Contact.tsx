@@ -311,15 +311,15 @@ export function Contact() {
               <motion.div variants={fadeUpSmall}>
                 <InfoRow icon={Clock} label="Working Hours">
                   <div className="space-y-2">
-                    <div className="flex justify-between gap-8">
+                    <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                       <span>Monday to Friday</span>
                       <span className="font-medium">{siteConfig.contact.hours.weekdays}</span>
                     </div>
-                    <div className="flex justify-between gap-8">
+                    <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                       <span>Saturday</span>
                       <span className="font-medium">{siteConfig.contact.hours.saturday}</span>
                     </div>
-                    <div className="flex justify-between gap-8">
+                    <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                       <span>Sunday</span>
                       <span className="font-medium">{siteConfig.contact.hours.sunday}</span>
                     </div>

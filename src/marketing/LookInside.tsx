@@ -217,17 +217,17 @@ function SlideIndicators({
           aria-pressed={i === index}
           aria-label={`Slide ${s.num} — ${s.title}`}
           onClick={() => goTo(i, i > index ? "forward" : "back")}
-          className="relative h-[3px] w-7 origin-left overflow-hidden rounded-full transition-[background-color,transform] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
-          style={{
-            transform: `scaleX(${i === index ? 1 : 12 / 28})`,
-            backgroundColor: i === index ? "transparent" : "rgba(244,242,245,0.12)",
-          }}
+          className="group relative flex h-11 w-11 items-center justify-center rounded-full transition-[background-color,transform] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
         >
+          <span
+            aria-hidden
+            className="absolute left-1/2 top-1/2 h-[3px] w-7 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full bg-white/[0.12] transition-[background-color,transform] duration-200 group-hover:bg-white/[0.2]"
+          />
           {i === index && (
             <motion.span
               key={`${prefix}-dot-${index}`}
               aria-hidden
-              className="absolute inset-0 rounded-full"
+              className="absolute left-1/2 top-1/2 h-[3px] w-7 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full"
               style={{ backgroundColor: LEMON, originX: 0 }}
               initial={{ scaleX: 0 }}
               animate={{ scaleX: progress / 100 }}
@@ -395,7 +395,7 @@ export function LookInside() {
       id="experience"
       className="relative overflow-hidden"
       style={{ backgroundColor: BG }}
-      aria-labelledby="experience-heading"
+      aria-label="Experience: A Look Inside Accurate Medical Center"
     >
       {/* Dot grid texture */}
       <div

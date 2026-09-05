@@ -154,7 +154,7 @@ export default function BookingForm() {
     return (
       <motion.div ref={statusRef} tabIndex={-1} role="status" aria-live="polite" initial="hidden" animate="visible" variants={currentStepVariant} className="text-center p-8 bg-white/5 border border-[#1b3135] rounded-2xl focus:outline-none">
         <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-8 h-8" />
+          <CheckCircle2 aria-hidden className="w-8 h-8" />
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Request Submitted</h2>
         <p className="text-[#a4b5b8] mb-6">Your appointment request has been submitted successfully. Our reception team will contact you to confirm availability.</p>
@@ -170,10 +170,16 @@ export default function BookingForm() {
   return (
     <div className="bg-white/5 border border-[#1b3135] rounded-2xl p-6 sm:p-8 backdrop-blur-xl">
       {/* Stepper */}
-      <div className="flex items-center mb-8">
-        <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${step === 1 ? "bg-white text-[#03161a]" : "bg-[#1b3135] text-white"}`}>1</div>
+      <div className="flex items-center mb-8" role="group" aria-label={`Appointment request progress: step ${step} of 2`}>
+        <div aria-current={step === 1 ? "step" : undefined} className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${step === 1 ? "bg-white text-[#03161a]" : "bg-[#1b3135] text-white"}`}>
+          <span aria-hidden>1</span>
+          <span className="sr-only">Personal details</span>
+        </div>
         <div className={`flex-1 h-1 mx-2 rounded-full ${step >= 2 ? "bg-white/50" : "bg-[#1b3135]"}`}></div>
-        <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${step === 2 ? "bg-white text-[#03161a]" : "bg-[#1b3135] text-white"}`}>2</div>
+        <div aria-current={step === 2 ? "step" : undefined} className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${step === 2 ? "bg-white text-[#03161a]" : "bg-[#1b3135] text-white"}`}>
+          <span aria-hidden>2</span>
+          <span className="sr-only">Appointment details</span>
+        </div>
       </div>
 
       {error && (

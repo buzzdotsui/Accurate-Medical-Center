@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useMediaPreloader } from "./MediaPreloaderContext";
@@ -15,6 +15,7 @@ const FALLBACK_MS = 5000;
 export function Loader() {
   const pathname = usePathname();
   const { isReady } = useMediaPreloader();
+  const reducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(true);
 
   // Primary path: all critical assets ready → hide with a short transition delay.
@@ -40,7 +41,7 @@ export function Loader() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={reducedMotion ? { duration: 0 } : { duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none"
           style={{ backgroundColor: "#03161a" }}
           aria-hidden="true"
@@ -49,7 +50,7 @@ export function Loader() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
             className="flex flex-col items-center gap-6"
           >
             <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-2xl">
@@ -75,11 +76,11 @@ export function Loader() {
                   className="h-full rounded-full"
                   style={{ backgroundColor: "#d4e842" }}
                   initial={{ x: "-100%" }}
-                  animate={{ x: "100%" }}
-                  transition={{ 
-                    repeat: Infinity, 
-                    duration: 1.8, 
-                    ease: "easeInOut" 
+                  animate={reducedMotion ? { x: "0%" } : { x: "100%" }}
+                  transition={reducedMotion ? { duration: 0 } : {
+                    repeat: Infinity,
+                    duration: 1.8,
+                    ease: "easeInOut",
                   }}
                 />
               </div>

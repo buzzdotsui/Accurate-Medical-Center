@@ -282,7 +282,7 @@ export function Header() {
                 <button
                   ref={closeButtonRef}
                   onClick={() => closeMenu(true)}
-                  className="-mr-2 rounded-xl p-2 text-[#f4f2f5]/55 transition-[background-color,color,transform] duration-200 hover:bg-white/10 hover:text-white active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+                  className="-mr-3 rounded-xl p-3 text-[#f4f2f5]/55 transition-[background-color,color,transform] duration-200 hover:bg-white/10 hover:text-white active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" aria-hidden="true" />

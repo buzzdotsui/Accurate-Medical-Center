@@ -85,10 +85,14 @@ export function CompanyVideo() {
   return (
     <section
       ref={sectionRef}
+      aria-labelledby="company-video-heading"
       className="relative w-full py-24 sm:py-32"
       style={{ backgroundColor: "#0b0f11" }}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
+        <h2 id="company-video-heading" className="sr-only">
+          Accurate Medical Center Company Video
+        </h2>
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -149,7 +153,7 @@ export function CompanyVideo() {
                   aria-controls="company-video"
                   aria-pressed={!isMuted}
                 >
-                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  {isMuted ? <VolumeX aria-hidden className="w-5 h-5" /> : <Volume2 aria-hidden className="w-5 h-5" />}
                 </button>
               </div>
               <div>
@@ -160,7 +164,7 @@ export function CompanyVideo() {
                   aria-label="Fullscreen"
                   aria-controls="company-video"
                 >
-                  <Maximize className="w-5 h-5" />
+                  <Maximize aria-hidden className="w-5 h-5" />
                 </button>
               </div>
             </div>

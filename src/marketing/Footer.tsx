@@ -10,20 +10,20 @@ import { BrandLockup } from "./BrandLockup";
 
 const NAV_LINKS = [
   { label: "Home",        href: "/" },
-  { label: "About",       href: "/#about" },
-  { label: "Services",    href: "/#about" },
+  { label: "About",       href: "/#vision-mission" },
+  { label: "Services",    href: "/#services" },
   { label: "Vision",      href: "/#vision-mission" },
   { label: "Experience",  href: "/#experience" },
   { label: "Contact",     href: "/#contact" },
 ] as const;
 
 const SERVICE_LINKS = [
-  "Psychological Therapy",
-  "Maternity & Delivery",
-  "Outpatient Care",
-  "Addictions Care",
-  "Ambulance Services",
-  "Online Consultations",
+  { label: "Psychological Therapy", value: "Psychological Therapy" },
+  { label: "Maternity & Delivery", value: "Pregnancy & Maternal Care" },
+  { label: "Outpatient Care", value: "Outpatient Clinic" },
+  { label: "Addictions Care", value: "Addiction Care" },
+  { label: "Ambulance Services", value: "Ambulance Services" },
+  { label: "Online Consultations", value: "Online Consultation" },
 ] as const;
 
 const stagger = {
@@ -188,7 +188,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-[38px] w-[38px] items-center justify-center rounded-full text-white/52 transition-colors duration-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-white/52 transition-colors duration-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                   style={{ backgroundColor: "rgba(244,242,245,0.055)" }}
                   aria-label={`Follow us on ${social.label}`}
                   onMouseEnter={(e) => {
@@ -213,7 +213,7 @@ export function Footer() {
             >
               Quick Links
             </h3>
-            <ul className="flex flex-col gap-3.5 gap-[14px]">
+            <ul className="flex flex-col gap-3.5">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -239,11 +239,11 @@ export function Footer() {
             >
               Our Services
             </h3>
-            <ul className="flex flex-col gap-3.5 gap-[14px]">
+            <ul className="flex flex-col gap-3.5">
               {SERVICE_LINKS.map((service) => (
-                <li key={service}>
+                <li key={service.value}>
                   <Link
-                    href={`/book-appointment?service=${encodeURIComponent(service)}`}
+                    href={`/book-appointment?service=${encodeURIComponent(service.value)}`}
                     className="group flex items-center gap-2.5 text-[13.5px] transition-colors duration-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                     style={{ color: "rgba(244,242,245,0.54)" }}
                   >
@@ -251,14 +251,14 @@ export function Footer() {
                       aria-hidden
                       className="h-px w-4 origin-left scale-x-0 rounded-full bg-white/30 transition-transform duration-300 ease-out group-hover:scale-x-100"
                     />
-                    {service}
+                    {service.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="flex flex-col gap-5.5 gap-[22px]">
+          <motion.div variants={fadeUp} className="flex flex-col gap-[22px]">
             <h3
               className="text-[10px] font-semibold tracking-[0.32em] uppercase"
               style={{ color: "rgba(244,242,245,0.38)" }}
@@ -269,6 +269,7 @@ export function Footer() {
               <li className="flex items-start gap-[14px]">
                 <MapPin
                   className="w-4 h-4 mt-0.5 shrink-0"
+                  aria-hidden
                   style={{ color: "rgba(244,242,245,0.36)" }}
                 />
                 <span
@@ -281,6 +282,7 @@ export function Footer() {
               <li className="flex items-center gap-3.5 gap-[14px]">
                 <Phone
                   className="w-4 h-4 shrink-0"
+                  aria-hidden
                   style={{ color: "rgba(244,242,245,0.36)" }}
                 />
                 <a
@@ -294,6 +296,7 @@ export function Footer() {
               <li className="flex items-center gap-3.5 gap-[14px]">
                 <Mail
                   className="w-4 h-4 shrink-0"
+                  aria-hidden
                   style={{ color: "rgba(244,242,245,0.36)" }}
                 />
                 <a

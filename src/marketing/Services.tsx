@@ -113,6 +113,7 @@ export function Services() {
     <section
       id="services"
       className="relative w-full py-24 sm:py-32 lg:py-40"
+      aria-labelledby="services-heading"
       style={{ backgroundColor: BG_NEUTRAL, color: CHARCOAL }}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
@@ -135,7 +136,8 @@ export function Services() {
           </motion.span>
           <motion.h2
             variants={fadeUpFast}
-            className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05]"
+            id="services-heading"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]"
             style={{ fontFamily: "var(--font-playfair)", color: CHARCOAL }}
           >
             Specialized Care <br className="hidden sm:block" />
@@ -185,7 +187,7 @@ export function Services() {
                           border: isHovered ? "1px solid transparent" : `1px solid ${BORDER}`
                         }}
                       >
-                        <Icon strokeWidth={1.5} className="h-5 w-5 transition-[color,transform] duration-300 group-hover:-translate-y-0.5" style={{ color: CHARCOAL }} />
+                        <Icon aria-hidden strokeWidth={1.5} className="h-5 w-5 transition-[color,transform] duration-300 group-hover:-translate-y-0.5" style={{ color: CHARCOAL }} />
                       </div>
                       <h3 className="text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight">
                         {srv.title}

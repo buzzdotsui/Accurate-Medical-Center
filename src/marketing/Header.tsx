@@ -27,8 +27,15 @@ export function Header() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  const closeMenu = useCallback((restoreFocus = false) => {
+    setMenuOpen(false);
+    if (restoreFocus) window.setTimeout(() => menuButtonRef.current?.focus(), 0);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -50,10 +57,32 @@ export function Header() {
 
   useEffect(() => {
     if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeMenu(true);
+        return;
+      }
+
+      if (e.key !== "Tab") return;
+      const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
+  }, [closeMenu, menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -94,7 +123,7 @@ export function Header() {
           WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(0px)",
           borderBottom: scrolled ? "1px solid rgba(244, 242, 245, 0.08)" : "1px solid transparent",
           boxShadow: scrolled ? "0 10px 40px rgba(0,0,0,0.2)" : "0 0 0 rgba(0,0,0,0)",
-          transition: "background-color 550ms ease, backdrop-filter 550ms ease, -webkit-backdrop-filter 550ms ease, border-color 550ms ease, box-shadow 550ms ease",
+          transition: "background-color var(--motion-base) ease, backdrop-filter var(--motion-base) ease, -webkit-backdrop-filter var(--motion-base) ease, border-color var(--motion-base) ease, box-shadow var(--motion-base) ease",
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -181,7 +210,8 @@ export function Header() {
             </div>
 
             <button
-              className={`lg:hidden p-2.5 rounded-xl text-[#f4f2f5] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 ${
+              ref={menuButtonRef}
+              className={`lg:hidden rounded-xl p-2.5 text-[#f4f2f5] transition-[background-color,transform] duration-200 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 ${
                 scrolled ? "hover:bg-white/10" : "hover:bg-black/20"
               }`}
               onClick={() => setMenuOpen(true)}
@@ -206,10 +236,11 @@ export function Header() {
               className="fixed inset-0 z-[60] lg:hidden"
               style={{ backgroundColor: "rgba(3, 22, 26, 0.6)", backdropFilter: "blur(5px)" }}
               aria-hidden="true"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => closeMenu(true)}
             />
 
             <motion.aside
+              ref={drawerRef}
               variants={slideInRight}
               initial="hidden"
               animate="visible"
@@ -246,8 +277,8 @@ export function Header() {
                 </div>
                 <button
                   ref={closeButtonRef}
-                  onClick={() => setMenuOpen(false)}
-                  className="p-2 -mr-2 rounded-xl text-[#f4f2f5]/55 hover:text-white hover:bg-white/10 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+                  onClick={() => closeMenu(true)}
+                  className="-mr-2 rounded-xl p-2 text-[#f4f2f5]/55 transition-[background-color,color,transform] duration-200 hover:bg-white/10 hover:text-white active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" aria-hidden="true" />

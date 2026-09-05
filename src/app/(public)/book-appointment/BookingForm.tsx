@@ -34,6 +34,18 @@ const emptyForm = (service = ""): BookingFormState => ({
   notes: "",
 });
 
+const bookingFieldClassName = (hasError: boolean, hasLeadingIcon = true) =>
+  `w-full rounded-lg border bg-[#03161a] py-3 pr-4 text-white transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-[#7a8f92] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#03161a] ${
+    hasLeadingIcon ? "pl-10" : "px-4"
+  } ${
+    hasError
+      ? "border-red-400/80 focus-visible:ring-red-300/80"
+      : "border-[#1b3135] focus-visible:border-white/40 focus-visible:ring-white/60"
+  }`;
+
+const primaryButtonClassName =
+  "flex items-center justify-center gap-2 rounded-lg bg-white py-3.5 font-semibold text-[#03161a] transition-[background-color,transform] duration-200 hover:bg-[#f4f2f5] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70";
+
 export default function BookingForm() {
   const searchParams = useSearchParams();
   const defaultService = searchParams.get("service") || "";
@@ -180,7 +192,7 @@ export default function BookingForm() {
                 <div className="space-y-2">
                   <label htmlFor="appointment-first-name" className="text-sm font-medium text-[#a4b5b8]">First Name <span aria-hidden className="text-red-400">*</span></label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8f92]" />
+                    <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8f92]" aria-hidden />
                     <input 
                       required 
                       id="appointment-first-name"
@@ -190,7 +202,7 @@ export default function BookingForm() {
                       onChange={e => setField("firstName", e.target.value)}
                       aria-invalid={Boolean(errors.firstName)}
                       aria-describedby={errors.firstName ? "appointment-first-name-error" : undefined}
-                      className="w-full bg-[#03161a] border border-[#1b3135] text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-white/40 transition-colors"
+                      className={bookingFieldClassName(Boolean(errors.firstName))}
                       placeholder="Jane"
                     />
                   </div>
@@ -199,7 +211,7 @@ export default function BookingForm() {
                 <div className="space-y-2">
                   <label htmlFor="appointment-last-name" className="text-sm font-medium text-[#a4b5b8]">Last Name <span aria-hidden className="text-red-400">*</span></label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8f92]" />
+                    <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8f92]" aria-hidden />
                     <input 
                       required 
                       id="appointment-last-name"
@@ -209,7 +221,7 @@ export default function BookingForm() {
                       onChange={e => setField("lastName", e.target.value)}
                       aria-invalid={Boolean(errors.lastName)}
                       aria-describedby={errors.lastName ? "appointment-last-name-error" : undefined}
-                      className="w-full bg-[#03161a] border border-[#1b3135] text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-white/40 transition-colors"
+                      className={bookingFieldClassName(Boolean(errors.lastName))}
                       placeholder="Doe"
                     />
                   </div>
@@ -220,7 +232,7 @@ export default function BookingForm() {
               <div className="space-y-2">
                 <label htmlFor="appointment-phone" className="text-sm font-medium text-[#a4b5b8]">Phone Number <span aria-hidden className="text-red-400">*</span></label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8f92]" />
+                  <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8f92]" aria-hidden />
                   <input 
                     required 
                     id="appointment-phone"
@@ -230,7 +242,7 @@ export default function BookingForm() {
                     onChange={e => setField("phone", e.target.value)}
                     aria-invalid={Boolean(errors.phone)}
                     aria-describedby={errors.phone ? "appointment-phone-error" : undefined}
-                    className="w-full bg-[#03161a] border border-[#1b3135] text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-white/40 transition-colors"
+                    className={bookingFieldClassName(Boolean(errors.phone))}
                     placeholder="08012345678"
                   />
                 </div>
@@ -240,7 +252,7 @@ export default function BookingForm() {
               <div className="space-y-2">
                 <label htmlFor="appointment-email" className="text-sm font-medium text-[#a4b5b8]">Email Address <span className="text-[#7a8f92] font-normal">(Optional)</span></label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8f92]" />
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8f92]" aria-hidden />
                   <input 
                     type="email" 
                     id="appointment-email"
@@ -249,7 +261,7 @@ export default function BookingForm() {
                     onChange={e => setField("email", e.target.value)}
                     aria-invalid={Boolean(errors.email)}
                     aria-describedby={errors.email ? "appointment-email-error" : undefined}
-                    className="w-full bg-[#03161a] border border-[#1b3135] text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-white/40 transition-colors"
+                    className={bookingFieldClassName(Boolean(errors.email))}
                     placeholder="jane@example.com"
                   />
                 </div>
@@ -260,7 +272,7 @@ export default function BookingForm() {
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-white text-[#03161a] hover:bg-[#f4f2f5] font-semibold py-3.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className={primaryButtonClassName}
                 >
                   Continue <ArrowRight className="w-4 h-4" />
                 </button>
@@ -273,7 +285,7 @@ export default function BookingForm() {
               <div className="space-y-2">
                 <label htmlFor="appointment-service" className="text-sm font-medium text-[#a4b5b8]">Service <span aria-hidden className="text-red-400">*</span></label>
                 <div className="relative">
-                  <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8f92]" />
+                  <Stethoscope className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8f92]" aria-hidden />
                   <select 
                     required
                     id="appointment-service"
@@ -282,7 +294,7 @@ export default function BookingForm() {
                     onChange={e => setField("service", e.target.value)}
                     aria-invalid={Boolean(errors.service)}
                     aria-describedby={errors.service ? "appointment-service-error" : undefined}
-                    className="w-full bg-[#03161a] border border-[#1b3135] text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-white/40 transition-colors appearance-none"
+                    className={`${bookingFieldClassName(Boolean(errors.service))} appearance-none`}
                   >
                     <option value="" disabled>Select a service</option>
                     {siteConfig.services.map(s => (
@@ -296,7 +308,7 @@ export default function BookingForm() {
               <div className="space-y-2">
                 <label htmlFor="appointment-preferred-date" className="text-sm font-medium text-[#a4b5b8]">Preferred Date <span aria-hidden className="text-red-400">*</span></label>
                 <div className="relative">
-                  <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8f92] pointer-events-none" />
+                  <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8f92]" aria-hidden />
                   <input
                     required
                     id="appointment-preferred-date"
@@ -307,7 +319,7 @@ export default function BookingForm() {
                     onChange={e => setField("preferredDate", e.target.value)}
                     aria-invalid={Boolean(errors.preferredDate)}
                     aria-describedby={errors.preferredDate ? "appointment-preferred-date-error" : undefined}
-                    className="w-full bg-[#03161a] border border-[#1b3135] text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-white/40 transition-colors [color-scheme:dark]"
+                    className={`${bookingFieldClassName(Boolean(errors.preferredDate))} [color-scheme:dark]`}
                   />
                 </div>
                 {errors.preferredDate && <p id="appointment-preferred-date-error" className="text-sm text-red-200">{errors.preferredDate}</p>}
@@ -322,7 +334,7 @@ export default function BookingForm() {
                   onChange={e => setField("notes", e.target.value)}
                   aria-invalid={Boolean(errors.notes)}
                   aria-describedby={errors.notes ? "appointment-notes-error" : undefined}
-                  className="w-full bg-[#03161a] border border-[#1b3135] text-white p-4 rounded-lg focus:outline-none focus:border-white/40 transition-colors resize-none h-24"
+                  className={`${bookingFieldClassName(Boolean(errors.notes), false)} h-24 resize-none`}
                   placeholder="Any scheduling preference or question?"
                 />
                 {errors.notes && <p id="appointment-notes-error" className="text-sm text-red-200">{errors.notes}</p>}
@@ -333,14 +345,14 @@ export default function BookingForm() {
                   type="button"
                   onClick={handleBack}
                   disabled={loading}
-                  className="w-1/3 bg-[#1b3135] text-white hover:bg-[#1b3135]/80 font-semibold py-3.5 rounded-lg transition-colors"
+                  className="w-1/3 rounded-lg bg-[#1b3135] py-3.5 font-semibold text-white transition-[background-color,transform] duration-200 hover:bg-[#1b3135]/80 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   Back
                 </button>
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="w-2/3 bg-white text-[#03161a] hover:bg-[#f4f2f5] font-semibold py-3.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className={`w-2/3 ${primaryButtonClassName}`}
                 >
                   {loading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>

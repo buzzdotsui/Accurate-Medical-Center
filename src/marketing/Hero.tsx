@@ -219,13 +219,13 @@ export default function Hero() {
         variants={heroStagger}
         initial="hidden"
         animate="visible"
-        className="relative z-10 w-full max-w-6xl mx-auto px-5 sm:px-8 text-center pt-[84px] flex flex-col items-center"
+        className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-5 pt-24 text-center sm:px-8 sm:pt-28 lg:pt-32"
       >
         <motion.h1
           variants={fadeUp}
-          className="mb-8 max-w-5xl text-[clamp(2.25rem,6vw,6.5rem)] font-bold italic leading-[1.03] tracking-tight sm:mb-10"
+          className="mb-6 max-w-[15ch] text-pretty text-[clamp(2.5rem,5.4vw,5.75rem)] font-bold italic leading-[1.04] tracking-[-0.035em] sm:mb-8"
           style={{
-            fontFamily: "var(--font-playfair-display)",
+            fontFamily: "var(--font-playfair)",
             color: "#f4f2f5",
             textShadow: "0 10px 40px rgba(3,22,26,0.7), 0 2px 10px rgba(3,22,26,0.5)",
           }}
@@ -235,14 +235,14 @@ export default function Hero() {
 
         <motion.p
           variants={fadeUp}
-          className="text-[16px] sm:text-[18px] lg:text-[19px] text-[#f4f2f5]/90 max-w-2xl mx-auto mb-14 sm:mb-[72px] leading-[1.7] font-light text-shadow-sm"
+          className="mx-auto mb-10 max-w-2xl text-pretty text-[16px] font-normal leading-[1.7] text-[#f4f2f5]/90 text-shadow-sm sm:mb-12 sm:text-[18px] lg:text-[19px]"
         >
           Specialized infertility and addiction care, supported by experienced healthcare professionals and compassionate, patient-first treatment.
         </motion.p>
 
         <motion.div
           variants={fadeUp}
-          className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center w-full max-w-sm sm:max-w-none"
+          className="flex w-full max-w-sm flex-col justify-center gap-3 sm:max-w-none sm:flex-row sm:gap-4"
         >
           <Link href="/book-appointment" passHref legacyBehavior>
             <motion.a
@@ -250,19 +250,19 @@ export default function Hero() {
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
+              className="group relative inline-flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
               style={{
-                backgroundColor: "#03161a",
-                color: "#f4f2f5",
-                boxShadow: "0 14px 40px rgba(3,22,26,0.28)",
-                border: "1px solid rgba(244,242,245,0.18)",
+                backgroundColor: "#f4f2f5",
+                color: "#03161a",
+                boxShadow: "0 14px 36px rgba(3,22,26,0.32)",
+                border: "1px solid rgba(244,242,245,0.72)",
               }}
             >
               <span
                 aria-hidden
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{
-                  background: "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, transparent 55%)",
+                  background: "linear-gradient(135deg, rgba(3,22,26,0.14) 0%, transparent 55%)",
                 }}
               />
               <Calendar
@@ -286,7 +286,7 @@ export default function Hero() {
             initial="rest"
             whileHover="hover"
             whileTap="tap"
-            className="group inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
+            className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-semibold transition-[background-color,border-color,transform] duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
             style={{
               color: "#f4f2f5",
               backgroundColor: "rgba(244,242,245,0.06)",

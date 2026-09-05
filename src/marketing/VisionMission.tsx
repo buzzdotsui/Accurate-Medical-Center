@@ -20,8 +20,14 @@ const panelStatementClassName =
   "max-w-xs text-[16px] font-medium italic leading-[1.65] sm:max-w-sm sm:text-[18px] lg:text-[19px]";
 
 const panelStatementStyle = {
-  fontFamily: "var(--font-playfair-display)",
+  fontFamily: "var(--font-playfair)",
   color: "rgba(244,242,245,0.94)",
+} as const;
+
+const panelSurfaceStyle = {
+  backgroundColor: "#000000",
+  boxShadow:
+    "0 24px 72px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
 } as const;
 
 // Ornamental dividers removed
@@ -35,11 +41,7 @@ function VisionPanel() {
       variants={staggerContainerSlow}
       aria-labelledby="vision-heading"
       className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-10 lg:px-12 py-10 sm:py-12 lg:py-14 overflow-hidden"
-      style={{
-        backgroundColor: "#000000",
-        boxShadow:
-          "0 38px 110px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
-      }}
+      style={panelSurfaceStyle}
     >
 
       <div
@@ -92,7 +94,7 @@ function VisionPanel() {
         id="vision-heading"
         className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold italic leading-[1.1] relative z-10 tracking-tight mb-4"
         style={{
-          fontFamily: "var(--font-playfair-display)",
+          fontFamily: "var(--font-playfair)",
           color: "#f4f2f5",
           textShadow: "0 8px 36px rgba(0,0,0,0.6)",
         }}
@@ -120,11 +122,7 @@ function MissionPanel() {
       variants={staggerContainerSlow}
       aria-labelledby="mission-heading"
       className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-10 lg:px-12 py-10 sm:py-12 lg:py-14 overflow-hidden"
-      style={{
-        backgroundColor: "#000000",
-        boxShadow:
-          "0 38px 110px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
-      }}
+      style={panelSurfaceStyle}
     >
 
       <div
@@ -177,7 +175,7 @@ function MissionPanel() {
         id="mission-heading"
         className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold italic leading-[1.1] relative z-10 tracking-tight mb-5"
         style={{
-          fontFamily: "var(--font-playfair-display)",
+          fontFamily: "var(--font-playfair)",
           color: "#f4f2f5",
           textShadow: "0 8px 36px rgba(0,0,0,0.6)",
         }}

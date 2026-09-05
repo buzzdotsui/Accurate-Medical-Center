@@ -126,6 +126,7 @@ export function CompanyVideo() {
             */}
             {shouldLoad && !reducedMotion && (
               <video
+                id="company-video"
                 ref={videoRef}
                 src={COMPANY.desktopUrl}
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${canPlay ? "opacity-100" : "opacity-0"}`}
@@ -141,18 +142,23 @@ export function CompanyVideo() {
             <div className="absolute inset-0 flex items-end justify-between bg-gradient-to-t from-black/60 via-transparent to-transparent p-6 opacity-100 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
               <div className="flex gap-4">
                 <button
+                  type="button"
                   onClick={toggleMute}
-                  className="rounded-full border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="rounded-full border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md transition-[background-color,transform] duration-200 hover:bg-white/20 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   aria-label={isMuted ? "Unmute video" : "Mute video"}
+                  aria-controls="company-video"
+                  aria-pressed={!isMuted}
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </button>
               </div>
               <div>
                 <button
+                  type="button"
                   onClick={toggleFullscreen}
-                  className="rounded-full border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="rounded-full border border-white/20 bg-white/10 p-3 text-white backdrop-blur-md transition-[background-color,transform] duration-200 hover:bg-white/20 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   aria-label="Fullscreen"
+                  aria-controls="company-video"
                 >
                   <Maximize className="w-5 h-5" />
                 </button>

@@ -85,6 +85,9 @@
 
   --radius: 0.5rem;
 
+  /* Shared interaction timing for calm, responsive marketing feedback. */
+  --motion-base: 240ms;
+
   /* ── Marketing / Landing Page Brand Tokens ──────────────────────────────
    * Source-of-truth hex values as specified in the brand brief.
    * ─────────────────────────────────────────────────────────────────────── */

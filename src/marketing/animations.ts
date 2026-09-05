@@ -5,10 +5,10 @@ export const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 export const EASE_IN_OUT: [number, number, number, number] = [0.65, 0, 0.35, 1];
 
 export const DURATION = {
-  fast: 0.3,
-  base: 0.6,
-  slow: 0.8,
-  cinematic: 1.0,
+  fast: 0.2,
+  base: 0.45,
+  slow: 0.65,
+  cinematic: 0.8,
 } as const;
 
 export const DEFAULT_TRANSITION: Transition = {

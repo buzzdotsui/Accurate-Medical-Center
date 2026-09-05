@@ -213,10 +213,11 @@ function SlideIndicators({
       {SLIDES.map((s, i) => (
         <button
           key={s.id}
+          type="button"
           aria-pressed={i === index}
           aria-label={`Slide ${s.num} — ${s.title}`}
           onClick={() => goTo(i, i > index ? "forward" : "back")}
-          className="relative h-[3px] w-7 origin-left overflow-hidden rounded-full transition-[background-color,transform] duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
+          className="relative h-[3px] w-7 origin-left overflow-hidden rounded-full transition-[background-color,transform] duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
           style={{
             transform: `scaleX(${i === index ? 1 : 12 / 28})`,
             backgroundColor: i === index ? "transparent" : "rgba(244,242,245,0.12)",
@@ -458,12 +459,12 @@ export function LookInside() {
             </AnimatePresence>
 
             <div className="flex items-center gap-4 mb-7">
-              <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.2em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ color: TEXT_MUTED }}>
+              <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-[12px] font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ color: TEXT_MUTED }}>
                 <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" aria-hidden />
                 <span className="group-hover:text-white transition-colors duration-300">Prev</span>
               </button>
               <span aria-hidden className="h-px flex-none w-5" style={{ backgroundColor: SURFACE_BORDER }} />
-              <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.2em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ color: TEXT_MUTED }}>
+              <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-[12px] font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ color: TEXT_MUTED }}>
                 <span className="group-hover:text-white transition-colors duration-300">Next</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
               </button>
@@ -558,11 +559,11 @@ export function LookInside() {
         </AnimatePresence>
 
         <div className="flex items-center justify-between mb-6">
-          <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex items-center gap-2.5 px-5 py-3 rounded-full border text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
+          <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.18em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
             <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5" aria-hidden />
             Prev
           </button>
-          <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex items-center gap-2.5 px-5 py-3 rounded-full border text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
+          <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.18em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
             Next
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
           </button>

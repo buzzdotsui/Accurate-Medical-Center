@@ -6,7 +6,6 @@ const BASE = `https://res.cloudinary.com/${CLOUD}/video/upload`;
 // accurate-medical/company-video            ✅
 // accurate-medical/consultation-slideshow   ✅ (uploaded 2026-08-22, trimmed to 10s)
 // accurate-medical/facility-slideshow       ✅
-// accurate-medical/hero                     ✅
 // accurate-medical/hospital-view-slideshow  ✅
 // accurate-medical/reception-slideshow      ✅
 
@@ -51,7 +50,7 @@ export const MEDIA_CONFIG = {
   cloudName: process.env.CLOUDINARY_CLOUD_NAME || "hefhxm1l",
 
   videos: {
-    hero: videoConfig("accurate-medical/hero", {
+    hero: videoConfig("accurate-medical/company-video", {
       posterWidth: 1280,
       videoWidth: 1920,
       mobileWidth: 854,

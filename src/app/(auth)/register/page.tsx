@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signUp, signIn } from "@/lib/auth/client";
 import { displayHeadingClassName } from "@/marketing/typography";
+import { AlertCircle, LockKeyhole, Mail, UserRound } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -85,20 +86,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className={`${displayHeadingClassName} text-4xl text-foreground sm:text-[2.65rem]`}>
+    <div className="space-y-8 sm:space-y-9">
+      <div className="space-y-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">New staff profile</p>
+        <h1 className={`${displayHeadingClassName} text-[clamp(2.2rem,8.5vw,2.85rem)] text-foreground`}>
           Create Patient Account
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="max-w-sm text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">
           Sign up to access your medical records and appointments.
         </p>
       </div>
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-4">
+      <form className="space-y-5" onSubmit={handleSubmit} aria-busy={loading}>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="firstName" className="text-sm font-medium text-foreground">
+            <label htmlFor="firstName" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
               First name
             </label>
             <Input 
@@ -107,10 +109,12 @@ export default function RegisterPage() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               disabled={loading}
+              icon={<UserRound aria-hidden className="h-4 w-4" />}
+              className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="lastName" className="text-sm font-medium text-foreground">
+            <label htmlFor="lastName" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
               Last name
             </label>
             <Input 
@@ -119,12 +123,14 @@ export default function RegisterPage() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               disabled={loading}
+              icon={<UserRound aria-hidden className="h-4 w-4" />}
+              className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground">
+          <label htmlFor="email" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
             Email address
           </label>
           <Input 
@@ -134,11 +140,13 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
+            icon={<Mail aria-hidden className="h-4 w-4" />}
+            className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
           />
         </div>
         
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-foreground">
+          <label htmlFor="password" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
             Password
           </label>
           <Input 
@@ -148,21 +156,24 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
+            icon={<LockKeyhole aria-hidden className="h-4 w-4" />}
+            className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
           />
         </div>
 
         {error && (
-          <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+          <div id="register-error" role="alert" aria-live="polite" className="flex items-start gap-3 rounded-2xl border border-destructive/20 bg-destructive/[0.06] px-4 py-3 text-sm leading-5 text-destructive">
+            <AlertCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
             {error}
           </div>
         )}
 
-        <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
+        <Button type="submit" className="h-12 w-full rounded-2xl bg-primary text-[0.95rem] font-bold tracking-wide text-primary-foreground shadow-[0_12px_28px_rgba(3,22,26,0.16)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_18px_36px_rgba(3,22,26,0.22)] active:translate-y-0 active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4" disabled={loading}>
           {loading ? "Creating account…" : "Create account"}
         </Button>
       </form>
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="rounded-2xl border border-black/[0.07] bg-white/60 px-4 py-4 text-center text-sm leading-5 text-muted-foreground shadow-sm">
         Already have an account?{" "}
         <Link href="/login" className="font-medium text-primary hover:underline">
           Sign in

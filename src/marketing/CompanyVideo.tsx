@@ -3,7 +3,8 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX, Maximize } from "lucide-react";
-import { fadeScaleIn } from "./animations";
+import { contentReveal, headingReveal, mediaReveal, sectionReveal } from "./animations";
+import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 import { MEDIA_CONFIG } from "@/config/media";
 
 const COMPANY = MEDIA_CONFIG.videos.company;
@@ -90,23 +91,38 @@ export function CompanyVideo() {
       style={{ backgroundColor: "#0b0f11" }}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <h2 id="company-video-heading" className="sr-only">
-          Accurate Medical Center Company Video
-        </h2>
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          variants={fadeScaleIn}
-          className="w-full relative group"
+          variants={sectionReveal}
+          className="w-full"
         >
-          <div
-            className="w-full aspect-video rounded-2xl md:rounded-3xl overflow-hidden relative shadow-2xl"
-            style={{
-              border: "1px solid rgba(244,242,245,0.08)",
-              backgroundColor: "#08090a",
-            }}
-          >
+          <div className="mb-10 max-w-2xl sm:mb-12">
+            <motion.p variants={contentReveal} className="mb-4 text-[10px] font-semibold uppercase tracking-[0.32em] text-white/45">
+              Company video
+            </motion.p>
+            <motion.h2
+              variants={headingReveal}
+              id="company-video-heading"
+              className={`mb-4 text-4xl text-white sm:text-5xl lg:text-6xl ${displayHeadingClassName}`}
+              style={displayHeadingStyle}
+            >
+              Accurate Medical Center
+            </motion.h2>
+            <motion.p variants={contentReveal} className="max-w-xl text-[15px] leading-[1.8] text-white/60 sm:text-lg">
+              A closer look at the calm, clinical environment behind our patient-first care.
+            </motion.p>
+          </div>
+
+          <motion.div variants={mediaReveal} className="relative w-full group">
+            <div
+              className="w-full aspect-video rounded-2xl md:rounded-3xl overflow-hidden relative shadow-2xl"
+              style={{
+                border: "1px solid rgba(244,242,245,0.08)",
+                backgroundColor: "#08090a",
+              }}
+            >
             {/*
               Poster image is ALWAYS visible, painted from Cloudinary's image CDN.
               It uses the first frame of the company video (so_0), served as WebP.
@@ -169,7 +185,8 @@ export function CompanyVideo() {
               </div>
             </div>
             )}
-          </div>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>

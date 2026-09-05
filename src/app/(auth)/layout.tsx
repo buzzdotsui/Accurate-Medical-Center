@@ -4,9 +4,11 @@ import { ShieldCheck, Stethoscope, Clock } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { BrandLockup } from "@/marketing/BrandLockup";
 import { displayHeadingClassName } from "@/marketing/typography";
+import { MotionConfig } from "framer-motion";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
+    <MotionConfig reducedMotion="user">
     <div data-auth className="flex min-h-screen min-h-[100svh] flex-col overflow-hidden bg-[#f7f8f5] lg:grid lg:grid-cols-[minmax(24rem,0.82fr)_minmax(34rem,1.18fr)]">
       {/* Left Pane - Auth Form */}
       <div className="order-2 flex min-w-0 flex-1 flex-col justify-center border-t border-black/[0.07] px-5 py-9 sm:px-10 sm:py-12 lg:order-1 lg:min-h-screen lg:border-r lg:border-t-0 lg:px-[clamp(2.5rem,6vw,7rem)] lg:py-16">
@@ -85,5 +87,6 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
     </div>
+    </MotionConfig>
   );
 }

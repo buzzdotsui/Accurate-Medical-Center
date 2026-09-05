@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   Ambulance,
   Baby,
@@ -17,7 +17,15 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
-import { fadeUp, fadeUpFast, ctaLift, fadeUpSmall, staggerContainerFast } from "./animations";
+import {
+  ctaLift,
+  contentReveal,
+  headingReveal,
+  serviceRowReveal,
+  servicesStagger,
+  sectionReveal,
+} from "./animations";
+import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 
 const BG_NEUTRAL = "#faf9f8";
 const CHARCOAL = "#1a1f22";
@@ -50,6 +58,20 @@ const ICONS: Record<IconKey, React.ComponentType<{ className?: string; "aria-hid
   radiation: Radiation,
   "flask-conical": FlaskConical,
   ambulance: Ambulance,
+};
+
+const SERVICE_ICON_MOTION: Record<IconKey, Variants> = {
+  brain: { rest: { scale: 1, x: 0, y: 0 }, active: { scale: 1.08, x: 1, y: -1 } },
+  "heart-handshake": { rest: { scale: 1 }, active: { scale: 1.09 } },
+  "shield-check": { rest: { scale: 1, y: 0 }, active: { scale: 1.06, y: -1 } },
+  baby: { rest: { y: 0, scale: 1 }, active: { y: -3, scale: 1.05 } },
+  stethoscope: { rest: { x: 0, scale: 1 }, active: { x: 2, scale: 1.05 } },
+  scissors: { rest: { rotate: 0, scale: 1 }, active: { rotate: -5, scale: 1.04 } },
+  bed: { rest: { y: 0, scale: 1 }, active: { y: -2, scale: 1.04 } },
+  "scan-line": { rest: { x: 0, scale: 1 }, active: { x: 2, scale: 1.04 } },
+  radiation: { rest: { scale: 1 }, active: { scale: 1.055 } },
+  "flask-conical": { rest: { y: 0, scale: 1 }, active: { y: -2, scale: 1.04 } },
+  ambulance: { rest: { x: 0, scale: 1 }, active: { x: 3, scale: 1.04 } },
 };
 
 const SERVICES = [
@@ -150,24 +172,21 @@ export function Services() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.1 } }
-          }}
+          variants={sectionReveal}
           className="mb-20 sm:mb-28"
         >
           <motion.span
-            variants={fadeUpFast}
+            variants={contentReveal}
             className="block text-xs font-bold uppercase tracking-[0.2em] mb-6"
             style={{ color: CHARCOAL_MUTED }}
           >
             Our Services
           </motion.span>
           <motion.h2
-            variants={fadeUpFast}
+            variants={headingReveal}
             id="services-heading"
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.05]"
-            style={{ fontFamily: "var(--font-playfair)", color: CHARCOAL }}
+            className={`text-4xl sm:text-5xl lg:text-6xl ${displayHeadingClassName}`}
+            style={{ ...displayHeadingStyle, color: CHARCOAL }}
           >
             Specialized Care <br className="hidden sm:block" />
             <span className="font-semibold">tailored to your needs.</span>
@@ -178,7 +197,7 @@ export function Services() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15, margin: "-70px" }}
-          variants={staggerContainerFast}
+          variants={servicesStagger}
           className="flex flex-col border-t"
           style={{ borderColor: BORDER }}
         >
@@ -189,8 +208,10 @@ export function Services() {
             return (
               <Link href={`/book-appointment?service=${encodeURIComponent(APPOINTMENT_SERVICE_BY_MARKETING_TITLE[srv.title])}`} key={srv.id} passHref legacyBehavior>
                 <motion.a
+                  whileHover="hover"
+                  whileFocus="hover"
                   whileTap={{ scale: 0.995 }}
-                  variants={fadeUpSmall}
+                  variants={serviceRowReveal}
                   onMouseEnter={() => setHoveredIdx(idx)}
                   onMouseLeave={() => setHoveredIdx(null)}
                   onFocus={() => setHoveredIdx(idx)}
@@ -206,25 +227,44 @@ export function Services() {
 
                 <div className="relative z-10 flex w-full flex-col md:flex-row md:items-center justify-between gap-6 md:gap-12 lg:gap-20 px-2">
                   <div className="flex items-center gap-6 sm:gap-12 lg:gap-20 md:w-1/2">
-                    <span 
-                      className="text-2xl sm:text-3xl font-light tracking-tight transition-[color,transform] duration-300 group-hover:translate-x-0.5 group-focus-visible:translate-x-0.5"
+                    <motion.span
+                      initial="rest"
+                      animate={isHovered ? "active" : "rest"}
+                      variants={{
+                        rest: { x: 0, opacity: 0.72 },
+                        active: { x: 3, opacity: 1, transition: { duration: 0.25 } },
+                      }}
+                      className="text-2xl sm:text-3xl font-light tracking-tight"
                       style={{ color: isHovered ? CHARCOAL : CHARCOAL_MUTED }}
                     >
                       {srv.id}
-                    </span>
+                    </motion.span>
                     <div className="flex items-center gap-6">
-                      <div 
-                        className="flex h-12 w-12 items-center justify-center rounded-full transition-[background-color,border-color,box-shadow,transform] duration-300 group-hover:-translate-y-0.5 group-hover:scale-[1.04] group-focus-visible:-translate-y-0.5 group-focus-visible:scale-[1.04]"
+                      <motion.div
+                        initial="rest"
+                        animate={isHovered ? "active" : "rest"}
+                        variants={{
+                          rest: { y: 0, scale: 1 },
+                          active: { y: -2, scale: 1.04, transition: { duration: 0.28 } },
+                        }}
+                        className="flex h-12 w-12 items-center justify-center rounded-full transition-[background-color,border-color,box-shadow] duration-300"
                         style={{ 
                           backgroundColor: isHovered ? LEMON : "transparent",
                           border: isHovered ? "1px solid transparent" : `1px solid ${BORDER}`
                         }}
                       >
-                        <Icon aria-hidden strokeWidth={1.7} className="h-5 w-5 transition-transform duration-300 group-hover:scale-110 group-focus-visible:scale-110" style={{ color: CHARCOAL }} />
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-[-0.02em]">
+                        <motion.div initial="rest" animate={isHovered ? "active" : "rest"} variants={SERVICE_ICON_MOTION[srv.icon]} transition={{ duration: 0.3 }}>
+                          <Icon aria-hidden strokeWidth={1.7} className="h-5 w-5" style={{ color: CHARCOAL }} />
+                        </motion.div>
+                      </motion.div>
+                      <motion.h3
+                        initial="rest"
+                        animate={isHovered ? "active" : "rest"}
+                        variants={{ rest: { x: 0 }, active: { x: 4, transition: { duration: 0.28 } } }}
+                        className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-[-0.02em]"
+                      >
                         {srv.title}
-                      </h3>
+                      </motion.h3>
                     </div>
                   </div>
 
@@ -252,7 +292,7 @@ export function Services() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          variants={fadeUp}
+          variants={contentReveal}
           className="mt-20 flex justify-center lg:justify-start"
         >
           <Link href="/book-appointment" passHref legacyBehavior>
@@ -270,9 +310,9 @@ export function Services() {
             >
               <span
                 aria-hidden
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute inset-y-0 -left-1/2 w-1/2 -translate-x-full opacity-0 transition-[transform,opacity] duration-500 ease-out group-hover:translate-x-[300%] group-hover:opacity-100"
                 style={{
-                  background: `linear-gradient(90deg, ${CHARCOAL} 0%, rgba(50,55,58,1) 100%)`,
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)",
                 }}
               />
               <span className="relative z-10 tracking-wide">Book an Appointment</span>

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { EASE_OUT, fadeScaleIn } from "./animations";
+import { contentReveal, EASE_OUT, headingReveal, mediaReveal, sectionReveal } from "./animations";
+import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 import { MEDIA_CONFIG } from "@/config/media";
 
 const BG           = "#0b0f11";
@@ -412,24 +413,31 @@ export function LookInside() {
       <div className="hidden lg:grid lg:grid-cols-[1fr_1px_1fr] min-h-[680px]">
 
         {/* LEFT: editorial info */}
-        <div className="flex flex-col justify-between px-12 xl:px-16 py-16 xl:py-20">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.18 }}
+          variants={sectionReveal}
+          className="flex flex-col justify-between px-12 xl:px-16 py-16 xl:py-20"
+        >
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.4em] mb-6" style={{ color: TEXT_MUTED }}>
+            <motion.p variants={contentReveal} className="text-[10px] font-semibold uppercase tracking-[0.4em] mb-6" style={{ color: TEXT_MUTED }}>
               Experience
-            </p>
-            <h2
+            </motion.p>
+            <motion.h2
+              variants={headingReveal}
               id="experience-heading"
-              className="text-[2.6rem] xl:text-[3.2rem] font-bold leading-[1.05] tracking-tight mb-5"
-              style={{ fontFamily: "var(--font-playfair)", color: TEXT }}
+              className={`text-[2.6rem] xl:text-[3.2rem] mb-5 ${displayHeadingClassName}`}
+              style={{ ...displayHeadingStyle, color: TEXT }}
             >
               A Look Inside<br />Accurate Medical<br />Center
-            </h2>
-            <p className="text-[14px] xl:text-[15px] leading-[1.82] max-w-sm" style={{ color: TEXT_SOFT }}>
+            </motion.h2>
+            <motion.p variants={contentReveal} className="text-[14px] xl:text-[15px] leading-[1.82] max-w-sm" style={{ color: TEXT_SOFT }}>
               Step through our doors. Every space reflects our commitment to patient dignity, clinical excellence, and calm, human care.
-            </p>
+            </motion.p>
           </div>
 
-          <div className="mt-14">
+          <motion.div variants={contentReveal} className="mt-14">
             <div className="flex items-baseline gap-2 mb-5">
               <AnimatePresence mode="wait">
                 <motion.span
@@ -471,8 +479,8 @@ export function LookInside() {
             </div>
 
             <SlideIndicators index={visibleIndex} progress={progress} goTo={goTo} prefix="desktop" />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Vertical divider */}
         <div aria-hidden style={{ backgroundColor: SURFACE_BORDER }} />
@@ -482,7 +490,7 @@ export function LookInside() {
           <div className="relative w-full max-w-[340px] xl:max-w-[380px]">
             {isDesktop === true && (
               <motion.div
-                variants={fadeScaleIn}
+                variants={mediaReveal}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.18 }}
@@ -505,20 +513,21 @@ export function LookInside() {
 
       {/* ── MOBILE / TABLET LAYOUT ────────────────────────────────────────── */}
       <div className="lg:hidden px-5 sm:px-8 py-16 sm:py-20">
-        <div className="mb-10 sm:mb-12">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.4em] mb-4" style={{ color: TEXT_MUTED }}>Experience</p>
-          <h2
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.18 }} variants={sectionReveal} className="mb-10 sm:mb-12">
+          <motion.p variants={contentReveal} className="text-[10px] font-semibold uppercase tracking-[0.4em] mb-4" style={{ color: TEXT_MUTED }}>Experience</motion.p>
+          <motion.h2
+            variants={headingReveal}
             id="experience-heading-mobile"
-            className="text-[1.9rem] sm:text-[2.4rem] font-bold leading-[1.06] tracking-tight"
-            style={{ fontFamily: "var(--font-playfair)", color: TEXT }}
+            className={`text-[1.9rem] sm:text-[2.4rem] ${displayHeadingClassName}`}
+            style={{ ...displayHeadingStyle, color: TEXT }}
           >
             A Look Inside Accurate Medical Center
-          </h2>
-        </div>
+          </motion.h2>
+        </motion.div>
 
         <div className="flex justify-center mb-8 sm:mb-10">
           <motion.div
-            variants={fadeScaleIn}
+            variants={mediaReveal}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.18 }}

@@ -91,6 +91,96 @@ export const heroStagger: Variants = {
   },
 };
 
+/** A page-level entrance used by focused portal and booking surfaces. */
+export const pageReveal: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: DURATION.slow, ease: EASE_OUT, staggerChildren: 0.1, delayChildren: 0.06 },
+  },
+};
+
+/** The shared rhythm for a section label, heading, body, then its content. */
+export const sectionReveal: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.11, delayChildren: 0.04 },
+  },
+};
+
+export const headingReveal: Variants = {
+  hidden: { opacity: 0, y: 24, scale: 0.985 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: DURATION.cinematic, ease: EASE_OUT },
+  },
+};
+
+/** The hero receives a slightly longer, settled version of the display reveal. */
+export const heroHeadingReveal: Variants = {
+  hidden: { opacity: 0, y: 28, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.95, ease: EASE_OUT },
+  },
+};
+
+export const contentReveal: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: DURATION.slow, ease: EASE_OUT },
+  },
+};
+
+export const mediaReveal: Variants = {
+  hidden: { opacity: 0, y: 26, scale: 0.975 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.9, ease: EASE_OUT },
+  },
+};
+
+export const cardReveal: Variants = {
+  hidden: { opacity: 0, y: 22 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: DURATION.base, ease: EASE_OUT },
+  },
+};
+
+/** Eleven service rows need a perceptible but compact progression. */
+export const servicesStagger: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.075, delayChildren: 0.05 },
+  },
+};
+
+export const serviceRowReveal: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.52, ease: EASE_OUT },
+  },
+  hover: {
+    y: -2,
+    transition: { duration: 0.25, ease: EASE_OUT },
+  },
+};
+
 export const drawerNavStagger: Variants = {
   hidden: { opacity: 0 },
   visible: {

@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { signIn } from "@/lib/auth/client";
 import { AlertCircle, LockKeyhole, Mail } from "lucide-react";
 import { displayHeadingClassName } from "@/marketing/typography";
+import { contentReveal, headingReveal, pageReveal } from "@/marketing/animations";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,18 +42,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="space-y-8 sm:space-y-9">
-      <div className="space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">Staff portal</p>
-        <h1 className={`${displayHeadingClassName} text-[clamp(2.35rem,9vw,2.85rem)] text-foreground`}>
+    <motion.div initial="hidden" animate="visible" variants={pageReveal} className="space-y-8 sm:space-y-9">
+      <motion.div variants={contentReveal} className="space-y-3">
+        <motion.p variants={contentReveal} className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">Staff portal</motion.p>
+        <motion.h1 variants={headingReveal} className={`${displayHeadingClassName} text-[clamp(2.35rem,9vw,2.85rem)] text-foreground`}>
           Welcome back
-        </h1>
-        <p className="max-w-sm text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">
+        </motion.h1>
+        <motion.p variants={contentReveal} className="max-w-sm text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">
           Enter your credentials to access the portal.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
-      <form className="space-y-5" onSubmit={handleSubmit} aria-busy={loading}>
+      <motion.form variants={contentReveal} className="space-y-5" onSubmit={handleSubmit} aria-busy={loading}>
         <div className="space-y-2">
           <label htmlFor="email" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
             Email address
@@ -109,14 +111,14 @@ export default function LoginPage() {
         <Button type="submit" className="h-12 w-full rounded-2xl bg-primary text-[0.95rem] font-bold tracking-wide text-primary-foreground shadow-[0_12px_28px_rgba(3,22,26,0.16)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_18px_36px_rgba(3,22,26,0.22)] active:translate-y-0 active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4" loading={loading}>
           Sign in
         </Button>
-      </form>
+      </motion.form>
 
-      <div className="rounded-2xl border border-black/[0.07] bg-white/60 px-4 py-4 text-center text-xs leading-5 text-muted-foreground shadow-sm">
+      <motion.div variants={contentReveal} className="rounded-2xl border border-black/[0.07] bg-white/60 px-4 py-4 text-center text-xs leading-5 text-muted-foreground shadow-sm">
         Patient access portal coming soon.{" "}
         <Link href="/patient" className="font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/75 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
           Learn more
         </Link>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

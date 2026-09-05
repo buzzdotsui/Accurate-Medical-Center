@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signUp, signIn } from "@/lib/auth/client";
 import { displayHeadingClassName } from "@/marketing/typography";
+import { contentReveal, headingReveal, pageReveal } from "@/marketing/animations";
+import { motion } from "framer-motion";
 import { AlertCircle, LockKeyhole, Mail, UserRound } from "lucide-react";
 
 export default function RegisterPage() {
@@ -86,18 +88,18 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="space-y-8 sm:space-y-9">
-      <div className="space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">New staff profile</p>
-        <h1 className={`${displayHeadingClassName} text-[clamp(2.2rem,8.5vw,2.85rem)] text-foreground`}>
+    <motion.div initial="hidden" animate="visible" variants={pageReveal} className="space-y-8 sm:space-y-9">
+      <motion.div variants={contentReveal} className="space-y-3">
+        <motion.p variants={contentReveal} className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">New staff profile</motion.p>
+        <motion.h1 variants={headingReveal} className={`${displayHeadingClassName} text-[clamp(2.2rem,8.5vw,2.85rem)] text-foreground`}>
           Create Patient Account
-        </h1>
-        <p className="max-w-sm text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">
+        </motion.h1>
+        <motion.p variants={contentReveal} className="max-w-sm text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">
           Sign up to access your medical records and appointments.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
-      <form className="space-y-5" onSubmit={handleSubmit} aria-busy={loading}>
+      <motion.form variants={contentReveal} className="space-y-5" onSubmit={handleSubmit} aria-busy={loading}>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="space-y-2">
             <label htmlFor="firstName" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
@@ -171,14 +173,14 @@ export default function RegisterPage() {
         <Button type="submit" className="h-12 w-full rounded-2xl bg-primary text-[0.95rem] font-bold tracking-wide text-primary-foreground shadow-[0_12px_28px_rgba(3,22,26,0.16)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_18px_36px_rgba(3,22,26,0.22)] active:translate-y-0 active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4" disabled={loading}>
           {loading ? "Creating account…" : "Create account"}
         </Button>
-      </form>
+      </motion.form>
 
-      <div className="rounded-2xl border border-black/[0.07] bg-white/60 px-4 py-4 text-center text-sm leading-5 text-muted-foreground shadow-sm">
+      <motion.div variants={contentReveal} className="rounded-2xl border border-black/[0.07] bg-white/60 px-4 py-4 text-center text-sm leading-5 text-muted-foreground shadow-sm">
         Already have an account?{" "}
         <Link href="/login" className="font-medium text-primary hover:underline">
           Sign in
         </Link>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

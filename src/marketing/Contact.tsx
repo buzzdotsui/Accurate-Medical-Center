@@ -8,11 +8,13 @@ import { motion } from "framer-motion";
 import {
   fadeUp,
   fadeUpSmall,
+  headingReveal,
+  mediaReveal,
+  sectionReveal,
   staggerContainer,
-  staggerContainerSlow,
   ctaLift,
-  EASE_OUT,
 } from "./animations";
+import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 
 const { contact } = siteConfig;
 const phone = contact.phone.primary;
@@ -181,7 +183,7 @@ export function Contact() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
-          variants={staggerContainerSlow}
+          variants={sectionReveal}
           className="mb-14 sm:mb-16 lg:mb-20 max-w-3xl"
         >
           <motion.p
@@ -192,11 +194,11 @@ export function Contact() {
             Get In Touch
           </motion.p>
           <motion.h2
-            variants={fadeUp}
+            variants={headingReveal}
             id="contact-heading"
-            className="text-4xl sm:text-5xl lg:text-[4.25rem] font-bold leading-[1.06] tracking-tight mb-6"
+            className={`text-4xl sm:text-5xl lg:text-[4.25rem] mb-6 ${displayHeadingClassName}`}
             style={{
-              fontFamily: "var(--font-playfair)",
+              ...displayHeadingStyle,
               color: "#03161a",
             }}
           >
@@ -368,10 +370,10 @@ export function Contact() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.85, ease: EASE_OUT, delay: 0.05 }}
+            variants={mediaReveal}
             className="relative rounded-[1.75rem] sm:rounded-[2rem] p-7 sm:p-10 lg:p-12 overflow-hidden self-start lg:sticky lg:top-28"
             style={{
               backgroundColor: "rgba(255,255,255,0.55)",

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { Calendar, ArrowRight, ChevronDown } from "lucide-react";
-import { heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide, EASE } from "./animations";
+import { heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide, EASE, heroHeadingReveal } from "./animations";
 import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 import { useMediaPreloader } from "./MediaPreloaderContext";
 import { MEDIA_CONFIG } from "@/config/media";
@@ -223,7 +223,7 @@ export default function Hero() {
         className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-5 pt-24 text-center sm:px-8 sm:pt-28 lg:pt-32"
       >
         <motion.h1
-          variants={fadeUp}
+          variants={heroHeadingReveal}
           className={`mb-6 max-w-[15ch] text-pretty text-[clamp(2.5rem,5.4vw,5.75rem)] ${displayHeadingClassName} sm:mb-8`}
           style={{
             ...displayHeadingStyle,

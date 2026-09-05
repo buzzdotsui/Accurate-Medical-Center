@@ -3,10 +3,13 @@
 import { motion } from "framer-motion";
 import { siteConfig } from "@/config/site";
 import {
-  fadeUp,
+  contentReveal,
   fadeUpSmall,
+  headingReveal,
+  sectionReveal,
   staggerContainerSlow,
 } from "./animations";
+import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 
 const MISSION_ITEMS: readonly string[] = [
   "Provide accessible, high-quality medical care.",
@@ -90,11 +93,11 @@ function VisionPanel() {
       </motion.p>
 
       <motion.h3
-        variants={fadeUp}
+        variants={headingReveal}
         id="vision-heading"
-        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold leading-[1.1] relative z-10 tracking-tight mb-4"
+        className={`text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] relative z-10 mb-4 ${displayHeadingClassName}`}
         style={{
-          fontFamily: "var(--font-playfair)",
+          ...displayHeadingStyle,
           color: "#f4f2f5",
           textShadow: "0 8px 36px rgba(0,0,0,0.6)",
         }}
@@ -103,7 +106,7 @@ function VisionPanel() {
       </motion.h3>
 
       <motion.p
-        variants={fadeUp}
+        variants={contentReveal}
         className={`${panelStatementClassName} relative z-10`}
         style={panelStatementStyle}
       >
@@ -171,11 +174,11 @@ function MissionPanel() {
       </motion.p>
 
       <motion.h3
-        variants={fadeUp}
+        variants={headingReveal}
         id="mission-heading"
-        className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold leading-[1.1] relative z-10 tracking-tight mb-5"
+        className={`text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] relative z-10 mb-5 ${displayHeadingClassName}`}
         style={{
-          fontFamily: "var(--font-playfair)",
+          ...displayHeadingStyle,
           color: "#f4f2f5",
           textShadow: "0 8px 36px rgba(0,0,0,0.6)",
         }}
@@ -249,7 +252,7 @@ export function VisionMission() {
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative">
         <motion.div
-          variants={fadeUpSmall}
+          variants={sectionReveal}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}

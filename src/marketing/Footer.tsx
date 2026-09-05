@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 import { MapPin, Mail, ArrowUp, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { fadeUpSmall, fadeUp, EASE } from "./animations";
+import { fadeUpSmall, fadeUp, EASE, sectionReveal } from "./animations";
 import { BrandLockup } from "./BrandLockup";
 
 const NAV_LINKS = [
@@ -25,11 +25,6 @@ const SERVICE_LINKS = [
   { label: "Ambulance Services", value: "Ambulance Services" },
   { label: "Online Consultations", value: "Online Consultation" },
 ] as const;
-
-const stagger = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.09 } },
-};
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -99,7 +94,7 @@ export function Footer() {
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative">
         <motion.div
-          variants={stagger}
+          variants={sectionReveal}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.06 }}

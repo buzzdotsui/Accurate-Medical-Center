@@ -44,7 +44,7 @@ const bookingFieldClassName = (hasError: boolean, hasLeadingIcon = true) =>
   }`;
 
 const primaryButtonClassName =
-  "flex items-center justify-center gap-2 rounded-lg bg-white py-3.5 font-semibold text-[#03161a] transition-[background-color,transform] duration-200 hover:bg-[#f4f2f5] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70";
+  "group relative flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-white py-3.5 font-semibold text-[#03161a] shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-[#f8f9f6] hover:shadow-[0_16px_34px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70";
 
 export default function BookingForm() {
   const searchParams = useSearchParams();
@@ -275,12 +275,14 @@ export default function BookingForm() {
               </div>
 
               <div className="pt-4">
-                <button 
+                <button
                   type="submit"
                   disabled={loading}
-                  className={primaryButtonClassName}
+                  className={`${primaryButtonClassName} w-full`}
                 >
-                  Continue <ArrowRight className="w-4 h-4" />
+                  <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4e842]/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <span className="relative z-10">Continue</span>
+                  <ArrowRight aria-hidden className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </button>
               </div>
             </motion.div>
@@ -360,10 +362,11 @@ export default function BookingForm() {
                   disabled={loading}
                   className={`w-2/3 ${primaryButtonClassName}`}
                 >
+                  <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4e842]/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   {loading ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
+                    <><Loader2 aria-hidden className="relative z-10 w-4 h-4 animate-spin" /> <span className="relative z-10">Processing...</span></>
                   ) : (
-                    <><CheckCircle2 className="w-4 h-4" /> Confirm Request</>
+                    <><CheckCircle2 aria-hidden className="relative z-10 w-4 h-4" /> <span className="relative z-10">Confirm Request</span></>
                   )}
                 </button>
               </div>

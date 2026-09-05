@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ShieldCheck, Stethoscope, Clock } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { BrandLockup } from "@/marketing/BrandLockup";
+import { displayHeadingClassName } from "@/marketing/typography";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -31,7 +32,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               <p className="auth-reveal text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55" style={{ animationDelay: "80ms" }}>
                 Secure staff portal
               </p>
-              <h2 className="auth-reveal max-w-xl font-playfair text-[clamp(2.7rem,5vw,5.3rem)] font-extrabold leading-[0.98] tracking-[-0.04em]" style={{ animationDelay: "160ms" }}>
+              <h2 className={`auth-reveal max-w-xl text-[clamp(2.7rem,5vw,5.3rem)] ${displayHeadingClassName}`} style={{ animationDelay: "160ms" }}>
                 Healing Minds.<br/>Restoring Lives.
               </h2>
               <p className="auth-reveal max-w-xl text-base leading-[1.8] text-white/70 sm:text-lg" style={{ animationDelay: "260ms" }}>

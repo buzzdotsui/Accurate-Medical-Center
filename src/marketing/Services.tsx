@@ -17,7 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
-import { fadeUp, fadeUpFast, ctaLift } from "./animations";
+import { fadeUp, fadeUpFast, ctaLift, fadeUpSmall, staggerContainerFast } from "./animations";
 
 const BG_NEUTRAL = "#faf9f8";
 const CHARCOAL = "#1a1f22";
@@ -174,7 +174,14 @@ export function Services() {
           </motion.h2>
         </motion.div>
 
-        <div className="flex flex-col border-t" style={{ borderColor: BORDER }}>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.15, margin: "-70px" }}
+          variants={staggerContainerFast}
+          className="flex flex-col border-t"
+          style={{ borderColor: BORDER }}
+        >
           {SERVICES.map((srv, idx) => {
             const Icon = ICONS[srv.icon];
             const isHovered = hoveredIdx === idx;
@@ -182,11 +189,8 @@ export function Services() {
             return (
               <Link href={`/book-appointment?service=${encodeURIComponent(APPOINTMENT_SERVICE_BY_MARKETING_TITLE[srv.title])}`} key={srv.id} passHref legacyBehavior>
                 <motion.a
-                  initial="hidden"
-                  whileInView="visible"
                   whileTap={{ scale: 0.995 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  variants={fadeUp}
+                  variants={fadeUpSmall}
                   onMouseEnter={() => setHoveredIdx(idx)}
                   onMouseLeave={() => setHoveredIdx(null)}
                   onFocus={() => setHoveredIdx(idx)}
@@ -242,7 +246,7 @@ export function Services() {
               </Link>
             );
           })}
-        </div>
+        </motion.div>
 
         <motion.div
           initial="hidden"

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signUp, signIn } from "@/lib/auth/client";
+import { displayHeadingClassName } from "@/marketing/typography";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -86,7 +87,7 @@ export default function RegisterPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-playfair text-4xl font-extrabold leading-[1.04] tracking-[-0.035em] text-foreground sm:text-[2.65rem]">
+        <h1 className={`${displayHeadingClassName} text-4xl text-foreground sm:text-[2.65rem]`}>
           Create Patient Account
         </h1>
         <p className="text-sm text-muted-foreground mt-1">

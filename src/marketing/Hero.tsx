@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { Calendar, ArrowRight, ChevronDown } from "lucide-react";
 import { heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide, EASE } from "./animations";
+import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 import { useMediaPreloader } from "./MediaPreloaderContext";
 import { MEDIA_CONFIG } from "@/config/media";
 
@@ -223,9 +224,9 @@ export default function Hero() {
       >
         <motion.h1
           variants={fadeUp}
-          className="mb-6 max-w-[15ch] text-pretty text-[clamp(2.5rem,5.4vw,5.75rem)] font-extrabold leading-[1.04] tracking-[-0.035em] sm:mb-8"
+          className={`mb-6 max-w-[15ch] text-pretty text-[clamp(2.5rem,5.4vw,5.75rem)] ${displayHeadingClassName} sm:mb-8`}
           style={{
-            fontFamily: "var(--font-playfair)",
+            ...displayHeadingStyle,
             color: "#f4f2f5",
             textShadow: "0 10px 40px rgba(3,22,26,0.7), 0 2px 10px rgba(3,22,26,0.5)",
           }}

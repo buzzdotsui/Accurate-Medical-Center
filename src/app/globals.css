@@ -193,6 +193,17 @@
   }
 }
 
+/* Lightweight entrance rhythm for the auth portal; keeps the server-rendered
+ * layout interactive immediately without adding a client animation boundary. */
+@keyframes auth-reveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+[data-auth] .auth-reveal {
+  animation: auth-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Keep fixed-header navigation from covering section headings after anchor scroll. */
 [data-marketing] [id] {
   scroll-margin-top: 6rem;
@@ -206,6 +217,15 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-auth],
+  [data-auth] *,
+  [data-auth] *::before,
+  [data-auth] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

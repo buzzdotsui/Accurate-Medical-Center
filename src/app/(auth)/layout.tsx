@@ -1,22 +1,19 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { ShieldCheck, Stethoscope, Clock } from "lucide-react";
-import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/ui/logo";
+import { BrandLockup } from "@/marketing/BrandLockup";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div data-auth className="flex min-h-screen flex-col bg-[#f7f8f5] lg:flex-row">
       {/* Left Pane - Auth Form */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+      <div className="order-2 flex flex-1 flex-col justify-center border-t border-black/[0.06] px-4 py-12 sm:px-6 lg:order-1 lg:flex-none lg:border-t-0 lg:border-r lg:px-20 lg:py-16 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-8">
-            <Link href="/" className="flex items-center gap-3 font-heading font-bold text-2xl text-primary mb-8 hover:opacity-80 transition-opacity">
+            <Link href="/" className="group mb-8 flex items-center gap-3 text-primary transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4">
               <Logo className="w-8 h-8 text-primary" />
-              <span className="leading-none flex flex-col">
-                <span>{siteConfig.shortName}</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-sans font-medium mt-0.5">Medical Center</span>
-              </span>
+              <BrandLockup size="header" className="text-primary" />
             </Link>
           </div>
           {children}
@@ -24,48 +21,49 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Right Pane - Visual/Brand */}
-      <div className="relative hidden w-0 flex-1 lg:block bg-grey-900 overflow-hidden">
-        {/* Subtle background glow */}
-        <div className="absolute inset-0 bg-primary/5" />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary rounded-full blur-[120px] opacity-10 -mr-96 -mt-96" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary rounded-full blur-[100px] opacity-5 -ml-64 -mb-64" />
+      <div className="order-1 relative flex min-h-[560px] w-full overflow-hidden bg-primary lg:order-2 lg:min-h-screen lg:w-0 lg:flex-1">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(244,242,245,0.14),transparent_42%),radial-gradient(circle_at_0%_100%,rgba(244,242,245,0.08),transparent_38%)]" />
+        <div aria-hidden className="absolute inset-8 rounded-[2rem] border border-white/[0.09] lg:inset-12 xl:inset-16" />
         
-        <div className="relative h-full flex flex-col justify-center p-16 xl:p-24">
-          <div className="max-w-2xl text-white space-y-12">
-            <div className="space-y-4">
-              <h2 className="text-4xl xl:text-5xl font-heading font-bold leading-tight">
+        <div className="relative flex w-full flex-col justify-center px-10 py-16 sm:px-16 lg:p-16 xl:p-24">
+          <div className="max-w-2xl space-y-10 text-white lg:space-y-12">
+            <div className="space-y-5">
+              <p className="auth-reveal text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55" style={{ animationDelay: "80ms" }}>
+                Secure staff portal
+              </p>
+              <h2 className="auth-reveal max-w-xl font-playfair text-[clamp(2.7rem,5vw,5.3rem)] font-extrabold leading-[0.98] tracking-[-0.04em]" style={{ animationDelay: "160ms" }}>
                 Healing Minds.<br/>Restoring Lives.
               </h2>
-              <p className="text-lg text-grey-300 max-w-xl">
+              <p className="auth-reveal max-w-xl text-base leading-[1.8] text-white/70 sm:text-lg" style={{ animationDelay: "260ms" }}>
                 Welcome to the staff and administrative portal for Accurate Medical Center. Sign in to access your workspace.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-grey-800">
-              <div className="space-y-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Stethoscope className="w-5 h-5 text-primary" />
+            <div className="auth-reveal grid grid-cols-1 gap-7 border-t border-white/[0.14] pt-8 sm:grid-cols-3 sm:gap-6" style={{ animationDelay: "360ms" }}>
+              <div className="space-y-3 border-l border-white/[0.12] pl-4">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.16] bg-white/[0.08]">
+                  <Stethoscope aria-hidden className="h-4 w-4 text-white/80" />
                 </div>
-                <h3 className="font-semibold text-base">Clinical Excellence</h3>
-                <p className="text-grey-400 text-sm leading-relaxed">
+                <h3 className="text-sm font-semibold tracking-tight">Clinical Excellence</h3>
+                <p className="text-sm leading-relaxed text-white/55">
                   Delivering precise, evidence-based care to every patient, every time.
                 </p>
               </div>
-              <div className="space-y-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
+              <div className="space-y-3 border-l border-white/[0.12] pl-4">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.16] bg-white/[0.08]">
+                  <ShieldCheck aria-hidden className="h-4 w-4 text-white/80" />
                 </div>
-                <h3 className="font-semibold text-base">Patient Privacy</h3>
-                <p className="text-grey-400 text-sm leading-relaxed">
+                <h3 className="text-sm font-semibold tracking-tight">Patient Privacy</h3>
+                <p className="text-sm leading-relaxed text-white/55">
                   Strict confidentiality and HIPAA-compliant data practices.
                 </p>
               </div>
-              <div className="space-y-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-primary" />
+              <div className="space-y-3 border-l border-white/[0.12] pl-4">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.16] bg-white/[0.08]">
+                  <Clock aria-hidden className="h-4 w-4 text-white/80" />
                 </div>
-                <h3 className="font-semibold text-base">Timely Service</h3>
-                <p className="text-grey-400 text-sm leading-relaxed">
+                <h3 className="text-sm font-semibold tracking-tight">Timely Service</h3>
+                <p className="text-sm leading-relaxed text-white/55">
                   Optimized workflows to reduce wait times and improve outcomes.
                 </p>
               </div>

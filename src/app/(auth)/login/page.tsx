@@ -39,19 +39,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       <div>
-        <h1 className="text-3xl font-heading font-bold text-foreground">
+        <h1 className="font-playfair text-4xl font-extrabold tracking-tight text-foreground sm:text-[2.65rem]">
           Welcome back
         </h1>
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
           Enter your credentials to access the portal.
         </p>
       </div>
 
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={handleSubmit} aria-busy={loading}>
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground">
+          <label htmlFor="email" className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground/70">
             Email address
           </label>
           <Input
@@ -63,17 +63,20 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             error={!!error}
+            aria-invalid={!!error}
+            aria-describedby={error ? "login-error" : undefined}
+            className={`h-12 rounded-xl bg-white px-4 shadow-sm transition-[border-color,box-shadow] duration-200 placeholder:text-muted-foreground/55 ${error ? "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20" : "border-black/[0.1] focus-visible:border-primary focus-visible:ring-primary/20"}`}
           />
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-medium text-foreground">
+            <label htmlFor="password" className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground/70">
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-primary hover:underline"
+              className="text-xs font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/75 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               Forgot password?
             </Link>
@@ -86,24 +89,27 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
             error={!!error}
+            aria-invalid={!!error}
+            aria-describedby={error ? "login-error" : undefined}
+            className={`h-12 rounded-xl bg-white px-4 shadow-sm transition-[border-color,box-shadow] duration-200 ${error ? "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20" : "border-black/[0.1] focus-visible:border-primary focus-visible:ring-primary/20"}`}
           />
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div id="login-error" role="alert" aria-live="polite" className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/[0.06] px-4 py-3 text-sm leading-5 text-destructive">
+            <AlertCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
             <p>{error}</p>
           </div>
         )}
 
-        <Button type="submit" className="w-full h-11 text-base font-semibold" loading={loading}>
+        <Button type="submit" className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-[0_12px_28px_rgba(3,22,26,0.16)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-primary/90 hover:shadow-[0_16px_34px_rgba(3,22,26,0.2)] active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4" loading={loading}>
           Sign in
         </Button>
       </form>
 
-      <div className="text-center text-sm text-muted-foreground pt-4 border-t">
+      <div className="border-t border-black/[0.08] pt-5 text-center text-xs leading-5 text-muted-foreground">
         Patient access portal coming soon.{" "}
-        <Link href="/patient" className="font-medium text-primary hover:underline">
+        <Link href="/patient" className="font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/75 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
           Learn more
         </Link>
       </div>

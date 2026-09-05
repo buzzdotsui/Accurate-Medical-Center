@@ -1,10 +1,15 @@
 import { ReactNode } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Stethoscope, Clock } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { BrandLockup } from "@/marketing/BrandLockup";
-import { displayHeadingClassName } from "@/marketing/typography";
+import { displayHeadingClassName, displayHeadingStyle } from "@/marketing/typography";
 import { MotionConfig } from "framer-motion";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -37,7 +42,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               <p className="auth-reveal text-[9px] font-bold uppercase tracking-[0.3em] text-white/55 sm:text-[10px]" style={{ animationDelay: "80ms" }}>
                 Secure staff portal
               </p>
-              <h2 className={`auth-reveal max-w-xl text-[clamp(2.35rem,7vw,5.3rem)] ${displayHeadingClassName}`} style={{ animationDelay: "160ms" }}>
+              <h2 className={`auth-reveal max-w-xl text-[clamp(2.35rem,7vw,5.3rem)] ${displayHeadingClassName}`} style={{ ...displayHeadingStyle, animationDelay: "160ms" }}>
                 Healing Minds.<br />Restoring Lives.
               </h2>
               <p className="auth-reveal max-w-xl text-sm leading-[1.75] text-white/70 sm:text-lg" style={{ animationDelay: "260ms" }}>

@@ -157,8 +157,12 @@ export function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[78px] lg:h-[88px]">
 
-            <button
-              onClick={() => scrollTo("#home")}
+            <Link
+              href="/#home"
+              onClick={(event) => {
+                event.preventDefault();
+                scrollTo("#home");
+              }}
               className="flex items-center shrink-0 gap-3.5 sm:gap-4 group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
               aria-label="Accurate Medical Center, scroll to top"
             >
@@ -173,19 +177,23 @@ export function Header() {
                 />
               </div>
               <BrandLockup size="header" className="hidden text-[#f4f2f5] sm:flex" />
-            </button>
+            </Link>
 
             <nav className="hidden lg:flex items-center gap-11" aria-label="Main navigation">
               {NAV_LINKS.map((link) => (
-                <button
+                <a
                   key={link.href + link.label}
-                  onClick={() => scrollTo(link.href)}
+                  href={`/${link.href}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    scrollTo(link.href);
+                  }}
                   aria-current={activeSection === link.href.slice(1) ? "location" : undefined}
                   className={`group relative text-[13px] font-medium tracking-[0.08em] uppercase transition-colors duration-300 hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-[#f4f2f5]" : "text-[#f4f2f5]/65"}`}
                 >
                   {link.label}
                   <span className={`absolute -bottom-1.5 left-0 h-[1.5px] w-full origin-left rounded-full bg-[#f4f2f5] transition-transform duration-300 ease-out ${activeSection === link.href.slice(1) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
-                </button>
+                </a>
               ))}
             </nav>
 
@@ -297,10 +305,14 @@ export function Header() {
                 aria-label="Mobile navigation"
               >
                 {NAV_LINKS.map((link) => (
-                  <motion.button
+                  <motion.a
                   key={link.href + link.label}
                   variants={fadeUpSmall}
-                  onClick={() => scrollTo(link.href)}
+                  href={`/${link.href}`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    scrollTo(link.href);
+                  }}
                     aria-current={activeSection === link.href.slice(1) ? "location" : undefined}
                     className={`group flex items-center justify-between border-b border-white/[0.05] py-4 text-left text-[23px] font-medium transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-white" : "text-[#f4f2f5]/78"}`}
                   >
@@ -309,7 +321,7 @@ export function Header() {
                       aria-hidden
                       className="h-px w-10 origin-left scale-x-[0.6] bg-[#f4f2f5]/28 transition-[transform,background-color] duration-300 ease-out group-hover:scale-x-100 group-hover:bg-[#f4f2f5]/55"
                     />
-                  </motion.button>
+                  </motion.a>
                 ))}
               </motion.nav>
 

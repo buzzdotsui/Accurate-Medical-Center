@@ -8,9 +8,11 @@ export const siteConfig = {
   shortName: 'AMC',
   tagline: 'Healing Minds, Restoring Lives',
   description:
-    'Accurate Medical Center is a modern, patient-focused hospital in Akure, Ondo State, Nigeria, delivering excellence in healthcare services both in-person and online.',
-  url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://accuratemedicalcenter.com',
-  ogImage: '/images/og-image.png',
+    'Accurate Medical Center in Akure, Ondo State provides patient-first infertility, addiction, mental health, maternal, diagnostic, and general medical care.',
+  // Public metadata must never inherit a local development or deployment-preview URL.
+  // NEXT_PUBLIC_APP_URL remains available to runtime application code where needed.
+  url: 'https://accuratemedicalcenter.com',
+  ogImage: '/images/hero-poster.jpg',
 
   contact: {
     address: {

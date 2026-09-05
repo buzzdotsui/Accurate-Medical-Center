@@ -6,6 +6,7 @@ import {
   contentReveal,
   fadeUpSmall,
   headingReveal,
+  panelReveal,
   sectionReveal,
   staggerContainerSlow,
 } from "./animations";
@@ -41,7 +42,8 @@ function VisionPanel() {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
-      variants={staggerContainerSlow}
+      variants={panelReveal}
+      custom={0}
       aria-labelledby="vision-heading"
       className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-10 lg:px-12 py-10 sm:py-12 lg:py-14 overflow-hidden"
       style={panelSurfaceStyle}
@@ -122,7 +124,8 @@ function MissionPanel() {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
-      variants={staggerContainerSlow}
+      variants={panelReveal}
+      custom={0.14}
       aria-labelledby="mission-heading"
       className="relative rounded-[1.85rem] sm:rounded-[2.1rem] flex flex-col items-center text-center px-7 sm:px-10 lg:px-12 py-10 sm:py-12 lg:py-14 overflow-hidden"
       style={panelSurfaceStyle}
@@ -281,7 +284,8 @@ export function VisionMission() {
               textShadow: "0 8px 36px rgba(0,0,0,0.48)",
             }}
           >
-            Healing Minds. Restoring Lives.
+            <span className="block">Healing Minds.</span>
+            <span className="block">Restoring Lives.</span>
           </motion.h2>
         </motion.div>
 

@@ -17,7 +17,7 @@ export const DEFAULT_TRANSITION: Transition = {
 };
 
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 28 },
+  hidden: { opacity: 0, y: 36 },
   visible: {
     opacity: 1,
     y: 0,
@@ -26,7 +26,7 @@ export const fadeUp: Variants = {
 };
 
 export const fadeUpSmall: Variants = {
-  hidden: { opacity: 0, y: 14 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
@@ -80,7 +80,7 @@ export const staggerContainerFast: Variants = {
 
 export const staggerContainerSlow: Variants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.16 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.18 } },
 };
 
 export const heroStagger: Variants = {
@@ -111,24 +111,37 @@ export const sectionReveal: Variants = {
 };
 
 export const headingReveal: Variants = {
-  hidden: { opacity: 0, y: 24, scale: 0.985 },
+  hidden: { opacity: 0, y: 42, scale: 0.96, clipPath: "inset(0 0 100% 0)" },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: DURATION.cinematic, ease: EASE_OUT },
+    clipPath: "inset(0 0 0% 0)",
+    transition: { duration: 0.9, ease: EASE_OUT },
   },
 };
 
 /** The hero receives a slightly longer, settled version of the display reveal. */
 export const heroHeadingReveal: Variants = {
-  hidden: { opacity: 0, y: 28, scale: 0.98 },
+  hidden: { opacity: 0, y: 54, scale: 0.94, clipPath: "inset(0 0 100% 0)" },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.95, ease: EASE_OUT },
+    clipPath: "inset(0 0 0% 0)",
+    transition: { duration: 1.05, ease: EASE_OUT },
   },
+};
+
+/** A visibly staged, but still compact, entrance for large editorial surfaces. */
+export const panelReveal: Variants = {
+  hidden: { opacity: 0, y: 44, scale: 0.97 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.82, ease: EASE_OUT, delay, staggerChildren: 0.18 },
+  }),
 };
 
 export const contentReveal: Variants = {
@@ -141,7 +154,7 @@ export const contentReveal: Variants = {
 };
 
 export const mediaReveal: Variants = {
-  hidden: { opacity: 0, y: 26, scale: 0.975 },
+  hidden: { opacity: 0, y: 48, scale: 0.94 },
   visible: {
     opacity: 1,
     y: 0,
@@ -164,16 +177,17 @@ export const servicesStagger: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.075, delayChildren: 0.05 },
+    transition: { staggerChildren: 0.1, delayChildren: 0.08 },
   },
 };
 
 export const serviceRowReveal: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 34, scale: 0.985 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.52, ease: EASE_OUT },
+    scale: 1,
+    transition: { duration: 0.62, ease: EASE_OUT },
   },
   hover: {
     y: -2,

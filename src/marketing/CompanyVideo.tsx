@@ -131,7 +131,8 @@ export function CompanyVideo() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={COMPANY.posterUrl}
-              alt="Accurate Medical Center — Company Video"
+              alt=""
+              aria-hidden
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${canPlay && !reducedMotion ? "opacity-0 pointer-events-none" : "opacity-100"}`}
               loading="lazy"
               decoding="async"

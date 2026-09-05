@@ -1,11 +1,36 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import BookingForm from "./BookingForm";
-import { displayHeadingClassName, displayHeadingStyle, displayHeadingVariantClassNames } from "@/marketing/typography";
+import { BookingPageMotion } from "./BookingPageMotion";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "Book an Appointment | Accurate Medical Center",
+  title: "Request Care",
   description: "Request an appointment at Accurate Medical Center for specialist care and consultation.",
+  alternates: { canonical: "/book-appointment" },
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    url: "/book-appointment",
+    siteName: siteConfig.name,
+    title: "Request Care",
+    description: "Request an appointment at Accurate Medical Center for specialist care and consultation.",
+    images: [{
+      url: siteConfig.ogImage,
+      width: 1920,
+      height: 1080,
+      alt: "Accurate Medical Center in Akure, Ondo State",
+    }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Request Care",
+    description: "Request an appointment at Accurate Medical Center for specialist care and consultation.",
+    images: [{
+      url: siteConfig.ogImage,
+      alt: "Accurate Medical Center in Akure, Ondo State",
+    }],
+  },
 };
 
 export default function BookAppointmentPage() {
@@ -20,23 +45,16 @@ export default function BookAppointmentPage() {
       />
       
       <div className="max-w-3xl mx-auto px-5 relative z-10">
-        <div className="text-center mb-10">
-          <h1 className={`${displayHeadingClassName} ${displayHeadingVariantClassNames.appointment} mb-4 text-white`} style={displayHeadingStyle}>
-            Request Care
-          </h1>
-          <p className="text-[#a4b5b8] text-lg max-w-xl mx-auto">
-            Fill out the form below to request an appointment. Our reception team will get back to you shortly to confirm your booking.
-          </p>
-        </div>
-
-        {/* Suspense boundary is required because BookingForm uses useSearchParams */}
-        <Suspense fallback={
-          <div className="bg-white/5 border border-[#1b3135] rounded-2xl p-8 h-96 flex items-center justify-center animate-pulse">
-            <p className="text-[#a4b5b8]">Loading booking form...</p>
-          </div>
-        }>
-          <BookingForm />
-        </Suspense>
+        <BookingPageMotion>
+          {/* Suspense boundary is required because BookingForm uses useSearchParams */}
+          <Suspense fallback={
+            <div className="bg-white/5 border border-[#1b3135] rounded-2xl p-8 h-96 flex items-center justify-center animate-pulse">
+              <p className="text-[#a4b5b8]">Loading booking form...</p>
+            </div>
+          }>
+            <BookingForm />
+          </Suspense>
+        </BookingPageMotion>
       </div>
     </div>
   );

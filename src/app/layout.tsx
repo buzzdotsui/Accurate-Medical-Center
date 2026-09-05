@@ -40,22 +40,10 @@ const playfairDisplay = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.name,
+    default: `${siteConfig.name} | Patient-First Healthcare in Akure`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  keywords: [
-    "hospital Akure",
-    "medical center Ondo State",
-    "healthcare Nigeria",
-    "Accurate Medical Center",
-    "doctor Akure",
-    "ambulance Akure",
-    "pregnancy delivery Akure",
-    "psychological therapy Nigeria",
-    "online consultation hospital",
-    "infertility care Ondo",
-  ],
   metadataBase: new URL(siteConfig.url),
   openGraph: {
     type: "website",
@@ -64,16 +52,21 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: `${siteConfig.name} | ${siteConfig.tagline}`,
     description: siteConfig.description,
-    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: siteConfig.name }],
+    images: [{
+      url: siteConfig.ogImage,
+      width: 1920,
+      height: 1080,
+      alt: "Accurate Medical Center in Akure, Ondo State",
+    }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} | ${siteConfig.tagline}`,
     description: siteConfig.description,
-    images: [siteConfig.ogImage],
-  },
-  icons: {
-    icon: "/favicon.ico",
+    images: [{
+      url: siteConfig.ogImage,
+      alt: "Accurate Medical Center in Akure, Ondo State",
+    }],
   },
   robots: {
     index: true,

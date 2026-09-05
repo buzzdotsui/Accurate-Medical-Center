@@ -9,7 +9,7 @@ import {
   sectionReveal,
   staggerContainerSlow,
 } from "./animations";
-import { displayHeadingClassName, displayHeadingStyle } from "./typography";
+import { displayHeadingClassName, displayHeadingStyle, displayHeadingVariantClassNames } from "./typography";
 
 const MISSION_ITEMS: readonly string[] = [
   "Provide accessible, high-quality medical care.",
@@ -246,19 +246,16 @@ export function VisionMission() {
         }}
       />
 
-      <h2 id="vm-heading" className="sr-only">
-        Our Vision and Our Mission
-      </h2>
-
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 relative">
         <motion.div
           variants={sectionReveal}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
-          className="text-center mb-8 sm:mb-10 lg:mb-12"
+          className="mx-auto mb-10 max-w-3xl text-center sm:mb-12 lg:mb-14"
         >
-          <span
+          <motion.span
+            variants={fadeUpSmall}
             className="inline-flex items-center gap-3 px-[22px] py-[10px] rounded-full text-[10px] font-semibold uppercase tracking-[0.3em]"
             style={{
               color: "rgba(244,242,245,0.5)",
@@ -273,7 +270,19 @@ export function VisionMission() {
               style={{ backgroundColor: "#f4f2f5", boxShadow: "0 0 10px rgba(244,242,245,0.5)" }}
             />
             Our Foundation
-          </span>
+          </motion.span>
+          <motion.h2
+            variants={headingReveal}
+            id="vm-heading"
+            className={`mt-6 ${displayHeadingClassName} ${displayHeadingVariantClassNames.section}`}
+            style={{
+              ...displayHeadingStyle,
+              color: "#f4f2f5",
+              textShadow: "0 8px 36px rgba(0,0,0,0.48)",
+            }}
+          >
+            Healing Minds. Restoring Lives.
+          </motion.h2>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8">

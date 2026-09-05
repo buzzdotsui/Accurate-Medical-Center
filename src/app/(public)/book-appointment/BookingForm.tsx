@@ -6,6 +6,7 @@ import { siteConfig } from "@/config/site";
 import { PublicAppointmentRequestSchema } from "@/lib/validations/appointment";
 import { ArrowRight, CheckCircle2, CalendarIcon, User, Phone, Mail, Stethoscope, AlertCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ctaLift } from "@/marketing/animations";
 
 type BookingFormState = {
   firstName: string;
@@ -274,16 +275,28 @@ export default function BookingForm() {
                 {errors.email && <p id="appointment-email-error" className="text-sm text-red-200">{errors.email}</p>}
               </div>
 
-              <div className="pt-4">
-                <button
+              <div className="pt-5">
+                <motion.button
                   type="submit"
                   disabled={loading}
+                  variants={ctaLift}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
                   className={`${primaryButtonClassName} w-full`}
                 >
-                  <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-transparent via-[#d4e842]/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <span className="relative z-10">Continue</span>
-                  <ArrowRight aria-hidden className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </button>
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 bg-[linear-gradient(112deg,transparent_28%,rgba(212,232,66,0.28)_50%,transparent_72%)] opacity-0 transition-[opacity,transform] duration-500 group-hover:translate-x-2 group-hover:opacity-100"
+                  />
+                  <span className="relative z-10 flex flex-1 flex-col items-start leading-tight">
+                    <span>Continue</span>
+                    <span className="mt-0.5 text-[10px] font-medium tracking-[0.08em] text-[#03161a]/55">Appointment details</span>
+                  </span>
+                  <span aria-hidden className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#03161a] text-white transition-[background-color,transform] duration-300 group-hover:translate-x-1 group-hover:bg-[#1b3135]">
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </motion.button>
               </div>
             </motion.div>
           )}

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import BookingForm from "./BookingForm";
-import { displayHeadingClassName, displayHeadingStyle } from "@/marketing/typography";
+import { displayHeadingClassName, displayHeadingStyle, displayHeadingVariantClassNames } from "@/marketing/typography";
 
 export const metadata: Metadata = {
   title: "Book an Appointment | Accurate Medical Center",
@@ -21,7 +21,7 @@ export default function BookAppointmentPage() {
       
       <div className="max-w-3xl mx-auto px-5 relative z-10">
         <div className="text-center mb-10">
-          <h1 className={`${displayHeadingClassName} mb-4 text-[clamp(2.35rem,8vw,3rem)] text-white`} style={displayHeadingStyle}>
+          <h1 className={`${displayHeadingClassName} ${displayHeadingVariantClassNames.appointment} mb-4 text-white`} style={displayHeadingStyle}>
             Request Care
           </h1>
           <p className="text-[#a4b5b8] text-lg max-w-xl mx-auto">

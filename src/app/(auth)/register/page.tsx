@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signUp, signIn } from "@/lib/auth/client";
-import { displayHeadingClassName } from "@/marketing/typography";
+import { displayHeadingClassName, displayHeadingStyle, displayHeadingVariantClassNames } from "@/marketing/typography";
 import { contentReveal, headingReveal, pageReveal } from "@/marketing/animations";
 import { motion } from "framer-motion";
 import { AlertCircle, LockKeyhole, Mail, UserRound } from "lucide-react";
@@ -91,7 +91,11 @@ export default function RegisterPage() {
     <motion.div initial="hidden" animate="visible" variants={pageReveal} className="space-y-8 sm:space-y-9">
       <motion.div variants={contentReveal} className="space-y-3">
         <motion.p variants={contentReveal} className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">New staff profile</motion.p>
-        <motion.h1 variants={headingReveal} className={`${displayHeadingClassName} text-[clamp(2.2rem,8.5vw,2.85rem)] text-foreground`}>
+        <motion.h1
+          variants={headingReveal}
+          className={`${displayHeadingClassName} ${displayHeadingVariantClassNames.auth} text-foreground`}
+          style={displayHeadingStyle}
+        >
           Create Patient Account
         </motion.h1>
         <motion.p variants={contentReveal} className="max-w-sm text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">

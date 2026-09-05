@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { EASE_OUT } from "./animations";
+import { EASE_OUT, fadeScaleIn } from "./animations";
 import { MEDIA_CONFIG } from "@/config/media";
 
 const BG           = "#0b0f11";
@@ -480,7 +480,16 @@ export function LookInside() {
         {/* RIGHT: portrait video */}
         <div className="relative flex items-center justify-center px-12 xl:px-16 py-16 xl:py-20" style={{ backgroundColor: VIDEO_BG }}>
           <div className="relative w-full max-w-[340px] xl:max-w-[380px]">
-            {isDesktop === true && VideoPanel}
+            {isDesktop === true && (
+              <motion.div
+                variants={fadeScaleIn}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.18 }}
+              >
+                {VideoPanel}
+              </motion.div>
+            )}
             <motion.div
               key={`lemon-${visibleIndex}`}
               aria-hidden
@@ -508,7 +517,11 @@ export function LookInside() {
         </div>
 
         <div className="flex justify-center mb-8 sm:mb-10">
-          <div
+          <motion.div
+            variants={fadeScaleIn}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.18 }}
             className="relative overflow-hidden rounded-2xl w-full"
             style={{
               maxWidth: "min(100%, 380px)",
@@ -535,7 +548,7 @@ export function LookInside() {
                 />
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <div className="flex items-baseline gap-3 mb-3">

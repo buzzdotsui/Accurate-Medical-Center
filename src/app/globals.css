@@ -193,6 +193,11 @@
   }
 }
 
+/* Keep fixed-header navigation from covering section headings after anchor scroll. */
+[data-marketing] [id] {
+  scroll-margin-top: 6rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-marketing],
   [data-marketing] *,

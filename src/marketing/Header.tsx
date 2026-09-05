@@ -27,6 +27,7 @@ const NAV_LINKS = [
 export function Header() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
@@ -44,6 +45,31 @@ export function Header() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      queueMicrotask(() => setActiveSection(null));
+      return;
+    }
+
+    const sections = NAV_LINKS.map((link) => document.querySelector(link.href)).filter(
+      (section): section is Element => Boolean(section)
+    );
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveSection(visible.target.id);
+      },
+      { rootMargin: "-18% 0px -62%", threshold: [0.15, 0.4, 0.7] }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [pathname]);
 
   useEffect(() => {
     const onResize = () => { if (window.innerWidth >= 1024) setMenuOpen(false); };
@@ -92,6 +118,7 @@ export function Header() {
   }, [menuOpen]);
 
   const scrollTo = useCallback((href: string) => {
+    setActiveSection(href.slice(1));
     setMenuOpen(false);
     if (pathname !== "/") {
       router.push("/" + href);
@@ -153,10 +180,11 @@ export function Header() {
                 <button
                   key={link.href + link.label}
                   onClick={() => scrollTo(link.href)}
-                  className="group relative text-[13px] font-medium tracking-[0.08em] uppercase text-[#f4f2f5]/65 transition-colors duration-300 hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+                  aria-current={activeSection === link.href.slice(1) ? "location" : undefined}
+                  className={`group relative text-[13px] font-medium tracking-[0.08em] uppercase transition-colors duration-300 hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-[#f4f2f5]" : "text-[#f4f2f5]/65"}`}
                 >
                   {link.label}
-                  <span className="absolute -bottom-1.5 left-0 h-[1.5px] w-full origin-left scale-x-0 rounded-full bg-[#f4f2f5] transition-transform duration-300 ease-out group-hover:scale-x-100" style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
+                  <span className={`absolute -bottom-1.5 left-0 h-[1.5px] w-full origin-left rounded-full bg-[#f4f2f5] transition-transform duration-300 ease-out ${activeSection === link.href.slice(1) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
                 </button>
               ))}
             </nav>
@@ -270,10 +298,11 @@ export function Header() {
               >
                 {NAV_LINKS.map((link) => (
                   <motion.button
-                    key={link.href + link.label}
-                    variants={fadeUpSmall}
-                    onClick={() => scrollTo(link.href)}
-                    className="group flex items-center justify-between border-b border-white/[0.05] py-4 text-left text-[23px] font-medium text-[#f4f2f5]/78 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+                  key={link.href + link.label}
+                  variants={fadeUpSmall}
+                  onClick={() => scrollTo(link.href)}
+                    aria-current={activeSection === link.href.slice(1) ? "location" : undefined}
+                    className={`group flex items-center justify-between border-b border-white/[0.05] py-4 text-left text-[23px] font-medium transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-white" : "text-[#f4f2f5]/78"}`}
                   >
                     <span className="tracking-tight">{link.label}</span>
                     <span

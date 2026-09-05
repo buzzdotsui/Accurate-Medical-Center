@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX, Maximize } from "lucide-react";
-import { fadeUp } from "./animations";
+import { fadeScaleIn } from "./animations";
 import { MEDIA_CONFIG } from "@/config/media";
 
 const COMPANY = MEDIA_CONFIG.videos.company;
@@ -93,7 +93,7 @@ export function CompanyVideo() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          variants={fadeUp}
+          variants={fadeScaleIn}
           className="w-full relative group"
         >
           <div

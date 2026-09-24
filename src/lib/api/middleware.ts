@@ -21,12 +21,15 @@ type AuthApiHandler = (
   context: RouteContext,
 ) => Promise<NextResponse<unknown>> | NextResponse<unknown>;
 
-/** Paths that already have stricter dedicated limiters (auth/contact/appointment). */
+/** Paths that already have stricter dedicated limiters or must stay unthrottled. */
 function hasDedicatedRateLimit(pathname: string): boolean {
   return (
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/contact') ||
-    pathname.startsWith('/api/appointment')
+    pathname.startsWith('/api/appointment') ||
+    // Uptime/monitoring probes must never be rate-limited.
+    pathname === '/api/health' ||
+    pathname.startsWith('/api/health/')
   );
 }
 

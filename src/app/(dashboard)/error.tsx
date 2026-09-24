@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +12,7 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
+    Sentry.captureException(error);
     // Intentionally no console dump of PHI-adjacent stack traces in production UI.
     if (process.env.NODE_ENV === "development") {
       console.error(error);

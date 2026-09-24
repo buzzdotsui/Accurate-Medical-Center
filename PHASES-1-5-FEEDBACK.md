@@ -2,7 +2,9 @@
 
 **Date:** 2026-09-24  
 **Scope:** Audit + completion work for Phase 1 (Foundation) through Phase 5 (QA & Security), per `src/THE-PROJECT.MD` §53.  
-**Verification:** `TSC_OK` · `LINT_OK` · `TESTS_OK` (21 files / 142 tests) · `BUILD_OK` (Next.js 16.3.0, `ƒ Proxy (Middleware)`).
+**Verification:** `TSC_OK` · `LINT_OK` · `TESTS_OK` (22 files / 145 tests) · `BUILD_OK` (Next.js 16.3.0) · `SMOKE_PASS` (7/7) · `verify:env` PASSED (local secrets; Sentry DSN optional warns).
+
+> **Post-report hotfix:** Admin patients/pharmacy/laboratory/radiology/finance hit the dashboard error boundary because `Button asChild` passed multi-child trees to Radix `Slot` (“Slot failed to slot onto its children”). Fixed in `src/components/ui/button.tsx`. See also Phase 6/7 ops deliverables in `PRODUCTION-OPS.md`.
 
 ---
 
@@ -217,14 +219,35 @@
 
 ---
 
-## 9. Recommended next steps (Phase 6+)
+## 9. Phase 6 & 7 — production infrastructure and go-live
 
-1. **Secrets:** rotate any historical admin password outside the repo; provision production Upstash + Sentry + Cloudinary + Resend keys.
-2. **Migrations:** introduce versioned Prisma migrations + backup runbook before production.
-3. **E2E:** add Playwright smoke for login → register patient → book appointment → consult → lab → dispense → invoice.
+See `PRODUCTION-OPS.md` for the full runbook. Code/script deliverables completed in this pass:
+
+| Phase 6 item | Deliverable |
+|--------------|-------------|
+| Backups | `scripts/backup-db.sh` + `npm run backup:db` |
+| Monitoring | `GET /api/health` (DB probe; not rate-limited) |
+| Error tracking | `withSentryConfig` + `src/instrumentation{,-client}.ts` + boundary `captureException`; DSN keys external |
+| Production env verification | `npm run verify:env` → `scripts/verify-production-env.mjs` |
+| Secret rotation | Enforced weak-secret check in verify:env; process documented |
+| Domain / deployment | **External** (Vercel/DNS) — documented |
+| Disaster recovery | Restore process in `PRODUCTION-OPS.md` |
+
+| Phase 7 item | Deliverable |
+|--------------|-------------|
+| Smoke testing | `npm run smoke` → `scripts/smoke-test.mjs` (7 checks; **PASS** against local) |
+| Final acceptance | Manual checklist in `PRODUCTION-OPS.md` |
+| Staff training | Outline in `PRODUCTION-OPS.md` |
+| Monitoring / post-launch | Health probe + 14-day checklist |
+
+### Still external / not fakeable from code
+
+1. **Secrets:** rotate any historical admin password outside the repo; provision production Upstash + Sentry + Cloudinary + Resend keys. Run `npm run verify:env -- --env-file .env.production` after.
+2. **Migrations:** introduce versioned Prisma migrations + backup runbook before production (no `prisma/migrations/` yet).
+3. **E2E:** add Playwright smoke for login → register patient → book appointment → consult → lab → dispense → invoice (browser binary external).
 4. **Performance:** baseline p95 on `/api/v1/appointments`, `/api/v1/patients`, reporting dashboard.
 5. **Product backlog:** psych/ambulance/theatre schedule/ANC modules; optional `Schedule` table if audit-log roster is insufficient for multi-week planning.
-6. **Monitoring:** wire Sentry release + uptime checks (Phase 6 §53).
+6. **Domain + Vercel deploy + uptime probe URL** (external accounts).
 
 ---
 
@@ -235,8 +258,8 @@
 | Architecture | A- | Clear layering; Next 16 proxy done correctly |
 | Security | A- | Multi-layer RBAC + rate limits + audit; residual ops secrets |
 | Data integrity | A- | CAS sequences + linkage tests; short IDs constrained by DB |
-| UX completeness | B+ | Dead ends closed; specialty modules intentionally honest |
-| Automated QA | B+ | Strong unit/integration; no E2E yet |
-| Production readiness | B | Code-ready; ops (migrations, secrets, monitoring, E2E) outstanding |
+| UX completeness | A- | Dead ends closed; Slot/`asChild` crash fixed; specialty modules honest |
+| Automated QA | A- | 145 tests (22 files) + CI + smoke/env scripts |
+| Production readiness | B+ | Code-ready; ops secrets, migrations, E2E, deploy still external |
 
-**Phases 1–5 are complete to a practical definition of done:** working end-to-end workflows, enforced security, verified identity/integrity, finished core UX, and automated permission/concurrency/integrity tests in CI. Remaining work is Phase 6 production infrastructure and Phase 7 go-live acceptance — not unfinished Phase 2–5 features.
+**Phases 1–5 are complete to a practical definition of done.** Phase 6/7 code-side items (health, smoke, env verify, backup, ops runbook) are in place; remaining go-live work is credentials, domain, E2E browsers, and versioned migrations — not unfinished HMS features.

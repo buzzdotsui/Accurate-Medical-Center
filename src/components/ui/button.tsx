@@ -46,9 +46,24 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, leftIcon, rightIcon, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    const classes = cn(buttonVariants({ variant, size, className }))
+
+    // Radix Slot requires EXACTLY one element child. Rendering icon
+    // placeholders (false/undefined) alongside `children` makes
+    // React.Children.count > 1 and throws
+    // "Slot failed to slot onto its children", which bubbles to the
+    // dashboard error boundary. Keep the asChild path single-child.
+    if (asChild) {
+      return (
+        <Comp className={classes} ref={ref} {...props}>
+          {children}
+        </Comp>
+      )
+    }
+
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={classes}
         ref={ref}
         disabled={loading || props.disabled}
         {...props}

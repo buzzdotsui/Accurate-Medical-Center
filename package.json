@@ -10,7 +10,11 @@
     "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke-test.mjs",
+    "verify:env": "node scripts/verify-production-env.mjs",
+    "backup:db": "bash scripts/backup-db.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",

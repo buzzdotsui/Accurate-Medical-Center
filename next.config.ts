@@ -1,5 +1,6 @@
 import path from "path";
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
@@ -43,4 +44,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry build-time wiring (instrumentation + optional source-map upload).
+// Without SENTRY_AUTH_TOKEN, sourcemaps upload is disabled so local/CI builds
+// still succeed; DSN absence means the SDK no-ops at runtime.
+const hasSentryAuthToken = Boolean(process.env.SENTRY_AUTH_TOKEN);
+
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT || "accurate-medical-center",
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  tunnelRoute: "/sentry-tunnel",
+  sourcemaps: {
+    disable: !hasSentryAuthToken,
+  },
+});

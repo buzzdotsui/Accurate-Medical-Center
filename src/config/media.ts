@@ -50,12 +50,17 @@ export const MEDIA_CONFIG = {
   cloudName: process.env.CLOUDINARY_CLOUD_NAME || "hefhxm1l",
 
   videos: {
-    hero: videoConfig("accurate-medical/company-video", {
-      posterWidth: 1280,
-      videoWidth: 1920,
-      mobileWidth: 854,
-      removeAudio: true,
-    }),
+    // Hero uses the dedicated versioned MP4 directly (desktop + mobile).
+    // Do not route through videoConfig() transforms — the deployed hero asset
+    // must request this exact URL.
+    hero: {
+      publicId: "accurate-medical/hero",
+      desktopUrl:
+        "https://res.cloudinary.com/hefhxm1l/video/upload/v1787403818/accurate-medical/hero.mp4",
+      mobileUrl:
+        "https://res.cloudinary.com/hefhxm1l/video/upload/v1787403818/accurate-medical/hero.mp4",
+      posterUrl: `${BASE}/so_0,w_1280,f_auto,q_auto:good/v1787403818/accurate-medical/hero.jpg`,
+    },
 
     company: videoConfig("accurate-medical/company-video", {
       posterWidth: 1280,

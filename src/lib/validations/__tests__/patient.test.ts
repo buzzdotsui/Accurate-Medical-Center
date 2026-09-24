@@ -70,6 +70,43 @@ describe("UpdatePatientSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("strips branchId so ordinary updates cannot reassign branch", () => {
+    const result = UpdatePatientSchema.safeParse({
+      id: "patient-1",
+      firstName: "Janet",
+      branchId: "branch-evil",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect("branchId" in result.data).toBe(false);
+      expect(Object.keys(result.data)).not.toContain("branchId");
+    }
+  });
+
+  it("strips userId so ordinary updates cannot re-link user ownership", () => {
+    const result = UpdatePatientSchema.safeParse({
+      id: "patient-1",
+      userId: "user-other",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect("userId" in result.data).toBe(false);
+      expect(Object.keys(result.data)).not.toContain("userId");
+    }
+  });
+
+  it("still allows ordinary demographic fields", () => {
+    const result = UpdatePatientSchema.safeParse({
+      id: "patient-1",
+      phone: "08012345678",
+      address: "12 New St",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.phone).toBe("08012345678");
+    }
+  });
 });
 
 describe("SetPatientStatusSchema", () => {

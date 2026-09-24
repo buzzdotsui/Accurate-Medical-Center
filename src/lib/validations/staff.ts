@@ -36,6 +36,18 @@ export const CreateStaffSchema = z.object({
 export type CreateStaffInput = z.infer<typeof CreateStaffSchema>;
 
 /**
+ * Server-side privilege boundary: only a SUPER_ADMIN may create or assign
+ * the SUPER_ADMIN role. An ADMIN (or any other caller) attempting to mint
+ * SUPER_ADMIN is rejected regardless of what the client sent.
+ */
+export function canAssignRole(callerRole: string, targetRole: string): boolean {
+  if (targetRole === ROLES.SUPER_ADMIN) {
+    return callerRole === ROLES.SUPER_ADMIN;
+  }
+  return true;
+}
+
+/**
  * Schema for updating a staff member's profile.
  * Intentionally excludes email/password/role — credential and role changes
  * must go through the authentication system, never through this endpoint.

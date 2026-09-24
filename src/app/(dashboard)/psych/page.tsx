@@ -25,36 +25,39 @@ export default function PsychDashboard() {
         </p>
       </div>
 
-      {/* Info alert */}
+      {/* Honest status — no fake metrics */}
       <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
-        <strong>Coming soon:</strong> Psychological assessment recording, therapy session tracking,
-        and recovery monitoring are planned for a future stage.
+        <strong>Module status:</strong> Psychological assessment recording, therapy session
+        tracking, and recovery monitoring are <em>not yet implemented</em>. Assessment models
+        exist in the schema (<code>PsychologicalAssessment</code>, <code>TherapySession</code>)
+        but no clinical workflow UI is deployed. Contact your branch administrator for
+        paper-based workflows until this module ships.
       </div>
 
-      {/* Placeholder stat cards */}
+      {/* Placeholder stat cards — intentionally show “—” not zeros */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Active Assessments"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={Brain}
         />
         <StatCard
           title="Therapy Sessions"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={Users}
         />
         <StatCard
           title="Patient Referrals"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={LineChart}
         />
         <StatCard
           title="Recovery Tracking"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={Heart}
         />
       </div>

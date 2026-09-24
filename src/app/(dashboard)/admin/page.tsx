@@ -24,6 +24,24 @@ interface DashboardMetrics {
   pendingRadiologyRequests: number;
 }
 
+interface AdmissionRow {
+  id: string;
+  admissionId: string;
+  admittedAt: string;
+  reason: string;
+  status: string;
+  patient: { firstName: string; lastName: string; patientId: string };
+  bed?: { room?: { ward?: { name?: string } } } | null;
+}
+
+interface StaffRow {
+  id: string;
+  staffId: string;
+  isActive: boolean;
+  department?: { name?: string } | null;
+  user: { name: string; role: string; email?: string };
+}
+
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -31,6 +49,148 @@ function formatCurrency(value: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function RecentAdmissionsPanel() {
+  const { data, isLoading, error, refetch, isFetching } = useQuery<AdmissionRow[]>({
+    queryKey: ["admin_recent_admissions"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/inpatient/admissions?take=8");
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error?.message ?? "Failed to load admissions");
+      }
+      const json = await res.json();
+      return json.data as AdmissionRow[];
+    },
+    staleTime: 30_000,
+  });
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-heading font-semibold">Recent Admissions</h2>
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0"
+          disabled={isFetching}
+          onClick={() => refetch()}
+        >
+          Refresh
+        </Button>
+      </div>
+      {error ? (
+        <ErrorState
+          title="Failed to load admissions"
+          description={(error as Error).message}
+          onRetry={() => refetch()}
+        />
+      ) : isLoading ? (
+        <Skeleton className="h-48 w-full rounded-xl" />
+      ) : !data || data.length === 0 ? (
+        <EmptyState
+          icon={<Bed className="w-full h-full" />}
+          title="No recent admissions"
+          description="Admitted patients will appear here as they are registered in the system."
+        />
+      ) : (
+        <div className="rounded-xl border bg-card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="border-b bg-muted/40">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">Patient</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">ID</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">Ward</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">Admitted</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {data.slice(0, 6).map((a) => (
+                <tr key={a.id} className="hover:bg-muted/30">
+                  <td className="px-3 py-2 font-medium">
+                    {a.patient.firstName} {a.patient.lastName}
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground font-mono text-xs">
+                    {a.patient.patientId}
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground">
+                    {a.bed?.room?.ward?.name ?? "—"}
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground text-xs">
+                    {new Date(a.admittedAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StaffOnDutyPanel({ onAddStaff }: { onAddStaff: () => void }) {
+  const { data, isLoading, error, refetch } = useQuery<StaffRow[]>({
+    queryKey: ["admin_staff_on_duty"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/hr/staff");
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error?.message ?? "Failed to load staff");
+      }
+      const json = await res.json();
+      return json.data as StaffRow[];
+    },
+    staleTime: 60_000,
+  });
+
+  const activeStaff = (data ?? []).filter((s) => s.isActive);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-heading font-semibold">Active Staff</h2>
+        <Button size="sm" className="gap-2" onClick={onAddStaff}>
+          <Users className="w-4 h-4" /> Add Staff
+        </Button>
+      </div>
+      {error ? (
+        <ErrorState
+          title="Failed to load staff"
+          description={(error as Error).message}
+          onRetry={() => refetch()}
+        />
+      ) : isLoading ? (
+        <Skeleton className="h-48 w-full rounded-xl" />
+      ) : activeStaff.length === 0 ? (
+        <EmptyState
+          icon={<Users className="w-full h-full" />}
+          title="No active staff"
+          description="Active staff members will appear here once they are added to the system."
+          action={
+            <Button size="sm" className="gap-2" onClick={onAddStaff}>
+              <Users className="w-4 h-4" /> Add Staff Member
+            </Button>
+          }
+        />
+      ) : (
+        <div className="rounded-xl border bg-card divide-y">
+          {activeStaff.slice(0, 6).map((s) => (
+            <div key={s.id} className="flex items-center justify-between px-4 py-3">
+              <div>
+                <p className="text-sm font-medium">{s.user.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {s.department?.name ?? "No department"} · {s.user.role.replace(/_/g, " ")}
+                </p>
+              </div>
+              <span className="text-xs font-mono text-muted-foreground">{s.staffId}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function AdminDashboardPage() {
@@ -159,28 +319,8 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-3">
-              <h2 className="text-lg font-heading font-semibold">Recent Admissions</h2>
-              <EmptyState
-                icon={<Bed className="w-full h-full" />}
-                title="No recent admissions"
-                description="Admitted patients will appear here as they are registered in the system."
-              />
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-lg font-heading font-semibold">Staff on Duty</h2>
-              <EmptyState
-                icon={<Users className="w-full h-full" />}
-                title="No staff on duty"
-                description="Staff shift assignments will appear here once staff members are added to the system."
-                action={
-                  <Button size="sm" className="gap-2" onClick={() => setStaffDialogOpen(true)}>
-                    <Users className="w-4 h-4" /> Add Staff Member
-                  </Button>
-                }
-              />
-            </div>
+            <RecentAdmissionsPanel />
+            <StaffOnDutyPanel onAddStaff={() => setStaffDialogOpen(true)} />
           </div>
         </>
       )}

@@ -1,11 +1,10 @@
-import { NextRequest } from 'next/server';
 import { withAuth, withRole, parseBody, parseQuery } from '@/lib/api/middleware';
 import { CreateAppointmentSchema } from '@/lib/validations/appointment';
 import { AppointmentService } from '@/services/appointment.service';
 import { ok, created } from '@/lib/api/response';
 import { z } from 'zod';
 import { ROLES } from '@/config/roles';
-import { buildBranchFilter, resolveBranchId } from '@/lib/auth/resource-authorization';
+import { buildBranchFilter, resolveBranchId, verifyPatientAccess, verifyAssignableDoctor } from '@/lib/auth/resource-authorization';
 import { PatientService } from '@/services/patient.service';
 
 const ListAppointmentsQuerySchema = z.object({
@@ -63,7 +62,21 @@ export const POST = withRole(
   async (req, session) => {
     const body = await parseBody(req, CreateAppointmentSchema);
 
-    const branchId = await resolveBranchId(session.user, body.branchId);
+    // Patient must be reachable by the caller (branch isolation / self-access).
+    const patient = await verifyPatientAccess(session.user, body.patientId, 'UPDATE');
+
+    // Resolve appointment branch. SUPER_ADMIN who omits branchId books into
+    // the patient's own branch (not an arbitrary HQ fallback) so the
+    // appointment and doctor stay consistent.
+    const requestedBranchId =
+      body.branchId ??
+      (session.user.role === ROLES.SUPER_ADMIN ? patient.branchId : undefined);
+    const branchId = await resolveBranchId(session.user, requestedBranchId);
+
+    // doctorId is a client-supplied Staff ID — never trusted blindly.
+    if (body.doctorId) {
+      await verifyAssignableDoctor(session.user, body.doctorId, branchId);
+    }
 
     const appointment = await AppointmentService.createAppointment(
       { ...body, branchId },

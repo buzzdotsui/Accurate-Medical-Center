@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-
 interface VisitPatientDetail {
   id: string;
   visitId: string;
@@ -89,8 +88,8 @@ export default function RecordVitals() {
             {isVisitLoading
               ? "Loading patient..."
               : isVisitError
-              ? (visitError instanceof Error ? visitError.message : "Failed to load patient")
-              : `Patient: ${visit?.patient.firstName} ${visit?.patient.lastName} (${visit?.patient.patientId})`}
+                ? (visitError instanceof Error ? visitError.message : "Failed to load patient")
+                : `Patient: ${visit?.patient.firstName} ${visit?.patient.lastName} (${visit?.patient.patientId})`}
           </p>
         </div>
       </div>
@@ -102,7 +101,7 @@ export default function RecordVitals() {
         <CardContent>
           <form onSubmit={form.handleSubmit((d) => mutation.mutate(d))} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Blood Pressure (mmHg)</label>
                 <Input {...form.register("bloodPressure")} placeholder="120/80" />
@@ -149,8 +148,8 @@ export default function RecordVitals() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Additional Nursing Notes</label>
-              <textarea 
-                {...form.register("notes")} 
+              <textarea
+                {...form.register("notes")}
                 className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 placeholder="Patient reports feeling dizzy..."
               />

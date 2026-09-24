@@ -4,8 +4,9 @@ import { HrService } from '@/services/hr.service';
 import { StaffService } from '@/services/staff.service';
 import { ok, created } from '@/lib/api/response';
 import { ROLES } from '@/config/roles';
-import { CreateStaffSchema } from '@/lib/validations/staff';
+import { CreateStaffSchema, canAssignRole } from '@/lib/validations/staff';
 import { buildBranchFilter, resolveBranchId } from '@/lib/auth/resource-authorization';
+import { AppError } from '@/lib/api/errors';
 
 /**
  * GET /api/v1/hr/staff
@@ -31,6 +32,15 @@ export const POST = withRole(
   [ROLES.SUPER_ADMIN, ROLES.ADMIN],
   async (req, session) => {
     const body = await parseBody(req, CreateStaffSchema);
+
+    // Privilege boundary: only SUPER_ADMIN may create SUPER_ADMIN.
+    if (!canAssignRole(session.user.role, body.role)) {
+      throw new AppError(
+        'Only a Super Administrator can create Super Administrator accounts.',
+        'FORBIDDEN',
+        403,
+      );
+    }
 
     // Resolve the effective branchId. Dialog clients never send branchId;
     // the server derives it from the admin's session (SUPER_ADMIN may

@@ -2,13 +2,16 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { AppError } from '@/lib/api/errors';
 
-// Initialize Redis only if URLs are provided (graceful degradation)
-const configuredRedisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL;
-// @upstash/redis is an HTTPS REST client; the local Redis TCP URL is not compatible.
-const redisUrl = configuredRedisUrl?.startsWith('https://') ? configuredRedisUrl : undefined;
+// Upstash-only architecture: @upstash/redis is an HTTPS REST client and
+// does NOT accept a TCP redis:// URL. A local Docker redis://redis:6379
+// backend is intentionally unsupported here — configure production/local
+// rate limiting with UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN.
+// When unset: auth fails open (login stays available); contact/appointment
+// public forms fail closed (503) so abuse protection is never silently off.
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-const redis = (redisUrl && redisToken) 
+const redis = (redisUrl?.startsWith('https://') && redisToken)
   ? new Redis({ url: redisUrl, token: redisToken })
   : null;
 

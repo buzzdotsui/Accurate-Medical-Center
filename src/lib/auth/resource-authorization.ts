@@ -520,3 +520,55 @@ export async function verifyStaffAccess(
 
   return staff;
 }
+
+/**
+ * Verify that a client-supplied doctorId refers to a real, active Staff
+ * member whose user role is DOCTOR (or SUPER_ADMIN), and that the doctor
+ * belongs to the target branch of the write (appointment branch, visit's
+ * patient branch, etc.). Never trust a raw staff ID from the request body.
+ *
+ * Pattern mirrors InpatientService.admitPatient's doctor validation.
+ */
+export async function verifyAssignableDoctor(
+  user: SessionUser,
+  doctorStaffId: string,
+  targetBranchId: string,
+): Promise<{ id: string; branchId: string }> {
+  const doctor = await prisma.staff.findUnique({
+    where: { id: doctorStaffId },
+    select: {
+      id: true,
+      branchId: true,
+      isActive: true,
+      user: { select: { role: true } },
+    },
+  });
+
+  if (!doctor || !doctor.isActive) {
+    throw new AppError('Doctor not found or inactive', 'NOT_FOUND', 404);
+  }
+
+  const role = doctor.user?.role;
+  if (role !== ROLES.DOCTOR && role !== ROLES.SUPER_ADMIN) {
+    throw new AppError(
+      'Assigned staff member must be a doctor',
+      'VALIDATION_ERROR',
+      400,
+    );
+  }
+
+  if (doctor.branchId !== targetBranchId) {
+    throw new AppError(
+      'Doctor does not belong to this branch',
+      'FORBIDDEN',
+      403,
+    );
+  }
+
+  // `user` is accepted for call-site symmetry with other verify* helpers
+  // and future policy extensions; the branch check above already covers
+  // non-SUPER_ADMIN callers because targetBranchId is their resolved branch.
+  void user;
+
+  return { id: doctor.id, branchId: doctor.branchId };
+}

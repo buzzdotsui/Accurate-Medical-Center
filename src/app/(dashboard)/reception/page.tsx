@@ -1,20 +1,30 @@
 "use client";
 
+import * as React from "react";
 import { format } from "date-fns";
 import { UserPlus, CalendarPlus, Users, CheckCircle, Clock, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingState } from "@/components/ui/loading-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { DataTable, Column } from "@/components/ui/data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookAppointmentDialog } from "@/components/admin/appointments/book-appointment-dialog";
 
 export default function ReceptionDashboard() {
   const today = new Date();
+  const queryClient = useQueryClient();
+  const [bookOpen, setBookOpen] = React.useState(false);
+
+  const invalidateAppointments = React.useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["dashboard_appointments_today"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard_queue_stats"] });
+    queryClient.invalidateQueries({ queryKey: ["reception_appointments"] });
+  }, [queryClient]);
 
   // Fetch Patients Count (assuming taking 1 item gets the total fast)
   const { data: patientsData } = useQuery({
@@ -102,7 +112,7 @@ export default function ReceptionDashboard() {
               Register Patient
             </Link>
           </Button>
-          <Button variant="outline" className="gap-2 bg-background">
+          <Button variant="outline" className="gap-2 bg-background" onClick={() => setBookOpen(true)}>
             <CalendarPlus className="w-4 h-4" />
             Book Appointment
           </Button>
@@ -204,7 +214,7 @@ export default function ReceptionDashboard() {
                 title="No appointments scheduled"
                 description="Upcoming appointments will appear here. Book a new appointment to get started."
                 action={
-                  <Button className="gap-2" size="sm">
+                  <Button className="gap-2" size="sm" onClick={() => setBookOpen(true)}>
                     <CalendarPlus className="w-4 h-4" /> Book Appointment
                   </Button>
                 }
@@ -215,6 +225,12 @@ export default function ReceptionDashboard() {
           </div>
         </div>
       </div>
+
+      <BookAppointmentDialog
+        open={bookOpen}
+        onOpenChange={setBookOpen}
+        onSuccess={invalidateAppointments}
+      />
     </div>
   );
 }

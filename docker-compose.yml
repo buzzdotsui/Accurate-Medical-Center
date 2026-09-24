@@ -8,14 +8,15 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/accurate_medical?schema=public
-      - REDIS_URL=redis://redis:6379
+      # Rate limiting uses Upstash Redis REST (HTTPS), not TCP redis://.
+      # Without these, auth rate limiting fails open and public
+      # contact/appointment forms fail closed (503) by design.
+      - UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL:-}
+      - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN:-}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in your environment}
       - BETTER_AUTH_URL=${BETTER_AUTH_URL:-http://localhost:3000}
-      - ALLOW_SEED=true
     depends_on:
       db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     restart: always
 
@@ -36,19 +37,5 @@ services:
       retries: 5
     restart: always
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: always
-
 volumes:
   db_data:
-  redis_data:

@@ -43,13 +43,19 @@ export class IdGeneratorService {
    * tagged-template parameterisation passes untyped values into raw SQL
    * expressions such as concat() or jsonb_build_object().
    *
-   * Atomicity guarantee:
+   * Atomicity guarantee (optimistic concurrency + retry):
    *   - Called inside a $transaction from the service layer.
    *   - upsert initialises the row if absent (current = 0).
-   *   - update reads the stored value, increments locally, and writes back.
-   *   - The surrounding transaction serialises concurrent callers at the
-   *     database level.
+   *   - A plain read-modify-write is NOT safe under Read Committed: two
+   *     concurrent transactions can both read current=N and both write N+1.
+   *   - We therefore use updateMany with an equality filter on the JSON
+   *     payload we read (compare-and-swap). If count === 0 another writer
+   *     won the race and we re-read and retry (bounded).
+   *   - Callers still wrap this in $transaction so a failed CAS never leaves
+   *     a half-created entity without its ID.
    */
+  private static readonly MAX_CAS_RETRIES = 5;
+
   static async getNextId(
     tx: TransactionClient,
     type: SequenceType
@@ -69,26 +75,52 @@ export class IdGeneratorService {
       update: {}, // no-op — row already exists
     });
 
-    // 2. Fetch the current counter value.
-    const setting = await tx.systemSetting.findUniqueOrThrow({
-      where: { key: config.key },
-    });
+    for (let attempt = 0; attempt < IdGeneratorService.MAX_CAS_RETRIES; attempt++) {
+      // 2. Fetch the current counter value.
+      const setting = await tx.systemSetting.findUnique({
+        where: { key: config.key },
+      });
+      if (!setting) {
+        // Row vanished mid-flight (should not happen after upsert) — re-create.
+        await tx.systemSetting.upsert({
+          where: { key: config.key },
+          create: {
+            key: config.key,
+            value: { current: 0 },
+            description: `Auto-increment sequence for ${type} IDs`,
+          },
+          update: {},
+        });
+        continue;
+      }
 
-    // 3. Parse the stored counter.  The JSON value shape is { current: number }.
-    const valueObj = setting.value as { current?: number };
-    const currentVal =
-      typeof valueObj?.current === "number" ? valueObj.current : 0;
-    const nextVal = currentVal + 1;
+      // 3. Parse the stored counter.  The JSON value shape is { current: number }.
+      const valueObj = setting.value as { current?: number };
+      const currentVal =
+        typeof valueObj?.current === "number" ? valueObj.current : 0;
+      const nextVal = currentVal + 1;
 
-    // 4. Write the incremented counter back.
-    await tx.systemSetting.update({
-      where: { key: config.key },
-      data: { value: { current: nextVal } },
-    });
+      // 4. Compare-and-swap write: only succeeds if the stored JSON still
+      //    equals what we read. Under concurrent writers only one CAS wins.
+      const cas = await tx.systemSetting.updateMany({
+        where: {
+          key: config.key,
+          value: { equals: { current: currentVal } },
+        },
+        data: { value: { current: nextVal } },
+      });
 
-    // 5. Format and return the human-readable ID.
-    const paddedNumber = String(nextVal).padStart(config.digits, "0");
-    return `${config.prefix}${paddedNumber}`;
+      if (cas.count === 1) {
+        const paddedNumber = String(nextVal).padStart(config.digits, "0");
+        return `${config.prefix}${paddedNumber}`;
+      }
+
+      // Lost the race — loop and re-read the winning value.
+    }
+
+    throw new Error(
+      `Failed to allocate ${type} ID after ${IdGeneratorService.MAX_CAS_RETRIES} concurrent retries`
+    );
   }
 
   static async generatePatientId(tx: TransactionClient): Promise<string> {

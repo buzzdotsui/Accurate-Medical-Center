@@ -20,9 +20,17 @@ export const CreatePatientSchema = z.object({
 
 export type CreatePatientInput = z.infer<typeof CreatePatientSchema>;
 
-export const UpdatePatientSchema = CreatePatientSchema.partial().extend({
-  id: z.string().min(1, 'Invalid patient ID'),
-});
+/**
+ * Ordinary patient profile updates must never reassign branch or user
+ * ownership. `branchId`/`userId` are omitted so Zod strips them from the
+ * update path; any dedicated administrative reassignment must use a
+ * separate, explicitly authorized workflow.
+ */
+export const UpdatePatientSchema = CreatePatientSchema.partial()
+  .omit({ branchId: true, userId: true })
+  .extend({
+    id: z.string().min(1, 'Invalid patient ID'),
+  });
 
 export type UpdatePatientInput = z.infer<typeof UpdatePatientSchema>;
 

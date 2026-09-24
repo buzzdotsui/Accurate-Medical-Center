@@ -6,6 +6,7 @@ import { error as errorResponse, serverError, validationError } from './response
 import { logger } from '@/lib/utils/logger';
 import { getSessionUser, type SessionUser } from '@/lib/auth/session';
 import { type Role, ROLES } from '@/config/roles';
+import { checkRateLimit } from '@/lib/security/rate-limit';
 
 type RouteContext = { params: Promise<Record<string, string>> };
 
@@ -20,13 +21,38 @@ type AuthApiHandler = (
   context: RouteContext,
 ) => Promise<NextResponse<unknown>> | NextResponse<unknown>;
 
+/** Paths that already have stricter dedicated limiters (auth/contact/appointment). */
+function hasDedicatedRateLimit(pathname: string): boolean {
+  return (
+    pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/api/contact') ||
+    pathname.startsWith('/api/appointment')
+  );
+}
+
+function clientIp(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    '127.0.0.1'
+  );
+}
+
 /**
  * Base API handler that catches all errors (AppError, Zod, generic)
  * and normalizes them into structured API responses.
+ *
+ * Also applies the shared Upstash global API rate limit (100 / 10s / IP)
+ * to every /api/* route that does not already use a dedicated limiter.
+ * When Upstash is unconfigured, `checkRateLimit(..., 'global')` is a no-op
+ * for this type (fail-open) so local development is unaffected.
  */
 export function withApiHandler(handler: ApiHandler): ApiHandler {
   return async (req, context) => {
     try {
+      if (req.nextUrl.pathname.startsWith('/api/') && !hasDedicatedRateLimit(req.nextUrl.pathname)) {
+        await checkRateLimit(clientIp(req), 'global');
+      }
       return await handler(req, context);
     } catch (error) {
       if (isAppError(error)) {

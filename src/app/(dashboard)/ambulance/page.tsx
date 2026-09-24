@@ -44,36 +44,38 @@ export default function AmbulanceDashboard() {
         </p>
       </div>
 
-      {/* Info alert */}
+      {/* Honest status — no fake metrics */}
       <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
-        <strong>Coming soon:</strong> Ambulance dispatch, fleet management, and GPS tracking
-        are planned for a future stage.
+        <strong>Module status:</strong> Ambulance dispatch, fleet management, and GPS tracking
+        are <em>not yet implemented</em>. No dispatch, fleet, or telemetry tables exist in the
+        schema. Coordinate emergency transport via the hospital&apos;s existing phone/dispatch
+        process until this module ships.
       </div>
 
-      {/* Placeholder stat cards */}
+      {/* Placeholder stat cards — intentionally show “—” not zeros */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Active Dispatches"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={Truck}
         />
         <StatCard
           title="Fleet Status"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={Radio}
         />
         <StatCard
           title="Emergency Calls"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={MapPin}
         />
         <StatCard
           title="Average Response"
           value="—"
-          description="Coming soon"
+          description="Not implemented"
           icon={Activity}
         />
       </div>

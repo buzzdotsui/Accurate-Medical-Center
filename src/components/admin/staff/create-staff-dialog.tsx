@@ -34,8 +34,11 @@ const ClientCreateStaffSchema = z.object({
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  // SUPER_ADMIN is intentionally excluded: only a SUPER_ADMIN may mint
+  // SUPER_ADMIN accounts, and that path is server-enforced in
+  // POST /api/v1/hr/staff (see canAssignRole). The dialog never offers it.
   role: z.enum([
-    ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE,
+    ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE,
     ROLES.RECEPTIONIST, ROLES.PHARMACIST, ROLES.LAB_SCIENTIST,
     ROLES.RADIOGRAPHER, ROLES.ACCOUNTANT, ROLES.THEATRE_STAFF,
     ROLES.MATERNAL_STAFF, ROLES.MENTAL_HEALTH, ROLES.AMBULANCE,
@@ -198,7 +201,7 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
 
           <FormField label="Role" htmlFor="staff-role" error={errors.role?.message} required>
             <Select id="staff-role" disabled={isSubmitting} {...register("role")}>
-              {STAFF_ROLES.map((r) => (
+              {STAFF_ROLES.filter((r) => r !== ROLES.SUPER_ADMIN).map((r) => (
                 <option key={r} value={r}>
                   {ROLE_LABELS[r]}
                 </option>

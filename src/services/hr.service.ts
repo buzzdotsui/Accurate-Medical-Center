@@ -21,27 +21,51 @@ export class HrService {
   }
 
   /**
-   * Assign or update a shift for a staff member
+   * Assign or update a shift for a staff member.
+   *
+   * There is no Schedule table in the schema. The assignment is persisted as
+   * an ASSIGN_SHIFT audit-log event (resource SCHEDULE) that GET
+   * /api/v1/hr/shifts reads back, with staff name/department snapshotted so
+   * the roster stays readable if directory data changes later.
    */
-  static async assignShift(data: AssignShiftInput, executorId: string) {
-    const staff = await prisma.staff.findUnique({ where: { id: data.staffId } });
+  static async assignShift(
+    data: AssignShiftInput,
+    executorId: string,
+    branchId?: string,
+  ) {
+    const staff = await prisma.staff.findUnique({
+      where: { id: data.staffId },
+      include: {
+        user: { select: { name: true } },
+        department: { select: { name: true } },
+      },
+    });
     if (!staff) throw new AppError('Staff member not found', 'NOT_FOUND', 404);
 
     const shiftDate = new Date(data.date);
+    const result = {
+      id: `shift:${data.staffId}:${data.date}:${data.shift}`,
+      staffId: data.staffId,
+      date: shiftDate,
+      shift: data.shift,
+      notes: data.notes,
+    };
 
-    // Upsert the schedule for that specific date and staff (Mocked as there's no Schedule model)
-    const _schedule = null;
-
-    const result = { id: 'mock', staffId: data.staffId, date: shiftDate, shift: data.shift, notes: data.notes };
-
-    // Audit Log
     await AuditService.log({
       userId: executorId,
       userRole: 'ADMIN',
       action: 'ASSIGN_SHIFT',
       resource: 'SCHEDULE',
       resourceId: result.id,
-      details: { staffId: data.staffId, date: data.date, shift: data.shift }
+      details: {
+        staffId: data.staffId,
+        staffName: staff.user.name,
+        department: staff.department?.name ?? null,
+        date: data.date,
+        shift: data.shift,
+        notes: data.notes ?? null,
+      },
+      branchId: branchId ?? staff.branchId,
     });
 
     return result;

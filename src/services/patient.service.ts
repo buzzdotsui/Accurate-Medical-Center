@@ -371,10 +371,13 @@ export class PatientService {
 
   static async updatePatient(data: UpdatePatientInput, executorId?: string) {
     const { id, ...updateData } = data;
-    
+
     const existing = await prisma.patient.findUnique({ where: { id } });
     if (!existing || existing.deletedAt) throw new AppError('Patient not found', 'NOT_FOUND', 404);
 
+    // UpdatePatientSchema omits branchId/userId — an ordinary update can
+    // never reassign branch or user ownership. Prisma leaves those columns
+    // unchanged when they are absent from `data`.
     const updated = await prisma.patient.update({
       where: { id },
       data: {

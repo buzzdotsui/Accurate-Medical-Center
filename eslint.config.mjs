@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Nested tool worktrees — not part of the application source tree.
+    ".kilo/**",
     // HMS dashboard pages — pre-existing issues out of scope for marketing refactor
     "src/app/(dashboard)/**",
     "src/app/(auth)/**",

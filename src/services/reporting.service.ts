@@ -83,9 +83,13 @@ export class ReportingService {
   }
 
   /**
-   * Generate raw data for specific report types
+   * Generate raw data for specific report types.
+   *
+   * `branchId` scopes every query to the caller's permitted branch
+   * (undefined = SUPER_ADMIN / hospital-wide). Payments are scoped through
+   * `invoice.branchId`; visits through `patient.branchId`.
    */
-  static async generateReportData(data: GenerateReportInput) {
+  static async generateReportData(data: GenerateReportInput, branchId?: string) {
     const start = new Date(data.startDate);
     const end = new Date(data.endDate);
     end.setHours(23, 59, 59, 999); // Include full end day
@@ -93,14 +97,20 @@ export class ReportingService {
     switch (data.type) {
       case 'FINANCIAL':
         return await prisma.payment.findMany({
-          where: { createdAt: { gte: start, lte: end } },
+          where: {
+            createdAt: { gte: start, lte: end },
+            ...(branchId ? { invoice: { branchId } } : {}),
+          },
           include: { invoice: { select: { invoiceId: true, patient: { select: { firstName: true, lastName: true } } } } },
           orderBy: { createdAt: 'desc' }
         });
         
       case 'CLINICAL':
         return await prisma.visit.findMany({
-          where: { startedAt: { gte: start, lte: end } },
+          where: {
+            startedAt: { gte: start, lte: end },
+            ...(branchId ? { patient: { branchId } } : {}),
+          },
           include: { patient: { select: { firstName: true, lastName: true } }, doctor: { select: { user: { select: { name: true } } } } },
           orderBy: { startedAt: 'desc' }
         });

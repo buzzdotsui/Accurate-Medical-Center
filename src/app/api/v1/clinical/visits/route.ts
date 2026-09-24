@@ -4,7 +4,8 @@ import { StartVisitSchema } from '@/lib/validations/clinical';
 import { ClinicalService } from '@/services/clinical.service';
 import { created, ok } from '@/lib/api/response';
 import { ROLES } from '@/config/roles';
-import { buildBranchFilter } from '@/lib/auth/resource-authorization';
+import { buildBranchFilter, verifyPatientAccess, verifyAppointmentAccess, verifyAssignableDoctor } from '@/lib/auth/resource-authorization';
+import { AppError } from '@/lib/api/errors';
 import { prisma } from '@/lib/db/client';
 import { z } from 'zod';
 
@@ -64,6 +65,29 @@ export const POST = withRole(
   [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.RECEPTIONIST, ROLES.NURSE, ROLES.DOCTOR],
   async (req: NextRequest, session) => {
     const body = await parseBody(req, StartVisitSchema);
+
+    // Resource/branch authorization before any write:
+    // patient must be reachable by the caller; appointment (if any) must
+    // belong to that patient and the caller's permitted branch.
+    const patient = await verifyPatientAccess(session.user, body.patientId, 'UPDATE');
+
+    if (body.appointmentId) {
+      const appointment = await verifyAppointmentAccess(session.user, body.appointmentId, 'UPDATE');
+      if (appointment.patientId !== body.patientId) {
+        throw new AppError(
+          'Appointment does not belong to this patient.',
+          'BAD_REQUEST',
+          400,
+        );
+      }
+    }
+
+    // doctorId is a client-supplied Staff ID — must be an active doctor
+    // in the patient's branch (same policy as admissions/appointments).
+    if (body.doctorId) {
+      await verifyAssignableDoctor(session.user, body.doctorId, patient.branchId);
+    }
+
     const visit = await ClinicalService.startVisit(body, session.user.id, session.user.role);
     return created(visit);
   }

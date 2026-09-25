@@ -36,6 +36,7 @@ export function GlobalSearch() {
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const runSearch = useCallback(async (q: string) => {
@@ -84,6 +85,19 @@ export function GlobalSearch() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Make the visible ⌘K / Ctrl+K badge truthful: the shortcut focuses search.
+  useEffect(() => {
+    function handleGlobalShortcut(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setOpen(true);
+      }
+    }
+    window.addEventListener("keydown", handleGlobalShortcut);
+    return () => window.removeEventListener("keydown", handleGlobalShortcut);
+  }, []);
+
   function navigateTo(result: SearchResult) {
     setOpen(false);
     setQuery("");
@@ -117,6 +131,7 @@ export function GlobalSearch() {
     <div ref={containerRef} className="relative hidden md:block group">
       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
       <input
+        ref={inputRef}
         type="text"
         value={query}
         onChange={(e) => {

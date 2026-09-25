@@ -118,9 +118,9 @@ export default function LoginPage() {
       </motion.form>
 
       <motion.div variants={contentReveal} className="rounded-2xl border border-black/[0.07] bg-white/60 px-4 py-4 text-center text-xs leading-5 text-muted-foreground shadow-sm">
-        Patient access portal coming soon.{" "}
-        <Link href="/patient" className="font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/75 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-          Learn more
+        Patients: sign in with your registered account above.{" "}
+        <Link href="/register" className="font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/75 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+          Create a patient account
         </Link>
       </motion.div>
     </motion.div>

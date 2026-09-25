@@ -90,7 +90,7 @@ export default function RegisterPage() {
   return (
     <motion.div initial="hidden" animate="visible" variants={pageReveal} className="space-y-8 sm:space-y-9">
       <motion.div variants={contentReveal} className="space-y-3">
-        <motion.p variants={contentReveal} className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">New staff profile</motion.p>
+        <motion.p variants={contentReveal} className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">Patient registration</motion.p>
         <motion.h1
           variants={headingReveal}
           className={`${displayHeadingClassName} ${displayHeadingVariantClassNames.auth} text-foreground`}

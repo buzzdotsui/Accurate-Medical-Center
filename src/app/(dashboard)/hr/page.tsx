@@ -186,7 +186,7 @@ export default function HrDashboard() {
           </CardContent>
         </Card>
 
-        {/* Shift Scheduling — Coming Soon */}
+        {/* Shift Scheduling */}
         <Card className="border-none shadow-sm ring-1 ring-border/50">
           <CardHeader>
             <CardTitle className="text-lg">Shift Scheduling</CardTitle>
@@ -196,12 +196,12 @@ export default function HrDashboard() {
               <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
                 <Clock className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground">Coming Soon</h3>
+              <h3 className="text-lg font-semibold text-foreground">Shift Roster</h3>
               <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                Shift scheduling and roster management are under development and will be available shortly.
+                View and manage staff shift schedules and roster assignments.
               </p>
               <Button className="mt-6" variant="outline" asChild>
-                <Link href="/hr/schedule">View Roster</Link>
+                <Link href="/hr/schedule">Open Roster</Link>
               </Button>
             </div>
           </CardContent>

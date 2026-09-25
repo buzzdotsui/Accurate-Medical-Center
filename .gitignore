@@ -45,4 +45,17 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Capacitor / Android (never commit keystores or local platform build junk)
+/dist-capacitor/
+/android/app/build/
+/android/.gradle/
+/android/capacitor.settings.gradle
+*.keystore
+*.jks
+*.aab
+*.apk
+
 #okay
+
+# local verification logs
+*.log

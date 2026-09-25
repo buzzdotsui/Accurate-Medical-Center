@@ -12,6 +12,12 @@ export interface NavItem {
 /**
  * Navigation structure per role. Each role gets its own sidebar
  * navigation tree. Items are rendered in order.
+ *
+ * Phase 1 commercial scope (invoice TTI/2026/HMS-P1-002):
+ * auth, patients, staff, appointments, records, operational dashboards,
+ * settings. Specialty modules that are incomplete (psych, ambulance,
+ * theatre, maternal) and deferred areas (advanced analytics) are kept
+ * out of the primary nav; their source routes remain for a future phase.
  */
 export const navConfig: Record<Role, NavItem[]> = {
   [ROLES.SUPER_ADMIN]: [
@@ -23,7 +29,7 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Laboratory', href: '/admin/laboratory', icon: 'flask-conical' },
     { title: 'Radiology', href: '/admin/radiology', icon: 'scan' },
     { title: 'Finance', href: '/admin/finance', icon: 'banknote' },
-    { title: 'Settings', href: '/admin/settings', icon: 'settings' },
+    { title: 'Settings', href: '/settings', icon: 'settings' },
   ],
 
   [ROLES.ADMIN]: [
@@ -31,7 +37,7 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Patients', href: '/admin/patients', icon: 'users' },
     { title: 'Staff', href: '/admin/staff', icon: 'user-cog' },
     { title: 'Appointments', href: '/admin/appointments', icon: 'calendar-check' },
-    { title: 'Settings', href: '/admin/settings', icon: 'settings' },
+    { title: 'Settings', href: '/settings', icon: 'settings' },
   ],
 
   [ROLES.DOCTOR]: [
@@ -75,14 +81,13 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Invoices', href: '/billing/invoices', icon: 'receipt' },
   ],
 
+  // Deferred specialty roles: dashboard root only (no unfinished sub-flows in nav).
   [ROLES.THEATRE_STAFF]: [
     { title: 'Dashboard', href: '/theatre', icon: 'layout-dashboard' },
-    { title: 'Inpatient Wards', href: '/inpatient/admissions', icon: 'bed' },
   ],
 
   [ROLES.MATERNAL_STAFF]: [
     { title: 'Dashboard', href: '/maternal', icon: 'layout-dashboard' },
-    { title: 'Inpatient Wards', href: '/inpatient/admissions', icon: 'bed' },
   ],
 
   [ROLES.MENTAL_HEALTH]: [

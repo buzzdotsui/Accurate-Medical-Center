@@ -111,7 +111,7 @@ export default function NurseDashboard() {
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2 bg-background" asChild>
-            <Link href="/nurse/vitals">
+            <Link href="/nurse/queue">
               <Activity className="w-4 h-4" /> Record Vitals
             </Link>
           </Button>

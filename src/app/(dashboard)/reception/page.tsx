@@ -80,7 +80,7 @@ export default function ReceptionDashboard() {
   const apptColumns: Column<any>[] = [
     { accessorKey: "timeSlot", header: "Time" },
     { accessorKey: "patientName", header: "Patient", cell: (row) => row.patient?.firstName ? `${row.patient.firstName} ${row.patient.lastName}` : 'Unknown' },
-    { accessorKey: "doctorName", header: "Doctor", cell: (row) => row.doctor?.user?.name || 'Any Doctor' },
+    { accessorKey: "doctorName", header: "Doctor", cell: (row) => row.staff?.user?.name || 'Any Doctor' },
     { accessorKey: "status", header: "Status", cell: (row) => (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
         row.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-800' :

@@ -1,0 +1,25 @@
+{
+  "name": "Accurate Medical Center",
+  "short_name": "Accurate HMS",
+  "description": "Accurate Medical Centre Hospital Management System — patients, appointments, records, and care team portal.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo/WhatsApp Image 2026-08-06 at 5.36.55 PM.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo/WhatsApp Image 2026-08-06 at 5.36.55 PM.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

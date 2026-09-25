@@ -3,6 +3,20 @@
 Executable Phase 6/7 items live in this repo as scripts. Items that require
 external accounts/operators are marked **External**.
 
+## Commercial scope (invoice TTI/2026/HMS-P1-002)
+
+| Item | Owner | Status |
+|------|-------|--------|
+| HMS design & development (web) | Dev | In-repo — code complete pending final regression |
+| Domain `accuratemedicalcentre.com` | Client | **External** — purchase/renew + DNS |
+| Hosting & production deployment | Client + Dev | Scripts ready; deploy is **External** |
+| Mobile app (Capacitor Android) | Dev + Client | Config in-repo; `.aab` blocked on Android SDK + keystore (**External**) |
+| Google Play publishing | Client | Blocked on Play Console + assets (**External**) |
+
+**Not in Phase 1 (do not expand):** additional departments, advanced lab/radiology, inventory/pharmacy expansion, advanced finance/reporting/analytics, automation, SMS/email/WhatsApp, payment gateways, third-party integrations, advanced notifications, extra mobile features, extra roles/workflows, new dashboards.
+
+Deferred specialty UI/APIs (psych, ambulance, theatre, maternal) are source-preserved and gated by `PHASE1_ENABLE_DEFERRED_MODULES` (default off).
+
 ## Phase 6 — Production infrastructure
 
 | Item | Status | How |
@@ -15,6 +29,16 @@ external accounts/operators are marked **External**.
 | Domain | **External** | Point DNS at Vercel/origin; set `BETTER_AUTH_URL` + `NEXT_PUBLIC_APP_URL` |
 | Production deployment | **External** | Vercel project → `npm run build` (`output: standalone` also supports Node host) |
 | Disaster recovery | Script + process | Restore from latest `db_backup_*.sql.gz`; verify with `GET /api/health`; keep ≥7 days local + S3 |
+| Database schema (no migrations dir) | Process | This repo has **no** `prisma/migrations/`. Initial production sync: `npx prisma db push` against prod `DATABASE_URL` (never `prisma migrate reset` on real data). Subsequent schema changes: introduce migrate workflow only with client sign-off |
+| Android / Play packaging | Scaffold + checklist | `capacitor.config.ts`, `public/manifest.json`, `ANDROID-PLAY-RELEASE.md`; build blocked until Android SDK + keystore exist on build machine |
+
+### Domain DNS (client)
+
+1. Purchase/renew `accuratemedicalcentre.com`.
+2. Point apex + `www` to hosting (Vercel recommended CNAME/A records).
+3. Wait for propagation; enable HTTPS (Vercel auto or reverse-proxy certs).
+4. Set production env: `BETTER_AUTH_URL=https://accuratemedicalcentre.com`, `NEXT_PUBLIC_APP_URL=https://accuratemedicalcentre.com`.
+5. Re-run `npm run verify:env` then `BASE_URL=https://accuratemedicalcentre.com npm run smoke`.
 
 ### Backup cron (example)
 
@@ -53,6 +77,8 @@ Required: `DATABASE_URL`, `DIRECT_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`,
 6. ADMIN: branch isolation (two-branch fixtures)  
 7. Unauthenticated `/api/v1/*` → 401  
 8. Seed route does not create SUPER_ADMIN without env gate  
+9. Deferred psych APIs → 403 unless `PHASE1_ENABLE_DEFERRED_MODULES=true`  
+10. Deferred role dashboards show honest Phase 1 notices (no fake stats)
 
 ### Staff training outline (30–45 min)
 

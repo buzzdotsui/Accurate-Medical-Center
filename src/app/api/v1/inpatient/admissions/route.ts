@@ -19,7 +19,7 @@ export const GET = withRole(
     const branchFilter = buildBranchFilter(session.user);
     const admissions = await InpatientService.getActiveAdmissions(branchFilter.branchId);
     return ok(admissions);
-  }
+  },
 );
 
 /**

@@ -64,9 +64,9 @@ export default function MaternalDashboard() {
       </div>
 
       {/* Info banner */}
-      <div className="rounded-lg border border-pink-200 bg-pink-50 dark:border-pink-800 dark:bg-pink-950/30 px-4 py-3 text-sm text-pink-800 dark:text-pink-300">
-        <strong>Note:</strong> Antenatal care (ANC), delivery records, and postnatal workflow are
-        planned for a future stage. Active inpatient admissions are shown below.
+      <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+        <strong>Note:</strong> ANC, delivery, and postnatal workflow modules are deferred
+        to a future phase. Active inpatient admissions are shown below for operational context.
       </div>
 
       {/* Error state */}
@@ -105,14 +105,14 @@ export default function MaternalDashboard() {
             />
             <StatCard
               title="ANC Visits"
-              value="—"
-              description="Coming soon"
+              value="Deferred"
+              description="Not in Phase 1"
               icon={Heart}
             />
             <StatCard
               title="Deliveries"
-              value="—"
-              description="Coming soon"
+              value="Deferred"
+              description="Not in Phase 1"
               icon={Baby}
             />
           </>

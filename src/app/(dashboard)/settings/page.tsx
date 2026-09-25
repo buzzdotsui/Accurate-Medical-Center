@@ -10,15 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Save, Building2, ShieldCheck, Mail, Database } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function SettingsDashboard() {
+  const queryClient = useQueryClient();
   const { data: settings, isLoading } = useQuery({
     queryKey: ['hospital-settings'],
     queryFn: async () => {
       const res = await fetch('/api/v1/settings');
       if (!res.ok) throw new Error("Failed to fetch settings");
-      return res.json();
+      const json = await res.json();
+      return (json.data ?? {}) as Record<string, string>;
     }
   });
 
@@ -57,6 +59,7 @@ export default function SettingsDashboard() {
     },
     onSuccess: () => {
       toast.success("Global settings updated successfully.");
+      queryClient.invalidateQueries({ queryKey: ['hospital-settings'] });
     }
   });
 

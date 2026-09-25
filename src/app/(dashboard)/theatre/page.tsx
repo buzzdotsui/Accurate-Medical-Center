@@ -64,9 +64,9 @@ export default function TheatreDashboard() {
       </div>
 
       {/* Info banner */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">
-        <strong>Note:</strong> Surgical workflow (theatre schedule, patient prep, post-op records) is
-        planned for a future stage. Active inpatient admissions are shown below.
+      <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+        <strong>Note:</strong> Surgical schedule and post-op modules are deferred to a
+        future phase. Active inpatient admissions are shown below for operational context.
       </div>
 
       {/* Error state */}
@@ -105,14 +105,14 @@ export default function TheatreDashboard() {
             />
             <StatCard
               title="Theatre Schedule"
-              value="—"
-              description="Coming soon"
+              value="Deferred"
+              description="Not in Phase 1"
               icon={Scissors}
             />
             <StatCard
               title="Post-Op Recovery"
-              value="—"
-              description="Coming soon"
+              value="Deferred"
+              description="Not in Phase 1"
               icon={Clock}
             />
           </>

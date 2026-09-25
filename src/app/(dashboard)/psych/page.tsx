@@ -1,79 +1,42 @@
-import { StatCard } from "@/components/ui/stat-card";
-import { Brain, Users, LineChart, Heart } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ShieldAlert, ArrowLeft } from "lucide-react";
 
+/**
+ * Deferred specialty module notice (Phase 1 commercial scope).
+ * Source for future development remains under src/ (psych service/APIs,
+ * schema models). This page does not present unfinished features as delivered.
+ */
 export default function PsychDashboard() {
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-heading font-bold text-foreground">
           Mental Health
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Psychological therapy and addiction recovery management.
+          Role workspace
         </p>
       </div>
 
-      {/* Welcome banner */}
-      <div className="rounded-lg border border-violet-200 bg-violet-50 dark:border-violet-800 dark:bg-violet-950/30 px-5 py-4">
-        <h2 className="text-base font-semibold text-violet-900 dark:text-violet-200 mb-1">
-          Welcome, Mental Health Specialist
-        </h2>
-        <p className="text-sm text-violet-800 dark:text-violet-300">
-          You are logged in as a Mental Health Specialist. Your role covers psychological
-          assessment recording, therapy session tracking, and patient recovery monitoring.
-        </p>
-      </div>
-
-      {/* Honest status — no fake metrics */}
-      <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
-        <strong>Module status:</strong> Psychological assessment recording, therapy session
-        tracking, and recovery monitoring are <em>not yet implemented</em>. Assessment models
-        exist in the schema (<code>PsychologicalAssessment</code>, <code>TherapySession</code>)
-        but no clinical workflow UI is deployed. Contact your branch administrator for
-        paper-based workflows until this module ships.
-      </div>
-
-      {/* Placeholder stat cards — intentionally show “—” not zeros */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Active Assessments"
-          value="—"
-          description="Not implemented"
-          icon={Brain}
-        />
-        <StatCard
-          title="Therapy Sessions"
-          value="—"
-          description="Not implemented"
-          icon={Users}
-        />
-        <StatCard
-          title="Patient Referrals"
-          value="—"
-          description="Not implemented"
-          icon={LineChart}
-        />
-        <StatCard
-          title="Recovery Tracking"
-          value="—"
-          description="Not implemented"
-          icon={Heart}
-        />
-      </div>
-
-      {/* Contact Admin section */}
-      <div className="rounded-lg border bg-card px-5 py-5 space-y-2">
-        <h2 className="text-base font-heading font-semibold">Need Patient Records or Appointments?</h2>
+      <div className="rounded-lg border border-border bg-card px-5 py-5 space-y-3">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <ShieldAlert className="w-5 h-5" />
+          <h2 className="text-base font-semibold text-foreground">
+            Module not included in Phase 1
+          </h2>
+        </div>
         <p className="text-sm text-muted-foreground">
-          If you need access to patient records, appointments, or other clinical data, please
-          contact your branch administrator. They can assign the appropriate permissions or
-          provide a workaround until the mental health module is fully deployed.
+          Psychological assessment and therapy workflows are deferred to a
+          future phase and are not part of the current product release. Please
+          use your hospital&apos;s approved clinical process for mental-health
+          records until this module is purchased and enabled.
         </p>
-        <p className="text-sm text-muted-foreground">
-          Contact the administrator via the hospital&apos;s internal communication system or
-          visit the administration office.
-        </p>
+        <Button variant="outline" size="sm" className="gap-2" asChild>
+          <Link href="/login">
+            <ArrowLeft className="w-4 h-4" /> Back to sign-in
+          </Link>
+        </Button>
       </div>
     </div>
   );

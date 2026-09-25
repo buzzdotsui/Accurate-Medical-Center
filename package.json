@@ -14,9 +14,15 @@
     "typecheck": "tsc --noEmit",
     "smoke": "node scripts/smoke-test.mjs",
     "verify:env": "node scripts/verify-production-env.mjs",
-    "backup:db": "bash scripts/backup-db.sh"
+    "backup:db": "bash scripts/backup-db.sh",
+    "mobile:init": "node scripts/mobile-init.mjs",
+    "mobile:sync": "npm run mobile:init && npx cap sync android",
+    "mobile:android": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "@hookform/resolvers": "^5.7.1",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",

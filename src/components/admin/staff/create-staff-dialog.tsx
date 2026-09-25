@@ -201,7 +201,21 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
 
           <FormField label="Role" htmlFor="staff-role" error={errors.role?.message} required>
             <Select id="staff-role" disabled={isSubmitting} {...register("role")}>
-              {STAFF_ROLES.filter((r) => r !== ROLES.SUPER_ADMIN).map((r) => (
+              {STAFF_ROLES.filter(
+                (r) =>
+                  r !== ROLES.SUPER_ADMIN &&
+                  // Phase 1 scope (invoice TTI/2026/HMS-P1-002): roles for
+                  // modules outside Phase 1 (radiology workflows, additional
+                  // hospital departments) are not offered. Server schema is
+                  // preserved for a future phase.
+                  !([
+                    ROLES.RADIOGRAPHER,
+                    ROLES.THEATRE_STAFF,
+                    ROLES.MATERNAL_STAFF,
+                    ROLES.MENTAL_HEALTH,
+                    ROLES.AMBULANCE,
+                  ] as readonly string[]).includes(r),
+              ).map((r) => (
                 <option key={r} value={r}>
                   {ROLE_LABELS[r]}
                 </option>

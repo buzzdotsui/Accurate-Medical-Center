@@ -27,7 +27,6 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Appointments', href: '/admin/appointments', icon: 'calendar-check' },
     { title: 'Pharmacy', href: '/admin/pharmacy', icon: 'pill' },
     { title: 'Laboratory', href: '/admin/laboratory', icon: 'flask-conical' },
-    { title: 'Radiology', href: '/admin/radiology', icon: 'scan' },
     { title: 'Finance', href: '/admin/finance', icon: 'banknote' },
     { title: 'Settings', href: '/settings', icon: 'settings' },
   ],

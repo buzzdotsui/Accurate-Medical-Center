@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatCard } from "@/components/ui/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Calendar, TrendingUp, Bed, Activity, FlaskConical, Radiation, BarChart3 } from "lucide-react";
+import { Users, Calendar, TrendingUp, Bed, Activity, FlaskConical } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Button } from "@/components/ui/button";
@@ -194,7 +193,6 @@ function StaffOnDutyPanel({ onAddStaff }: { onAddStaff: () => void }) {
 }
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const [staffDialogOpen, setStaffDialogOpen] = useState(false);
 
@@ -227,13 +225,6 @@ export default function AdminDashboardPage() {
           <p className="text-sm text-muted-foreground mt-1">Real-time metrics for Accurate Medical Center.</p>
         </div>
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="gap-2 bg-background"
-            onClick={() => router.push("/analytics/reports")}
-          >
-            <BarChart3 className="w-4 h-4" /> Reports
-          </Button>
           <Button className="gap-2" onClick={() => setStaffDialogOpen(true)}>
             <Users className="w-4 h-4" /> Add Staff
           </Button>
@@ -303,11 +294,6 @@ export default function AdminDashboardPage() {
                   title="Pending Lab"
                   value={metrics?.pendingLabRequests ?? 0}
                   icon={FlaskConical}
-                />
-                <StatCard
-                  title="Pending Radiology"
-                  value={metrics?.pendingRadiologyRequests ?? 0}
-                  icon={Radiation}
                 />
                 <StatCard
                   title="Low Stock Items"

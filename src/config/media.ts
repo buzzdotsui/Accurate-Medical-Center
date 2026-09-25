@@ -54,6 +54,17 @@ export const MEDIA_CONFIG = {
     // Do not route through videoConfig() transforms — the deployed hero asset
     // must request this exact URL.
     hero: {
+      publicId: "accurate-medical/hero",
+      desktopUrl:
+        "https://res.cloudinary.com/hefhxm1l/video/upload/v1787403818/accurate-medical/hero.mp4",
+      mobileUrl:
+        "https://res.cloudinary.com/hefhxm1l/video/upload/v1787403818/accurate-medical/hero.mp4",
+      posterUrl: `${BASE}/so_0,w_1280,f_auto,q_auto:good/v1787403818/accurate-medical/hero.jpg`,
+    },
+
+    // Company Video uses the dedicated versioned MP4 directly (desktop + mobile),
+    // same pattern as hero — do not route through videoConfig() transforms.
+    company: {
       publicId: "VID-20260822-WA0025",
       desktopUrl:
         "https://res.cloudinary.com/hefhxm1l/video/upload/v1790320966/VID-20260822-WA0025.mp4",
@@ -61,12 +72,6 @@ export const MEDIA_CONFIG = {
         "https://res.cloudinary.com/hefhxm1l/video/upload/v1790320966/VID-20260822-WA0025.mp4",
       posterUrl: `${BASE}/so_0,w_1280,f_auto,q_auto:good/v1790320966/VID-20260822-WA0025.jpg`,
     },
-
-    company: videoConfig("accurate-medical/company-video", {
-      posterWidth: 1280,
-      videoWidth: 1920,
-      mobileWidth: 854,
-    }),
 
     // Carousel: portrait 9:16 clips — only 4 displayed, mapped from 5 uploaded
     carousel: [

@@ -199,6 +199,9 @@ export default function Hero() {
             tabIndex={-1}
           />
         )}
+
+        {/* Gradient overlay: darker top-left (nav area), lighter center-right (behind headline) */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/30 to-black/10" aria-hidden />
       </motion.div>
 
       <motion.div
@@ -206,7 +209,7 @@ export default function Hero() {
         variants={heroStagger}
         initial="hidden"
         animate="visible"
-        className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-5 pt-24 text-center sm:px-8 sm:pt-28 lg:pt-32"
+        className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-5 pt-24 pb-16 text-center sm:px-8 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24"
       >
         <motion.h1
           variants={heroHeadingReveal}
@@ -272,11 +275,10 @@ export default function Hero() {
             initial="rest"
             whileHover="hover"
             whileTap="tap"
-            className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-semibold transition-[background-color,border-color,transform] duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
+            className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-semibold transition-[background-color,border-color,transform] duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px] border border-white/60"
             style={{
               color: "#f4f2f5",
               backgroundColor: "rgba(244,242,245,0.06)",
-              border: "1px solid rgba(244,242,245,0.22)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
             }}

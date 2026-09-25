@@ -139,18 +139,18 @@ export function Header() {
 
   return (
     <>
-      <motion.header
+<motion.header
         role="banner"
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.75, ease: EASE, delay: 0.1 }}
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: scrolled ? "rgba(3, 22, 26, 0.7)" : "transparent",
-          backdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(0px)",
-          WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(0px)",
-          borderBottom: scrolled ? "1px solid rgba(244, 242, 245, 0.08)" : "1px solid transparent",
-          boxShadow: scrolled ? "0 10px 40px rgba(0,0,0,0.2)" : "0 0 0 rgba(0,0,0,0)",
+          backgroundColor: scrolled ? "rgba(3, 22, 26, 0.85)" : "rgba(3, 22, 26, 0.6)",
+          backdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
+          WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
+          borderBottom: scrolled ? "1px solid rgba(244, 242, 245, 0.12)" : "1px solid rgba(244, 242, 245, 0.06)",
+          boxShadow: scrolled ? "0 10px 40px rgba(0,0,0,0.25)" : "0 4px 24px rgba(0,0,0,0.15)",
           transition: "background-color var(--motion-base) ease, backdrop-filter var(--motion-base) ease, -webkit-backdrop-filter var(--motion-base) ease, border-color var(--motion-base) ease, box-shadow var(--motion-base) ease",
         }}
       >

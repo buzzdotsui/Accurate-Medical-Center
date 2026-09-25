@@ -25,6 +25,14 @@ interface FormState { name: string; phone: string; email: string; message: strin
 const INITIAL: FormState = { name: "", phone: "", email: "", message: "" };
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
+const INK = "var(--marketing-ink)";
+const INK_MUTED = "rgba(3,22,26,0.48)";
+const INK_SOFT = "rgba(3,22,26,0.65)";
+const PRIMARY = "var(--primary)";
+const BORDER = "var(--border)";
+const BG = "var(--marketing-bone)";
+const SURFACE = "rgba(255,255,255,0.55)";
+
 interface ContactApiResponse {
   success: boolean;
   data?: { status?: string; submissionId?: string };
@@ -46,26 +54,26 @@ function InfoRow({
         className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 transition-colors duration-300"
         style={{
           backgroundColor: "rgba(3,22,26,0.04)",
-          border: "1px solid rgba(3,22,26,0.07)",
+          border: `1px solid ${BORDER}`,
         }}
       >
         <Icon
           className="w-[18px] h-[18px]"
           strokeWidth={1.75}
           aria-hidden
-          style={{ color: "rgba(3,22,26,0.7)" }}
+          style={{ color: INK }}
         />
       </div>
       <div className="min-w-0 flex-1">
         <p
           className="text-[10px] font-semibold uppercase tracking-[0.24em] mb-2"
-          style={{ color: "rgba(3,22,26,0.45)" }}
+          style={{ color: INK_MUTED }}
         >
           {label}
         </p>
         <div
           className="text-[14px] sm:text-[15px] leading-[1.7]"
-          style={{ color: "rgba(3,22,26,0.82)" }}
+          style={{ color: INK }}
         >
           {children}
         </div>
@@ -148,9 +156,9 @@ export function Contact() {
     "w-full rounded-xl border px-4 py-3.5 text-[14px] transition-[background-color,border-color,box-shadow,color] duration-300 focus:outline-none focus:ring-2 placeholder:opacity-35";
   const inputStyle: React.CSSProperties = {
     backgroundColor: "rgba(255,255,255,0.7)",
-    borderColor: "rgba(3,22,26,0.09)",
-    color: "#03161a",
-    ["--tw-ring-color" as never]: "rgba(3,22,26,0.18)",
+    borderColor: BORDER,
+    color: INK,
+    ["--tw-ring-color" as never]: PRIMARY,
   };
 
   return (
@@ -158,7 +166,7 @@ export function Contact() {
       id="contact"
       className="py-24 sm:py-32 lg:py-40 relative overflow-hidden"
       aria-labelledby="contact-heading"
-      style={{ backgroundColor: "#f4f2f5" }}
+      style={{ backgroundColor: BG }}
     >
       <div
         aria-hidden
@@ -189,7 +197,7 @@ export function Contact() {
           <motion.p
             variants={fadeUpSmall}
             className="text-[11px] font-semibold uppercase tracking-[0.32em] mb-5"
-            style={{ color: "rgba(3,22,26,0.52)" }}
+            style={{ color: INK_MUTED }}
           >
             Get In Touch
           </motion.p>
@@ -199,7 +207,7 @@ export function Contact() {
             className={`text-4xl sm:text-5xl lg:text-[4.25rem] mb-6 ${displayHeadingClassName}`}
             style={{
               ...displayHeadingStyle,
-              color: "#03161a",
+              color: INK,
             }}
           >
             Contact and Location
@@ -207,7 +215,7 @@ export function Contact() {
           <motion.p
             variants={fadeUp}
             className="text-[15px] sm:text-lg font-light leading-[1.8] max-w-2xl"
-            style={{ color: "rgba(3,22,26,0.7)" }}
+            style={{ color: INK_SOFT }}
           >
             Ready to book, visit, or speak with a member of our team? We are here to help
             you take the next step in your healthcare journey.
@@ -243,10 +251,10 @@ export function Contact() {
                 initial="rest"
                 whileHover="hover"
                 whileTap="tap"
-                className="group mb-10 inline-flex w-full items-center gap-4 rounded-2xl px-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:mb-12 sm:w-auto"
+                className="group mb-10 inline-flex w-full items-center gap-4 rounded-2xl px-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)] sm:mb-12 sm:w-auto"
                 style={{
-                  backgroundColor: "#03161a",
-                  color: "#f4f2f5",
+                  backgroundColor: INK,
+                  color: "var(--marketing-white)",
                   boxShadow: "0 20px 50px rgba(3,22,26,0.12)",
                 }}
               >
@@ -286,13 +294,13 @@ export function Contact() {
                 <InfoRow icon={Phone} label="Telephone">
                   <a
                     href={`tel:${phone}`}
-                    className="hover:text-[#03161a] transition-colors font-semibold text-[16px]"
+                    className="hover:text-[var(--primary)] transition-colors font-semibold text-[16px]"
                   >
                     {display}
                   </a>
                   <span
                     className="block text-[12px] mt-1"
-                    style={{ color: "rgba(3,22,26,0.45)" }}
+                    style={{ color: INK_MUTED }}
                   >
                     Available during working hours. 24/7 emergency response.
                   </span>
@@ -303,7 +311,7 @@ export function Contact() {
                 <InfoRow icon={Mail} label="Email">
                   <a
                     href={`mailto:${email}`}
-                    className="hover:text-[#03161a] transition-colors break-all"
+                    className="hover:text-[var(--primary)] transition-colors break-all"
                   >
                     {email}
                   </a>
@@ -327,14 +335,14 @@ export function Contact() {
                     </div>
                     <div
                       className="mt-3 pt-3 flex items-center gap-2.5"
-                      style={{ borderTop: "1px solid rgba(3,22,26,0.07)" }}
+                      style={{ borderTop: `1px solid ${BORDER}` }}
                     >
                       <span
                         aria-hidden
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: "#ef4444" }}
                       />
-                      <span className="font-semibold" style={{ color: "#03161a" }}>
+                      <span className="font-semibold" style={{ color: INK }}>
                         {siteConfig.contact.hours.emergency}
                       </span>
                     </div>
@@ -343,15 +351,15 @@ export function Contact() {
               </motion.div>
             </div>
 
-            <motion.div
-              variants={fadeUp}
-              className="rounded-[1.5rem] sm:rounded-[1.75rem] overflow-hidden"
-              style={{
-                height: "260px",
-                border: "1px solid rgba(3,22,26,0.08)",
-                boxShadow: "0 20px 60px rgba(3,22,26,0.08)",
-              }}
-            >
+<motion.div
+            variants={fadeUp}
+            className="rounded-[1.5rem] sm:rounded-[1.75rem] overflow-hidden"
+            style={{
+              height: "260px",
+              border: `1px solid ${BORDER}`,
+              boxShadow: "0 20px 60px rgba(3,22,26,0.08)",
+            }}
+          >
               <iframe
                 title="Accurate Medical Center location on Google Maps"
                 src={`https://maps.google.com/maps?q=${encodeURIComponent(contact.address.full)}&z=15&output=embed`}
@@ -376,8 +384,8 @@ export function Contact() {
             variants={mediaReveal}
             className="relative rounded-[1.75rem] sm:rounded-[2rem] p-7 sm:p-10 lg:p-12 overflow-hidden self-start lg:sticky lg:top-28"
             style={{
-              backgroundColor: "rgba(255,255,255,0.55)",
-              border: "1px solid rgba(3,22,26,0.07)",
+              backgroundColor: SURFACE,
+              border: `1px solid ${BORDER}`,
               backdropFilter: "blur(18px)",
               WebkitBackdropFilter: "blur(18px)",
               boxShadow:
@@ -430,8 +438,8 @@ export function Contact() {
                     setFormError(null);
                     setErrors({});
                   }}
-                  className="mt-3 text-sm underline underline-offset-4 transition-colors hover:text-[#03161a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
-                  style={{ color: "rgba(3,22,26,0.5)" }}
+                  className="mt-3 text-sm underline underline-offset-4 transition-colors hover:text-[var(--primary)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
+                  style={{ color: INK_MUTED }}
                 >
                   Send another message
                 </button>
@@ -449,23 +457,23 @@ export function Contact() {
                     className="w-11 h-11 rounded-xl flex items-center justify-center"
                     style={{
                       backgroundColor: "rgba(3,22,26,0.04)",
-                      border: "1px solid rgba(3,22,26,0.07)",
+                      border: `1px solid ${BORDER}`,
                     }}
                   >
                     <Calendar
                       className="w-[18px] h-[18px]"
                       strokeWidth={1.8}
                       aria-hidden
-                      style={{ color: "rgba(3,22,26,0.72)" }}
+                      style={{ color: INK }}
                     />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-semibold text-[#03161a] tracking-tight">
+                    <h3 className="text-2xl font-semibold tracking-tight" style={{ color: INK }}>
                       Send a Message
                     </h3>
                     <p
                       className="text-sm"
-                      style={{ color: "rgba(3,22,26,0.5)" }}
+                      style={{ color: INK_MUTED }}
                     >
                       We typically respond within one business day.
                     </p>
@@ -490,7 +498,7 @@ export function Contact() {
                   <label
                     htmlFor="contact-name"
                     className="block text-[11px] font-medium mb-2 tracking-wide"
-                    style={{ color: "rgba(3,22,26,0.58)" }}
+                    style={{ color: INK_MUTED }}
                   >
                     Full Name
                     <span aria-hidden className="text-red-500 ml-1">
@@ -519,7 +527,7 @@ export function Contact() {
                     <label
                       htmlFor="contact-phone"
                       className="block text-[11px] font-medium mb-2 tracking-wide"
-                      style={{ color: "rgba(3,22,26,0.58)" }}
+                      style={{ color: INK_MUTED }}
                     >
                       Phone Number
                     </label>
@@ -542,7 +550,7 @@ export function Contact() {
                     <label
                       htmlFor="contact-email"
                       className="block text-[11px] font-medium mb-2 tracking-wide"
-                      style={{ color: "rgba(3,22,26,0.58)" }}
+                      style={{ color: INK_MUTED }}
                     >
                       Email Address
                     </label>
@@ -567,7 +575,7 @@ export function Contact() {
                   <label
                     htmlFor="contact-message"
                     className="block text-[11px] font-medium mb-2 tracking-wide"
-                    style={{ color: "rgba(3,22,26,0.58)" }}
+                    style={{ color: INK_MUTED }}
                   >
                     Message
                     <span aria-hidden className="text-red-500 ml-1">
@@ -597,8 +605,8 @@ export function Contact() {
                   initial="rest"
                   whileHover="hover"
                   whileTap="tap"
-                  className="group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl py-[18px] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
-                  style={{ backgroundColor: "#03161a", color: "#f4f2f5" }}
+                  className="group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl py-[18px] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
+                  style={{ backgroundColor: INK, color: "var(--marketing-white)" }}
                 >
                   <span
                     aria-hidden
@@ -629,14 +637,14 @@ export function Contact() {
 
                 <div
                   className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2"
-                  style={{ borderTop: "1px solid rgba(3,22,26,0.07)" }}
+                  style={{ borderTop: `1px solid ${BORDER}` }}
                 >
                   <a
                     href={`tel:${phone}`}
-                    className="flex items-center justify-center gap-2 rounded-xl border py-3.5 text-[13px] font-medium transition-colors duration-300 hover:bg-[#03161a]/[0.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
+                    className="flex items-center justify-center gap-2 rounded-xl border py-3.5 text-[13px] font-medium transition-colors duration-300 hover:bg-[var(--marketing-ink)]/[0.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
                     style={{
-                      borderColor: "rgba(3,22,26,0.1)",
-                      color: "rgba(3,22,26,0.75)",
+                      borderColor: BORDER,
+                      color: INK,
                     }}
                   >
                     <Phone
@@ -649,10 +657,10 @@ export function Contact() {
                     href={`https://wa.me/${whatsapp}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-xl border py-3.5 text-[13px] font-medium transition-colors duration-300 hover:bg-[#03161a]/[0.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
+                    className="flex items-center justify-center gap-2 rounded-xl border py-3.5 text-[13px] font-medium transition-colors duration-300 hover:bg-[var(--marketing-ink)]/[0.03] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
                     style={{
-                      borderColor: "rgba(3,22,26,0.1)",
-                      color: "rgba(3,22,26,0.75)",
+                      borderColor: BORDER,
+                      color: INK,
                     }}
                   >
                     <Mail className="w-4 h-4" aria-hidden />

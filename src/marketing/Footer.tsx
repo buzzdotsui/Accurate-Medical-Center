@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { label: "Vision",      href: "/#vision-mission" },
   { label: "Experience",  href: "/#experience" },
   { label: "Contact",     href: "/#contact" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
 ] as const;
 
 const SERVICE_LINKS = [
@@ -45,7 +46,7 @@ export function Footer() {
       viewport={{ once: true, amount: 0.06 }}
       transition={{ duration: 0.95, ease: EASE }}
       className="relative pt-24 sm:pt-32 pb-10"
-      style={{ backgroundColor: "#000000" }}
+      style={{ backgroundColor: "var(--marketing-ink)" }}
       aria-labelledby="footer-heading"
     >
       <h2 id="footer-heading" className="sr-only">
@@ -183,7 +184,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-white/52 transition-colors duration-300 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--marketing-white)]/52 transition-colors duration-300 hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]"
                   style={{ backgroundColor: "rgba(244,242,245,0.055)" }}
                   aria-label={`Follow us on ${social.label}`}
                   onMouseEnter={(e) => {
@@ -211,11 +212,11 @@ export function Footer() {
             <ul className="flex flex-col gap-3.5">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="group flex items-center gap-2.5 text-[13.5px] transition-colors duration-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
-                    style={{ color: "rgba(244,242,245,0.54)" }}
-                  >
+<Link
+                      href={link.href}
+                      className="group flex items-center gap-2.5 text-[13.5px] transition-colors duration-200 hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/70"
+                      style={{ color: "rgba(244,242,245,0.54)" }}
+                    >
                     <span
                       aria-hidden
                       className="h-px w-4 origin-left scale-x-0 rounded-full bg-white/30 transition-transform duration-300 ease-out group-hover:scale-x-100"
@@ -237,11 +238,11 @@ export function Footer() {
             <ul className="flex flex-col gap-3.5">
               {SERVICE_LINKS.map((service) => (
                 <li key={service.value}>
-                  <Link
-                    href={`/book-appointment?service=${encodeURIComponent(service.value)}`}
-                    className="group flex items-center gap-2.5 text-[13.5px] transition-colors duration-200 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
-                    style={{ color: "rgba(244,242,245,0.54)" }}
-                  >
+<Link
+                      href={`/book-appointment?service=${encodeURIComponent(service.value)}`}
+                      className="group flex items-center gap-2.5 text-[13.5px] transition-colors duration-200 hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/70"
+                      style={{ color: "rgba(244,242,245,0.54)" }}
+                    >
                     <span
                       aria-hidden
                       className="h-px w-4 origin-left scale-x-0 rounded-full bg-white/30 transition-transform duration-300 ease-out group-hover:scale-x-100"
@@ -265,7 +266,7 @@ export function Footer() {
                 <MapPin
                   className="w-4 h-4 mt-0.5 shrink-0"
                   aria-hidden
-                  style={{ color: "rgba(244,242,245,0.36)" }}
+                  style={{ color: "var(--primary)" }}
                 />
                 <span
                   className="text-[13.5px] leading-[1.78]"
@@ -278,11 +279,11 @@ export function Footer() {
                 <Phone
                   className="w-4 h-4 shrink-0"
                   aria-hidden
-                  style={{ color: "rgba(244,242,245,0.36)" }}
+                  style={{ color: "var(--primary)" }}
                 />
                 <a
                   href={`tel:${siteConfig.contact.phone.primary}`}
-                  className="text-[13.5px] font-medium transition-colors duration-200 hover:text-white"
+                  className="text-[13.5px] font-medium transition-colors duration-200 hover:text-[var(--marketing-white)]"
                   style={{ color: "rgba(244,242,245,0.84)" }}
                 >
                   {siteConfig.contact.phone.displayPrimary}
@@ -292,11 +293,11 @@ export function Footer() {
                 <Mail
                   className="w-4 h-4 shrink-0"
                   aria-hidden
-                  style={{ color: "rgba(244,242,245,0.36)" }}
+                  style={{ color: "var(--primary)" }}
                 />
                 <a
                   href={`mailto:${siteConfig.contact.email.general}`}
-                  className="text-[13.5px] transition-colors duration-200 hover:text-white break-all"
+                  className="text-[13.5px] transition-colors duration-200 hover:text-[var(--marketing-white)] break-all"
                   style={{ color: "rgba(244,242,245,0.6)" }}
                 >
                   {siteConfig.contact.email.general}
@@ -308,10 +309,27 @@ export function Footer() {
 
         <div
           className="pt-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-4 text-[12.5px]"
-          style={{ borderTop: "1px solid rgba(244,242,245,0.07)" }}
+          style={{ borderTop: `1px solid ${BORDER}` }}
         >
           <div style={{ color: "rgba(244,242,245,0.36)" }}>
             &copy; {year} Accurate Medical Center. All rights reserved.
+          </div>
+
+          <div className="flex items-center gap-6 text-[12.5px]">
+            <Link
+              href="/privacy-policy"
+              className="transition-colors duration-200 hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/70"
+              style={{ color: "rgba(244,242,245,0.54)" }}
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms-of-service"
+              className="transition-colors duration-200 hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/70"
+              style={{ color: "rgba(244,242,245,0.54)" }}
+            >
+              Terms of Service
+            </Link>
           </div>
 
           <button

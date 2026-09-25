@@ -45,12 +45,12 @@ export function Sidebar({ role, user }: SidebarProps) {
   return (
     <aside 
       className={cn(
-        "bg-card border-r flex flex-col hidden md:flex transition-all duration-300",
+        "bg-[var(--marketing-ink)] border-r flex flex-col hidden md:flex transition-all duration-300 text-[var(--marketing-white)]",
         isCollapsed ? "w-20" : "w-64"
       )}
     >
       {/* Brand Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b bg-background">
+      <div className="h-16 flex items-center justify-between px-4 border-b bg-[var(--marketing-ink-2)]">
         <div className="flex items-center gap-3 overflow-hidden">
           <Logo className="w-8 h-8 shrink-0 text-primary" />
           {!isCollapsed && (
@@ -71,7 +71,7 @@ export function Sidebar({ role, user }: SidebarProps) {
       {/* Navigation Links */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-1">
         {!isCollapsed && (
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground px-3 py-2 font-semibold">
+          <div className="text-[11px] uppercase tracking-wider text-[var(--marketing-white)]/40 px-3 py-2 font-semibold">
             Main Menu
           </div>
         )}
@@ -89,13 +89,13 @@ export function Sidebar({ role, user }: SidebarProps) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group relative",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-[var(--primary)]/15 text-[var(--primary)]"
+                    : "text-[var(--marketing-white)]/60 hover:bg-[var(--marketing-white)]/10 hover:text-[var(--marketing-white)]",
                   isCollapsed && "justify-center px-0"
                 )}
               >
                 {isActive && !isCollapsed && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[var(--primary)] rounded-r-full" />
                 )}
                 <Icon className={cn("shrink-0", isCollapsed ? "w-6 h-6" : "w-5 h-5")} />
                 {!isCollapsed && <span className="truncate">{item.title}</span>}
@@ -119,11 +119,11 @@ export function Sidebar({ role, user }: SidebarProps) {
           })}
         </TooltipProvider>
 
-        <div className="pt-4 mt-4 border-t">
+        <div className="pt-4 mt-4 border-t border-[var(--marketing-white)]/10">
           <Link
             href="/"
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group relative text-muted-foreground hover:bg-muted hover:text-foreground",
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group relative text-[var(--marketing-white)]/60 hover:bg-[var(--marketing-white)]/10 hover:text-[var(--marketing-white)]",
               isCollapsed && "justify-center px-0"
             )}
             title={isCollapsed ? "View Website" : undefined}
@@ -135,24 +135,24 @@ export function Sidebar({ role, user }: SidebarProps) {
       </nav>
 
       {/* User Mini Profile */}
-      <div className="p-4 border-t bg-muted/20">
+      <div className="p-4 border-t border-[var(--marketing-white)]/10 bg-[var(--marketing-ink-2)]">
         {!isCollapsed ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 overflow-hidden">
-              <Avatar className="h-9 w-9 border border-primary/20 shrink-0">
+              <Avatar className="h-9 w-9 border border-[var(--primary)]/20 shrink-0">
                 <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                <AvatarFallback className="bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-bold">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-semibold truncate text-foreground">{user?.name || "User Name"}</span>
-                <span className="text-[11px] text-muted-foreground truncate uppercase tracking-wider">{role.replace('_', ' ')}</span>
+                <span className="text-sm font-semibold truncate text-[var(--marketing-white)]">{user?.name || "User Name"}</span>
+                <span className="text-[11px] text-[var(--marketing-white)]/40 truncate uppercase tracking-wider">{role.replace('_', ' ')}</span>
               </div>
             </div>
             <button 
               onClick={handleLogout}
-              className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0"
+              className="p-2 text-[var(--marketing-white)]/60 hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
@@ -160,15 +160,15 @@ export function Sidebar({ role, user }: SidebarProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-10 w-10 border border-primary/20 shrink-0">
+            <Avatar className="h-10 w-10 border border-[var(--primary)]/20 shrink-0">
               <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+              <AvatarFallback className="bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-bold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
             <button 
               onClick={handleLogout}
-              className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0"
+              className="p-2 text-[var(--marketing-white)]/60 hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0"
               title="Logout"
             >
               <LogOut className="w-5 h-5" />

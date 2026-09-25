@@ -139,14 +139,14 @@ export function Header() {
 
   return (
     <>
-<motion.header
+      <motion.header
         role="banner"
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.75, ease: EASE, delay: 0.1 }}
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: scrolled ? "rgba(3, 22, 26, 0.85)" : "rgba(3, 22, 26, 0.6)",
+          backgroundColor: scrolled ? "rgba(3, 22, 26, 0.95)" : "rgba(3, 22, 26, 0.85)",
           backdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
           WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
           borderBottom: scrolled ? "1px solid rgba(244, 242, 245, 0.12)" : "1px solid rgba(244, 242, 245, 0.06)",
@@ -211,8 +211,8 @@ export function Header() {
                   initial="rest"
                   whileHover="hover"
                   whileTap="tap"
-                  className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-[26px] py-[11px] text-[13px] font-semibold tracking-wide focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 28px rgba(3,22,26,0.25)" }}
+                  className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-[26px] py-[11px] text-[13px] font-semibold tracking-wide focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]"
+                  style={{ backgroundColor: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 8px 28px rgba(196,106,63,0.25)" }}
                 >
                   <span
                     aria-hidden
@@ -335,8 +335,8 @@ export function Header() {
                 <Link
                   href="/book-appointment"
                   onClick={() => setMenuOpen(false)}
-                  className="flex w-full items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-semibold transition-transform hover:brightness-[0.98] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 10px 32px rgba(3,22,26,0.2)" }}
+                  className="flex w-full items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-semibold transition-transform hover:brightness-[0.98] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]"
+                  style={{ backgroundColor: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 10px 32px rgba(196,106,63,0.2)" }}
                 >
                   <Calendar className="w-5 h-5" aria-hidden="true" />
                   Book an Appointment
@@ -345,7 +345,7 @@ export function Header() {
                 <Link
                   href="/register"
                   onClick={() => setMenuOpen(false)}
-                  className="py-2 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[#f4f2f5]/40 transition-colors hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+                  className="py-2 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--marketing-white)]/40 transition-colors hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/70"
                   aria-label="Portal Login"
                 >
                   Portal

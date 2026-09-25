@@ -29,7 +29,7 @@ const panelStatementStyle = {
 } as const;
 
 const panelSurfaceStyle = {
-  backgroundColor: "#000000",
+  backgroundColor: "var(--marketing-black)",
   boxShadow:
     "0 24px 72px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(244,242,245,0.06)",
 } as const;
@@ -88,7 +88,7 @@ function VisionPanel() {
         style={{ color: "rgba(244,242,245,0.4)" }}
       >
         01
-        <span className="mx-2.5" style={{ color: "rgba(244,242,245,0.45)" }}>
+        <span className="mx-2.5" style={{ color: "var(--primary)" }}>
           ·
         </span>
         Vision
@@ -100,7 +100,7 @@ function VisionPanel() {
         className={`text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] relative z-10 mb-4 ${displayHeadingClassName}`}
         style={{
           ...displayHeadingStyle,
-          color: "#f4f2f5",
+          color: "var(--marketing-white)",
           textShadow: "0 8px 36px rgba(0,0,0,0.6)",
         }}
       >
@@ -170,7 +170,7 @@ function MissionPanel() {
         style={{ color: "rgba(244,242,245,0.4)" }}
       >
         02
-        <span className="mx-2.5" style={{ color: "rgba(244,242,245,0.45)" }}>
+        <span className="mx-2.5" style={{ color: "var(--primary)" }}>
           ·
         </span>
         Mission
@@ -182,7 +182,7 @@ function MissionPanel() {
         className={`text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] relative z-10 mb-5 ${displayHeadingClassName}`}
         style={{
           ...displayHeadingStyle,
-          color: "#f4f2f5",
+          color: "var(--marketing-white)",
           textShadow: "0 8px 36px rgba(0,0,0,0.6)",
         }}
       >
@@ -225,7 +225,7 @@ export function VisionMission() {
       id="vision-mission"
       className="py-14 sm:py-20 lg:py-24 relative overflow-hidden"
       aria-labelledby="vm-heading"
-      style={{ backgroundColor: "#000000" }}
+      style={{ backgroundColor: "var(--marketing-ink)" }}
     >
       <div
         aria-hidden
@@ -257,30 +257,13 @@ export function VisionMission() {
           viewport={{ once: true, amount: 0.3 }}
           className="mx-auto mb-10 max-w-3xl text-center sm:mb-12 lg:mb-14"
         >
-          <motion.span
-            variants={fadeUpSmall}
-            className="inline-flex items-center gap-3 px-[22px] py-[10px] rounded-full text-[10px] font-semibold uppercase tracking-[0.3em]"
-            style={{
-              color: "rgba(244,242,245,0.5)",
-              backgroundColor: "rgba(244,242,245,0.035)",
-              border: "1px solid rgba(244,242,245,0.12)",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
-            }}
-          >
-            <span
-              aria-hidden
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: "#f4f2f5", boxShadow: "0 0 10px rgba(244,242,245,0.5)" }}
-            />
-            Our Foundation
-          </motion.span>
           <motion.h2
             variants={headingReveal}
             id="vm-heading"
             className={`mt-6 ${displayHeadingClassName} ${displayHeadingVariantClassNames.section}`}
             style={{
               ...displayHeadingStyle,
-              color: "#f4f2f5",
+              color: "var(--marketing-white)",
               textShadow: "0 8px 36px rgba(0,0,0,0.48)",
             }}
           >

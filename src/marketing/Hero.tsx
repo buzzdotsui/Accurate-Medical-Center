@@ -139,7 +139,7 @@ export default function Hero() {
     <section
       id="home"
       className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden sm:min-h-screen"
-      style={{ backgroundColor: "#03161a" }}
+      style={{ backgroundColor: "var(--marketing-ink)" }}
       aria-label="Hero, Accurate Medical Center"
     >
       <motion.div
@@ -200,8 +200,8 @@ export default function Hero() {
           />
         )}
 
-        {/* Gradient overlay: darker top-left (nav area), lighter center-right (behind headline) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/30 to-black/10" aria-hidden />
+        {/* Gradient overlay: darker top-left (nav area), lighter center-right (behind headline) — using --marketing-ink */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--marketing-ink)]/75 via-[var(--marketing-ink)]/40 to-[var(--marketing-ink)]/10" aria-hidden />
       </motion.div>
 
       <motion.div
@@ -216,7 +216,7 @@ export default function Hero() {
           className={`mb-6 max-w-[15ch] ${displayHeadingClassName} ${displayHeadingVariantClassNames.hero} sm:mb-8`}
           style={{
             ...displayHeadingStyle,
-            color: "#f4f2f5",
+            color: "var(--marketing-white)",
           }}
         >
           Leadin<span style={{ fontFamily: '"Segoe UI", Arial, Helvetica, sans-serif' }}>g</span> Infertility & Addiction Care in South-West Nigeria
@@ -224,7 +224,7 @@ export default function Hero() {
 
         <motion.p
           variants={fadeUp}
-          className="mx-auto mb-10 max-w-2xl text-pretty text-[16px] font-normal leading-[1.7] text-[#f4f2f5]/90 text-shadow-sm sm:mb-12 sm:text-[18px] lg:text-[19px]"
+          className="mx-auto mb-10 max-w-2xl text-pretty text-[16px] font-normal leading-[1.7] text-[var(--marketing-white)]/90 text-shadow-sm sm:mb-12 sm:text-[18px] lg:text-[19px]"
         >
           Specialized infertility and addiction care, supported by experienced healthcare professionals and compassionate, patient-first treatment.
         </motion.p>
@@ -239,10 +239,10 @@ export default function Hero() {
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="group relative inline-flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
+              className="group relative inline-flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)] sm:px-10 sm:py-[18px] sm:text-[15px]"
               style={{
-                backgroundColor: "#f4f2f5",
-                color: "#03161a",
+                backgroundColor: "var(--primary)",
+                color: "var(--primary-foreground)",
                 boxShadow: "0 14px 36px rgba(3,22,26,0.32)",
                 border: "1px solid rgba(244,242,245,0.72)",
               }}
@@ -275,9 +275,9 @@ export default function Hero() {
             initial="rest"
             whileHover="hover"
             whileTap="tap"
-            className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-semibold transition-[background-color,border-color,transform] duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px] border border-white/60"
+            className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-semibold transition-[background-color,border-color,transform] duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)] sm:px-10 sm:py-[18px] sm:text-[15px] border border-[var(--marketing-white)]/60"
             style={{
-              color: "#f4f2f5",
+              color: "var(--marketing-white)",
               backgroundColor: "rgba(244,242,245,0.06)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
@@ -296,7 +296,7 @@ export default function Hero() {
         animate={{ opacity: 1 }}
         transition={{ delay: 2.4, duration: 0.8, ease: EASE }}
         onClick={scrollToNext}
-        className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#f4f2f5]/30 hover:text-[#f4f2f5]/65 transition-colors duration-300 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40 rounded-lg px-3 py-2"
+        className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[var(--marketing-white)]/30 hover:text-[var(--marketing-white)]/65 transition-colors duration-300 z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--marketing-white)]/40 rounded-lg px-3 py-2"
         aria-label="Scroll down to Our Foundation"
       >
         <span className="text-[10px] tracking-[0.32em] uppercase font-semibold">Scroll</span>

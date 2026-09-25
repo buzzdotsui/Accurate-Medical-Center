@@ -10,8 +10,8 @@ import {
   staggerContainer,
 } from "./animations";
 
-const LEMON = "#03161a";
-const INK = "#03161a";
+const PRIMARY = "var(--primary)";
+const INK = "var(--marketing-ink)";
 const INK_SOFT = "rgba(3,22,26,0.65)";
 const INK_MUTED = "rgba(3,22,26,0.48)";
 
@@ -102,8 +102,8 @@ function CountUp247() {
       className="text-[2.5rem] sm:text-[3.25rem] font-extrabold leading-none tabular-nums"
       style={{
         fontFamily: "var(--font-playfair)",
-        color: LEMON,
-        textShadow: "0 6px 24px rgba(3,22,26,0.22)",
+        color: PRIMARY,
+        textShadow: "0 6px 24px rgba(196,106,63,0.22)",
       }}
     >
       {n24}/7
@@ -157,7 +157,7 @@ function TrustIndicator({
           aria-hidden
           className="mt-3 w-px flex-1 min-h-[36px]"
           style={{
-            background: `linear-gradient(180deg, ${LEMON}35 0%, transparent 100%)`,
+            background: `linear-gradient(180deg, var(--primary) 0%, transparent 100%)`,
           }}
         />
       </div>
@@ -186,7 +186,7 @@ export function About() {
     <section
       id="about"
       className="relative py-[96px] sm:py-[120px] lg:py-[144px] overflow-hidden"
-      style={{ backgroundColor: "#F7F6F1" }}
+      style={{ backgroundColor: "var(--marketing-ivory)" }}
       aria-labelledby="about-heading"
     >
       <div
@@ -279,12 +279,12 @@ export function About() {
               <span
                 aria-hidden
                 className="h-px w-14 sm:w-20"
-                style={{ background: `linear-gradient(90deg, ${LEMON}65, rgba(3,22,26,0.2))` }}
+                style={{ background: `linear-gradient(90deg, var(--primary) 0%, rgba(3,22,26,0.2))` }}
               />
               <span
                 aria-hidden
                 className="inline-block rounded-full"
-                style={{ width: 7, height: 7, backgroundColor: LEMON }}
+                style={{ width: 7, height: 7, backgroundColor: "var(--primary)" }}
               />
             </motion.div>
 
@@ -367,7 +367,7 @@ export function About() {
                 <span
                   aria-hidden
                   className="h-px w-12 sm:w-16"
-                  style={{ background: `linear-gradient(90deg, ${LEMON}70, rgba(3,22,26,0.14))` }}
+                  style={{ background: `linear-gradient(90deg, var(--primary) 0%, rgba(3,22,26,0.14))` }}
                 />
                 <span
                   className="text-[10.5px] font-semibold uppercase tracking-[0.28em]"
@@ -398,7 +398,7 @@ export function About() {
             <div
               aria-hidden
               className="absolute top-5 left-5 sm:top-6 sm:left-6 rounded-full"
-              style={{ width: 9, height: 9, backgroundColor: LEMON, opacity: 0.9 }}
+              style={{ width: 9, height: 9, backgroundColor: "var(--primary)", opacity: 0.9 }}
             />
             <div
               aria-hidden

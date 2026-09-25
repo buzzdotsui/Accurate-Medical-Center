@@ -5,7 +5,7 @@
  * behavior, line-height, and tracking remain identical for every use.
  */
 export const displayHeadingClassName =
-  "font-playfair not-italic font-bold leading-[1.2] tracking-[-0.035em] text-pretty";
+  "font-playfair not-italic font-bold leading-[1.3] tracking-[-0.035em] text-pretty";
 
 export const displayHeadingVariantClassNames = {
   hero: "text-[clamp(2.5rem,5.4vw,5.75rem)]",

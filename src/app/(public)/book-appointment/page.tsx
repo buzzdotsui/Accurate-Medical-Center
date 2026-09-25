@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function BookAppointmentPage() {
   return (
-    <div className="min-h-screen bg-[#03161a] text-white pt-32 pb-20 relative overflow-hidden">
+    <div className="min-h-screen text-white pt-32 pb-20 relative overflow-hidden" style={{ backgroundColor: "var(--marketing-ink)" }}>
       {/* Background decoration */}
       <div 
         className="absolute inset-0 pointer-events-none" 
@@ -48,8 +48,8 @@ export default function BookAppointmentPage() {
         <BookingPageMotion>
           {/* Suspense boundary is required because BookingForm uses useSearchParams */}
           <Suspense fallback={
-            <div className="bg-white/5 border border-[#1b3135] rounded-2xl p-8 h-96 flex items-center justify-center animate-pulse">
-              <p className="text-[#a4b5b8]">Loading booking form...</p>
+            <div className="bg-white/5 border border-[var(--marketing-ink)]/20 rounded-2xl p-8 h-96 flex items-center justify-center animate-pulse">
+              <p className="text-[var(--marketing-white)]/40">Loading booking form...</p>
             </div>
           }>
             <BookingForm />

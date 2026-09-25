@@ -27,11 +27,11 @@ import {
 } from "./animations";
 import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 
-const BG_NEUTRAL = "#faf9f8";
-const CHARCOAL = "#1a1f22";
-const CHARCOAL_MUTED = "rgba(26,31,34,0.65)";
-const LEMON = "#d4e842";
-const BORDER = "rgba(26,31,34,0.08)";
+const BG_NEUTRAL = "var(--marketing-ivory)";
+const CHARCOAL = "var(--marketing-ink)";
+const CHARCOAL_MUTED = "rgba(3,22,26,0.65)";
+const PRIMARY = "var(--primary)";
+const BORDER = "var(--border)";
 
 type IconKey =
   | "brain"
@@ -76,67 +76,56 @@ const SERVICE_ICON_MOTION: Record<IconKey, Variants> = {
 
 const SERVICES = [
   {
-    id: "01",
     icon: "brain" as IconKey,
     title: "Psychological Therapy",
     desc: "Confidential, compassionate counseling and mental health support for individuals and families.",
   },
   {
-    id: "02",
     icon: "heart-handshake" as IconKey,
     title: "Infertility Care",
     desc: "Advanced, compassionate fertility treatments designed to help you build your family.",
   },
   {
-    id: "03",
     icon: "shield-check" as IconKey,
     title: "Addiction Care",
     desc: "Structured, dignified addiction recovery programs tailored to each patient's unique journey.",
   },
   {
-    id: "04",
     icon: "baby" as IconKey,
     title: "Pregnancy Delivery",
     desc: "Safe, supportive maternity and delivery care from experienced healthcare professionals.",
   },
   {
-    id: "05",
     icon: "stethoscope" as IconKey,
     title: "Outpatient Clinic Services",
     desc: "Comprehensive outpatient services focusing on accurate diagnosis and effective treatment.",
   },
   {
-    id: "06",
     icon: "scissors" as IconKey,
     title: "Surgery",
     desc: "State-of-the-art surgical care performed by experienced specialists in a safe environment.",
   },
   {
-    id: "07",
     icon: "bed" as IconKey,
     title: "Admissions",
     desc: "Comfortable, monitored inpatient wards providing 24-hour medical and nursing care.",
   },
   {
-    id: "08",
     icon: "scan-line" as IconKey,
     title: "Ultrasound Scan",
     desc: "Advanced diagnostic ultrasound imaging for accurate and timely medical assessments.",
   },
   {
-    id: "09",
     icon: "radiation" as IconKey,
     title: "X-ray Services",
     desc: "Rapid and precise radiological imaging to support accurate clinical diagnoses.",
   },
   {
-    id: "10",
     icon: "flask-conical" as IconKey,
     title: "Laboratories",
     desc: "Fully equipped diagnostic laboratory services delivering reliable and rapid test results.",
   },
   {
-    id: "11",
     icon: "ambulance" as IconKey,
     title: "Ambulance Services",
     desc: "Rapid-response emergency transport fully equipped for critical medical support.",
@@ -165,7 +154,7 @@ export function Services() {
       id="services"
       className="relative w-full py-24 sm:py-32 lg:py-40"
       aria-labelledby="services-heading"
-      style={{ backgroundColor: BG_NEUTRAL, color: CHARCOAL }}
+      style={{ backgroundColor: "var(--marketing-ivory)", color: "var(--marketing-ink)" }}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <motion.div
@@ -175,18 +164,11 @@ export function Services() {
           variants={sectionReveal}
           className="mb-20 sm:mb-28"
         >
-          <motion.span
-            variants={contentReveal}
-            className="block text-xs font-bold uppercase tracking-[0.2em] mb-6"
-            style={{ color: CHARCOAL_MUTED }}
-          >
-            Our Services
-          </motion.span>
           <motion.h2
             variants={headingReveal}
             id="services-heading"
             className={`text-4xl sm:text-5xl lg:text-6xl ${displayHeadingClassName}`}
-            style={{ ...displayHeadingStyle, color: CHARCOAL }}
+            style={{ ...displayHeadingStyle, color: "var(--marketing-ink)" }}
           >
             Specialized Care <br className="hidden sm:block" />
             <span className="font-semibold">tailored to your needs.</span>
@@ -198,91 +180,74 @@ export function Services() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.15, margin: "-70px" }}
           variants={servicesStagger}
-          className="flex flex-col border-t"
-          style={{ borderColor: BORDER }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {SERVICES.map((srv, idx) => {
             const Icon = ICONS[srv.icon];
             const isHovered = hoveredIdx === idx;
 
             return (
-              <Link href={`/book-appointment?service=${encodeURIComponent(APPOINTMENT_SERVICE_BY_MARKETING_TITLE[srv.title])}`} key={srv.id} passHref legacyBehavior>
-                <motion.a
+              <Link href={`/book-appointment?service=${encodeURIComponent(APPOINTMENT_SERVICE_BY_MARKETING_TITLE[srv.title])}`} key={srv.title} passHref legacyBehavior>
+                <motion.article
                   whileHover="hover"
                   whileFocus="hover"
-                  whileTap={{ scale: 0.995 }}
+                  whileTap={{ scale: 0.99 }}
                   variants={serviceRowReveal}
                   onMouseEnter={() => setHoveredIdx(idx)}
                   onMouseLeave={() => setHoveredIdx(null)}
                   onFocus={() => setHoveredIdx(idx)}
                   onBlur={() => setHoveredIdx(null)}
-                  className="group relative block min-h-20 cursor-pointer overflow-hidden border-b py-10 transition-[background-color,border-color,transform] duration-300 active:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:py-14 md:flex md:items-center"
-                  style={{ borderColor: BORDER }}
+                  className="group relative flex flex-col h-full p-6 rounded-2xl transition-[background-color,border-color,box-shadow] duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
+                  style={{
+                    backgroundColor: "var(--card)",
+                    border: `1px solid ${BORDER}`,
+                    boxShadow: isHovered ? "0 12px 32px rgba(3,22,26,0.08)" : "none",
+                    borderColor: isHovered ? "var(--primary)" : BORDER,
+                  }}
                 >
-                {/* Hover Background Reveal */}
-                <div 
-                  className="absolute inset-0 transition-opacity duration-500 ease-out pointer-events-none"
-                  style={{ backgroundColor: "rgba(26,31,34,0.02)", opacity: isHovered ? 1 : 0 }}
-                />
-
-                <div className="relative z-10 flex w-full flex-col md:flex-row md:items-center justify-between gap-6 md:gap-12 lg:gap-20 px-2">
-                  <div className="flex items-center gap-6 sm:gap-12 lg:gap-20 md:w-1/2">
-                    <motion.span
+                  <div className="flex items-start gap-4">
+                    <motion.div
                       initial="rest"
                       animate={isHovered ? "active" : "rest"}
                       variants={{
-                        rest: { x: 0, opacity: 0.72 },
-                        active: { x: 3, opacity: 1, transition: { duration: 0.25 } },
+                        rest: { scale: 1 },
+                        active: { scale: 1.05, transition: { duration: 0.28 } },
                       }}
-                      className="text-2xl sm:text-3xl font-light tracking-tight"
-                      style={{ color: isHovered ? CHARCOAL : CHARCOAL_MUTED }}
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-[background-color,border-color] duration-300"
+                      style={{
+                        backgroundColor: isHovered ? "var(--primary)" : "transparent",
+                        border: isHovered ? "1px solid transparent" : `1px solid ${BORDER}`,
+                      }}
                     >
-                      {srv.id}
-                    </motion.span>
-                    <div className="flex items-center gap-6">
-                      <motion.div
-                        initial="rest"
-                        animate={isHovered ? "active" : "rest"}
-                        variants={{
-                          rest: { y: 0, scale: 1 },
-                          active: { y: -2, scale: 1.04, transition: { duration: 0.28 } },
+                      <Icon
+                        aria-hidden
+                        strokeWidth={1.7}
+                        className="h-6 w-6 transition-colors duration-300"
+                        style={{
+                          color: isHovered ? "var(--primary-foreground)" : "var(--marketing-ink)",
                         }}
-                        className="flex h-12 w-12 items-center justify-center rounded-full transition-[background-color,border-color,box-shadow] duration-300"
-                        style={{ 
-                          backgroundColor: isHovered ? LEMON : "transparent",
-                          border: isHovered ? "1px solid transparent" : `1px solid ${BORDER}`
-                        }}
-                      >
-                        <motion.div initial="rest" animate={isHovered ? "active" : "rest"} variants={SERVICE_ICON_MOTION[srv.icon]} transition={{ duration: 0.3 }}>
-                          <Icon aria-hidden strokeWidth={1.7} className="h-5 w-5" style={{ color: CHARCOAL }} />
-                        </motion.div>
-                      </motion.div>
-                      <motion.h3
-                        initial="rest"
-                        animate={isHovered ? "active" : "rest"}
-                        variants={{ rest: { x: 0 }, active: { x: 4, transition: { duration: 0.28 } } }}
-                        className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-[-0.02em]"
-                      >
+                      />
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-semibold leading-tight tracking-tight truncate" style={{ color: "var(--marketing-ink)" }}>
                         {srv.title}
-                      </motion.h3>
+                      </h3>
                     </div>
                   </div>
-
-                  <div className="md:w-1/2 flex items-center justify-between pl-[4.5rem] md:pl-0">
-                    <p className="text-base sm:text-lg max-w-md font-light leading-relaxed transition-colors duration-300" style={{ color: CHARCOAL_MUTED }}>
-                      {srv.desc}
-                    </p>
-                    <ArrowRight 
-                      className="hidden h-6 w-6 lg:block transition-[opacity,transform] duration-500" 
-                      style={{ 
-                        color: CHARCOAL, 
-                        opacity: isHovered ? 1 : 0, 
-                        transform: isHovered ? "translateX(0)" : "translateX(-15px)" 
-                      }} 
-                    />
-                  </div>
-                </div>
-                </motion.a>
+                  <p className="mt-4 text-base leading-relaxed flex-1" style={{ color: CHARCOAL_MUTED }}>
+                    {srv.desc}
+                  </p>
+                  <motion.div
+                    initial="rest"
+                    animate={isHovered ? "active" : "rest"}
+                    variants={{ rest: { x: 0, opacity: 0 }, active: { x: 4, opacity: 1, transition: { duration: 0.28 } } }}
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium"
+                    style={{ color: "var(--primary)" }}
+                  >
+                    <span>Learn more</span>
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+                  </motion.div>
+                </motion.article>
               </Link>
             );
           })}
@@ -293,7 +258,7 @@ export function Services() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={contentReveal}
-          className="mt-20 flex justify-center lg:justify-start"
+          className="mt-16 flex justify-center lg:justify-start"
         >
           <Link href="/book-appointment" passHref legacyBehavior>
             <motion.a
@@ -301,11 +266,11 @@ export function Services() {
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-[18px] text-[15px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
+              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-[18px] text-[15px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
               style={{
-                backgroundColor: CHARCOAL,
-                color: "#fff",
-                boxShadow: "0 10px 30px rgba(26,31,34,0.15)",
+                backgroundColor: "var(--primary)",
+                color: "var(--primary-foreground)",
+                boxShadow: "0 10px 30px rgba(196,106,63,0.15)",
               }}
             >
               <span

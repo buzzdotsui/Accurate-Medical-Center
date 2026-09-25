@@ -59,7 +59,7 @@ export function Topbar({ user, role }: TopbarProps) {
   };
 
   return (
-    <header className="h-16 bg-background border-b flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shadow-sm">
+    <header className="h-16 bg-[var(--marketing-bone)] border-b border-[var(--border)] flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shadow-sm">
       <div className="flex items-center gap-4">
         <MobileNav role={role} user={user} />
         
@@ -117,12 +117,12 @@ export function Topbar({ user, role }: TopbarProps) {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-2 p-0.5 rounded-full hover:bg-muted transition-colors border border-transparent hover:border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+              className="flex items-center gap-2 p-0.5 rounded-full hover:bg-[var(--muted)] transition-colors border border-transparent hover:border-[var(--border)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/50"
               aria-label="Open user menu"
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                <AvatarFallback className="bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-bold">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
@@ -137,7 +137,7 @@ export function Topbar({ user, role }: TopbarProps) {
                 <p className="text-xs leading-none text-muted-foreground truncate">
                   {user?.email}
                 </p>
-                <p className="text-xs leading-none text-primary/80 mt-1 uppercase tracking-wide">
+                <p className="text-xs leading-none text-[var(--primary)]/80 mt-1 uppercase tracking-wide">
                   {role.replace(/_/g, " ")}
                 </p>
               </div>

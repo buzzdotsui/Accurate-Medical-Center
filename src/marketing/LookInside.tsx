@@ -7,11 +7,11 @@ import { contentReveal, EASE_OUT, headingReveal, mediaReveal, sectionReveal } fr
 import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 import { MEDIA_CONFIG } from "@/config/media";
 
-const BG           = "#0b0f11";
-const TEXT         = "#f4f2f5";
+const BG           = "var(--marketing-ink-2)";
+const TEXT         = "var(--marketing-white)";
 const TEXT_SOFT    = "rgba(244,242,245,0.62)";
 const TEXT_MUTED   = "rgba(244,242,245,0.38)";
-const LEMON        = "#d4e842";
+const PRIMARY      = "var(--primary)";
 const SURFACE_BORDER = "rgba(244,242,245,0.08)";
 const VIDEO_BG     = "#08090a";
 
@@ -229,7 +229,7 @@ function SlideIndicators({
               key={`${prefix}-dot-${index}`}
               aria-hidden
               className="absolute left-1/2 top-1/2 h-[3px] w-7 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full"
-              style={{ backgroundColor: LEMON, originX: 0 }}
+              style={{ backgroundColor: PRIMARY, originX: 0 }}
               initial={{ scaleX: 0 }}
               animate={{ scaleX: progress / 100 }}
               transition={{ ease: "linear", duration: TICK_MS / 1000 }}
@@ -467,13 +467,13 @@ export function LookInside() {
             </AnimatePresence>
 
             <div className="flex items-center gap-4 mb-7">
-              <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-[12px] font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ color: TEXT_MUTED }}>
+              <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-[12px] font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/40" style={{ color: TEXT_MUTED }}>
                 <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" aria-hidden />
-                <span className="group-hover:text-white transition-colors duration-300">Prev</span>
+                <span className="group-hover:text-[var(--marketing-white)] transition-colors duration-300">Prev</span>
               </button>
               <span aria-hidden className="h-px flex-none w-5" style={{ backgroundColor: SURFACE_BORDER }} />
-              <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-[12px] font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ color: TEXT_MUTED }}>
-                <span className="group-hover:text-white transition-colors duration-300">Next</span>
+              <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-[12px] font-semibold uppercase tracking-[0.2em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/40" style={{ color: TEXT_MUTED }}>
+                <span className="group-hover:text-[var(--marketing-white)] transition-colors duration-300">Next</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
               </button>
             </div>
@@ -499,10 +499,10 @@ export function LookInside() {
               </motion.div>
             )}
             <motion.div
-              key={`lemon-${visibleIndex}`}
+              key={`primary-${visibleIndex}`}
               aria-hidden
               className="absolute -bottom-3 left-1/2 -translate-x-1/2 h-[2px] rounded-full"
-              style={{ backgroundColor: LEMON, width: 48 }}
+              style={{ backgroundColor: PRIMARY, width: 48 }}
               initial={{ opacity: 0, scaleX: 0 }}
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.2 }}
@@ -581,11 +581,11 @@ export function LookInside() {
         </AnimatePresence>
 
         <div className="flex items-center justify-between mb-6">
-          <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.18em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
+          <button type="button" onClick={goPrev} aria-label="Previous slide" className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.18em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
             <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5" aria-hidden />
             Prev
           </button>
-          <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.18em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
+          <button type="button" onClick={goNext} aria-label="Next slide" className="group inline-flex min-h-11 items-center gap-2.5 rounded-full border px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.18em] transition-[background-color,color,transform] duration-200 hover:bg-white/[0.04] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--marketing-white)]/40" style={{ borderColor: SURFACE_BORDER, color: TEXT_MUTED }}>
             Next
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
           </button>

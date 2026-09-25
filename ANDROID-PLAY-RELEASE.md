@@ -30,6 +30,23 @@ keytool -genkeypair -v \
 
 Store password + key password in the client password manager — **not** in git.
 
+## Configure release signing (keystore.properties)
+
+`android/app/build.gradle` reads release signing credentials from
+`android/app/keystore.properties` (git-ignored — never committed). Create the
+file at `android/app/keystore.properties` with:
+
+```properties
+storeFile=/absolute/path/to/accurate-hms-upload.keystore
+storePassword=<from client password manager>
+keyAlias=accurate-hms
+keyPassword=<from client password manager>
+```
+
+When the file exists, `gradlew bundleRelease` produces a **signed** AAB.
+When it is absent the build still works but produces an unsigned package
+(same as before the signing config was added).
+
 ## Build commands (after SDK is installed)
 
 ```bash
@@ -55,9 +72,9 @@ Sign the AAB with the upload keystore (or configure `android/app/build.gradle` s
    - Category: Medical
    - Privacy policy URL (required) — host on production domain
 2. **Graphics**
-   - App icon 512×512 PNG
-   - Feature graphic 1024×500
-   - At least 2 phone screenshots (login, dashboard)
+   - App icon 512×512 PNG — **ready:** `android/play-store/icon-512.png`
+   - Feature graphic 1024×500 — **ready:** `android/play-store/feature-graphic.png`
+   - At least 2 phone screenshots (login, dashboard) — capture from the running app at submission time
 3. **Content rating questionnaire** — Medical / health app
 4. **Data safety form** — declare: account info, health app data (if applicable), no sale of data
 5. **Upload AAB** to internal testing → closed testing → production track
@@ -76,6 +93,10 @@ Sign the AAB with the upload keystore (or configure `android/app/build.gradle` s
 
 - [x] `capacitor.config.ts` (appId, production server URL, https scheme)
 - [x] `public/manifest.json` (PWA manifest for web + install prompts)
+- [x] PWA icons `public/images/icon-192.png` / `icon-512.png` (correct sizes/types)
+- [x] Play store icon `android/play-store/icon-512.png` (matches installed launcher icon)
+- [x] Play feature graphic `android/play-store/feature-graphic.png`
+- [x] Release signing wired via `android/keystore.properties` (git-ignored)
 - [x] `@capacitor/core`, `@capacitor/cli`, `@capacitor/android` dependencies
 - [x] `npm run mobile:*` scripts
 - [x] This checklist for Play handoff

@@ -80,15 +80,21 @@ export default function BookingForm() {
 
   const handleNext = () => {
     if (step === 1) {
+      const step1Data = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email,
+      };
       const validation = PublicAppointmentRequestSchema.pick({
         firstName: true,
         lastName: true,
         phone: true,
         email: true,
-      }).safeParse(formData);
+      }).safeParse(step1Data);
       if (!validation.success) {
         setValidationErrors(validation.error.issues);
-        const firstFieldIssue = validation.error.issues.find((issue) => issue.path[0] in formData);
+        const firstFieldIssue = validation.error.issues.find((issue) => issue.path[0] in step1Data);
         setError(firstFieldIssue?.message ?? "Please correct the highlighted personal details.");
         return;
       }

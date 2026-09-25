@@ -214,7 +214,6 @@ export default function Hero() {
           style={{
             ...displayHeadingStyle,
             color: "#f4f2f5",
-            textShadow: "0 10px 40px rgba(3,22,26,0.7), 0 2px 10px rgba(3,22,26,0.5)",
           }}
         >
           Leadin<span style={{ fontFamily: '"Segoe UI", Arial, Helvetica, sans-serif' }}>g</span> Infertility & Addiction Care in South-West Nigeria

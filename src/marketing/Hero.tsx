@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { Calendar, ArrowRight, ChevronDown } from "lucide-react";
-import { heroStagger, fadeUp, fadeInSlow, ctaLift, arrowSlide, EASE, heroHeadingReveal } from "./animations";
+import { heroStagger, fadeUp, ctaLift, arrowSlide, EASE, heroHeadingReveal } from "./animations";
 import { displayHeadingClassName, displayHeadingStyle, displayHeadingVariantClassNames } from "./typography";
 import { useMediaPreloader } from "./MediaPreloaderContext";
 import { MEDIA_CONFIG } from "@/config/media";
@@ -202,20 +202,6 @@ export default function Hero() {
       </motion.div>
 
       <motion.div
-        variants={fadeInSlow}
-        initial="hidden"
-        animate="visible"
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden
-        style={{
-          background: `
-            linear-gradient(180deg, rgba(3,22,26,0.5) 0%, rgba(3,22,26,0.1) 40%, rgba(3,22,26,0.7) 100%),
-            radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(3,22,26,0.6) 100%)
-          `,
-        }}
-      />
-
-      <motion.div
         style={reducedMotion ? undefined : { y: yContent, opacity: opacityContent }}
         variants={heroStagger}
         initial="hidden"
@@ -231,7 +217,7 @@ export default function Hero() {
             textShadow: "0 10px 40px rgba(3,22,26,0.7), 0 2px 10px rgba(3,22,26,0.5)",
           }}
         >
-          Leading Infertility & Addiction Care in South-West Nigeria
+          Leadin<span style={{ fontFamily: '"Segoe UI", Arial, Helvetica, sans-serif' }}>g</span> Infertility & Addiction Care in South-West Nigeria
         </motion.h1>
 
         <motion.p

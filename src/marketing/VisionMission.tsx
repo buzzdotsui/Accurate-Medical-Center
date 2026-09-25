@@ -284,8 +284,8 @@ export function VisionMission() {
               textShadow: "0 8px 36px rgba(0,0,0,0.48)",
             }}
           >
-            <span className="block">Healing Minds.</span>
-            <span className="block">Restoring Lives.</span>
+            <span className="block">Healin<span style={{ fontFamily: '"Segoe UI", Arial, Helvetica, sans-serif' }}>g</span> Minds.</span>
+            <span className="block">Restorin<span style={{ fontFamily: '"Segoe UI", Arial, Helvetica, sans-serif' }}>g</span> Lives.</span>
           </motion.h2>
         </motion.div>
 

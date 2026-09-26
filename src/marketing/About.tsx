@@ -8,11 +8,43 @@ import {
   staggerContainerSlow,
   staggerContainerFast,
   staggerContainer,
+  sectionReveal,
 } from "./animations";
+import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 
 const INK = "var(--marketing-ink)";
 const INK_SOFT = "var(--muted-text-on-dark)";
 const INK_MUTED = "var(--muted-text-on-dark)";
+const PRIMARY = "var(--primary)";
+const LEMON = "var(--marketing-lemon)";
+
+const TRUST_ITEMS = [
+  {
+    num: "01",
+    title: "24/7 Emergency Care",
+    desc: "Round-the-clock emergency response with dedicated staff and critical care readiness at all hours.",
+  },
+  {
+    num: "02",
+    title: "Comprehensive Medical Services",
+    desc: "From outpatient consultations to advanced diagnostics, surgery, and specialist care under one roof.",
+  },
+  {
+    num: "03",
+    title: "Experienced Healthcare Professionals",
+    desc: "A team of seasoned doctors, surgeons, nurses, and therapists delivering evidence-based care.",
+  },
+  {
+    num: "04",
+    title: "Online Consultations",
+    desc: "Convenient virtual consultations that bring quality healthcare directly to you, wherever you are.",
+  },
+  {
+    num: "05",
+    title: "Multiple Locations Across Ondo State",
+    desc: "Expanding access to quality care with strategic presence and partnerships across the state.",
+  },
+] as const;
 
 const HOSPITAL_STATS = [
   { label: "Years of Operation", value: 11, suffix: "+" },
@@ -213,6 +245,7 @@ function TrustIndicator({
 
 export function About() {
   return (
+    <>
     <section
       id="about"
       className="relative py-[96px] sm:py-[120px] lg:py-[144px] overflow-hidden"
@@ -597,5 +630,6 @@ export function About() {
         </motion.div>
       </div>
     </section>
+  </>
   );
 }

@@ -21,10 +21,10 @@ import {
   Sprout,
   UserRound,
   Heart,
-  Lungs,
+  Activity,
   Bone,
   Eye,
-  Tooth,
+  Smile,
   Ear,
   HelpCircle,
 } from "lucide-react";
@@ -53,6 +53,7 @@ type IconKey =
   | "user-round"
   | "heart"
   | "lungs"
+  | "brain"
   | "bone"
   | "eye"
   | "tooth"
@@ -75,10 +76,11 @@ const ICONS: Record<IconKey, React.ComponentType<{ className?: string; "aria-hid
   "sprout": Sprout,
   "user-round": UserRound,
   "heart": Heart,
-  "lungs": Lungs,
+  "lungs": Activity,
+  "brain": Brain,
   "bone": Bone,
   "eye": Eye,
-  "tooth": Tooth,
+  "tooth": Smile,
   "ear": Ear,
   "shield-check": ShieldCheck,
   baby: Baby,
@@ -100,6 +102,7 @@ const SERVICE_ICON_MOTION: Record<IconKey, Variants> = {
   "user-round": { rest: { scale: 1, x: 0 }, active: { x: 2, scale: 1.05 } },
   heart: { rest: { scale: 1 }, active: { scale: 1.08 } },
   lungs: { rest: { scale: 1, y: 0 }, active: { scale: 1.06, y: -1 } },
+  brain: { rest: { scale: 1 }, active: { scale: 1.08 } },
   bone: { rest: { scale: 1 }, active: { rotate: -3, scale: 1.04 } },
   eye: { rest: { scale: 1 }, active: { scale: 1.08 } },
   tooth: { rest: { scale: 1 }, active: { scale: 1.06 } },

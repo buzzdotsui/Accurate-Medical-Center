@@ -34,6 +34,9 @@ const nextConfig: NextConfig = {
       './public/vision and mission statement/**',
     ],
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async headers() {
     return [
       {

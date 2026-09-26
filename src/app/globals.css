@@ -92,7 +92,7 @@
    * Source-of-truth hex values as specified in the brand brief.
    * ─────────────────────────────────────────────────────────────────────── */
   --marketing-lemon:   #03161a;  /* signature accent — CTAs, progress, highlights */
-  --marketing-lemon-dark: #bccb3c; /* hover accent */
+  --marketing-lemon-dark: #03161a; /* hover accent */
   --marketing-ink:     #03161a;  /* deep ink-navy — hero, experience, dark surfaces */
   --marketing-ink-2:   #111312;  /* cinematic charcoal — experience background */
   --marketing-ivory:   #F7F6F1;  /* warm off-white — about section */

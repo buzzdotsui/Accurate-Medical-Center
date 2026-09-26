@@ -8,6 +8,8 @@ import Link from "next/link";
 import { fadeUpSmall, fadeUp, EASE, sectionReveal } from "./animations";
 import { BrandLockup } from "./BrandLockup";
 
+const BORDER = "var(--marketing-border)";
+
 const NAV_LINKS = [
   { label: "Home",        href: "/" },
   { label: "About",       href: "/#vision-mission" },

@@ -31,9 +31,10 @@ export const siteConfig = {
       displayPrimary: '0703 909 2836',
     },
     email: {
-      general: 'immediateaccuratediagnostics@yahoo.com',
-      appointments: 'immediateaccuratediagnostics@yahoo.com',
-      emergency: 'immediateaccuratediagnostics@yahoo.com',
+      general: 'accuratemedicalcenterofficial@gmail.com',
+      appointments: 'accuratemedicalcenterofficial@gmail.com',
+      emergency: 'accuratemedicalcenterofficial@gmail.com',
+      privacy: 'accuratemedicalcenterofficial@gmail.com',
     },
     hours: {
       weekdays: '8:00 AM to 8:00 PM',

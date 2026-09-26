@@ -7,6 +7,7 @@ import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
 import { ROLES } from '@/config/roles';
 import { logger } from '@/lib/utils/logger';
+import { Prisma } from '@prisma/client';
 
 export class ClinicalService {
   /**
@@ -165,6 +166,157 @@ export class ClinicalService {
     if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
     
     return visit;
+  }
+
+  /**
+   * Start a consultation for an existing visit (change status to IN_PROGRESS)
+   */
+  static async startConsultation(visitId: string, data: { chiefComplaint?: string; vitals?: Record<string, unknown> }, executorId: string) {
+    const existingVisit = await prisma.visit.findUnique({ where: { id: visitId } });
+    if (!existingVisit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
+    
+    if (existingVisit.status === 'COMPLETED') {
+      throw new AppError('Cannot start a completed visit', 'BAD_REQUEST', 400);
+    }
+
+    const updated = await prisma.visit.update({
+      where: { id: visitId },
+      data: {
+        status: 'IN_PROGRESS',
+        chiefComplaint: data.chiefComplaint ?? existingVisit.chiefComplaint,
+        vitals: (data.vitals ?? existingVisit.vitals ?? undefined) as Prisma.InputJsonValue,
+      },
+    });
+
+    await AuditService.log({
+      userId: executorId,
+      userRole: 'DOCTOR',
+      action: 'START_VISIT',
+      resource: 'VISIT',
+      resourceId: existingVisit.id,
+      details: { chiefComplaint: data.chiefComplaint }
+    });
+
+    return updated;
+  }
+
+  /**
+   * Complete a consultation (change status to COMPLETED, add diagnoses, notes, treatment plan)
+   */
+  static async completeConsultation(visitId: string, data: { 
+    diagnoses?: Array<{ description: string; code?: string; type?: 'PRIMARY' | 'SECONDARY'; notes?: string }>;
+    notes?: string;
+    treatmentPlan?: string;
+    vitals?: Record<string, unknown>;
+  }, executorId: string) {
+    const existingVisit = await prisma.visit.findUnique({ where: { id: visitId } });
+    if (!existingVisit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
+    
+    if (existingVisit.status !== 'IN_PROGRESS') {
+      throw new AppError('Can only complete visits in progress', 'BAD_REQUEST', 400);
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      // Update visit
+      const visit = await tx.visit.update({
+        where: { id: visitId },
+        data: {
+          status: 'COMPLETED',
+          endedAt: new Date(),
+          notes: data.notes ? { create: { noteText: data.notes } } : undefined,
+          vitals: (data.vitals ?? existingVisit.vitals ?? undefined) as Prisma.InputJsonValue,
+        },
+      });
+
+      // Add diagnoses
+      if (data.diagnoses && data.diagnoses.length > 0) {
+        for (const d of data.diagnoses) {
+          await tx.diagnosis.create({
+            data: {
+              visitId,
+              code: d.code || null,
+              description: d.description,
+              type: d.type || 'PRIMARY',
+              notes: d.notes || null,
+            },
+          });
+        }
+      }
+
+      // Add treatment plan
+      if (data.treatmentPlan) {
+        await tx.treatmentPlan.upsert({
+          where: { visitId },
+          update: { instructions: data.treatmentPlan!, followUpDate: null },
+          create: { visitId, instructions: data.treatmentPlan! },
+        });
+      }
+
+      return visit;
+    });
+
+    await AuditService.log({
+      userId: executorId,
+      userRole: 'DOCTOR',
+      action: 'COMPLETE_VISIT',
+      resource: 'VISIT',
+      resourceId: existingVisit.id,
+    });
+
+    return updated;
+  }
+
+  /**
+   * List appointments queue for doctor (today's appointments with IN_PROGRESS, ARRIVED, SCHEDULED status)
+   */
+  static async listQueue(params: {
+    branchId?: string;
+    doctorId?: string;
+    status?: string;
+    skip?: number;
+    take?: number;
+  }) {
+    const { skip = 0, take = 50 } = params;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {};
+    if (params.branchId) where.branchId = params.branchId;
+    if (params.doctorId) where.doctorId = params.doctorId;
+    if (params.status) where.status = params.status;
+    
+    // For queue, show appointments that are SCHEDULED, ARRIVED, or IN_PROGRESS today
+    const today = new Date();
+    const startOfDay = new Date(today); startOfDay.setUTCHours(0,0,0,0);
+    const endOfDay = new Date(today); endOfDay.setUTCHours(23,59,59,999);
+    where.date = { gte: startOfDay, lte: endOfDay };
+    where.status = { in: ['SCHEDULED', 'ARRIVED', 'CHECKED_IN', 'IN_PROGRESS'] };
+
+    const [total, appointments] = await Promise.all([
+      prisma.appointment.count({ where }),
+      prisma.appointment.findMany({
+        where, skip, take,
+        include: {
+          patient: { 
+            select: { 
+              id: true, 
+              firstName: true, 
+              lastName: true, 
+              patientId: true, 
+              phone: true 
+            } 
+          },
+          staff: { 
+            select: { 
+              id: true, 
+              user: { select: { name: true } } 
+            } 
+          },
+        },
+        orderBy: { date: 'asc' },
+      })
+    ]);
+
+    return { total, appointments };
   }
 
   /**

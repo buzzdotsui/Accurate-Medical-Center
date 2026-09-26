@@ -11,6 +11,7 @@ import {
 } from "./animations";
 
 const PRIMARY = "var(--primary)";
+const LEMON = "var(--marketing-lemon)";
 const INK = "var(--marketing-ink)";
 const INK_SOFT = "rgba(3,22,26,0.65)";
 const INK_MUTED = "rgba(3,22,26,0.48)";

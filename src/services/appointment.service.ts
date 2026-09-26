@@ -581,4 +581,54 @@ export class AppointmentService {
       noShowCount: noShow,
     };
   }
+
+  static async listQueue(params: {
+    branchId?: string;
+    doctorId?: string;
+    status?: string;
+    skip?: number;
+    take?: number;
+  }) {
+    const { skip = 0, take = 50 } = params;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {};
+    if (params.branchId) where.branchId = params.branchId;
+    if (params.doctorId) where.doctorId = params.doctorId;
+    if (params.status) where.status = params.status;
+    
+    // For queue, show appointments that are SCHEDULED, ARRIVED, or IN_PROGRESS today
+    const today = new Date();
+    const startOfDay = new Date(today); startOfDay.setUTCHours(0,0,0,0);
+    const endOfDay = new Date(today); endOfDay.setUTCHours(23,59,59,999);
+    where.date = { gte: startOfDay, lte: endOfDay };
+    where.status = { in: ['SCHEDULED', 'ARRIVED', 'CHECKED_IN', 'IN_PROGRESS'] };
+
+    const [total, appointments] = await Promise.all([
+      prisma.appointment.count({ where }),
+      prisma.appointment.findMany({
+        where, skip, take,
+        include: {
+          patient: { 
+            select: { 
+              id: true, 
+              firstName: true, 
+              lastName: true, 
+              patientId: true, 
+              phone: true 
+            } 
+          },
+          staff: { 
+            select: { 
+              id: true, 
+              user: { select: { name: true } } 
+            } 
+          },
+        },
+        orderBy: { date: 'asc' },
+      })
+    ]);
+
+    return { total, appointments };
+  }
 }

@@ -56,4 +56,34 @@ export class PrescriptionService {
       return prescription;
     });
   }
+
+  /**
+   * Create a prescription for a visit (from visit context - auto-resolves doctor/patient)
+   */
+  static async createPrescriptionFromVisit(visitId: string, data: {
+    items: Array<{
+      medicineId: string;
+      dosage: string;
+      frequency: string;
+      duration: string;
+      quantity: number;
+      instructions?: string;
+    }>;
+  }, executorId: string) {
+    // Get visit to find doctor and patient
+    const visit = await prisma.visit.findUnique({
+      where: { id: visitId },
+      select: { patientId: true, doctorId: true },
+    });
+    
+    if (!visit) throw new Error('Visit not found');
+    if (!visit.doctorId) throw new Error('Visit has no assigned doctor');
+
+    return this.createPrescription({
+      visitId,
+      patientId: visit.patientId,
+      doctorId: visit.doctorId,
+      items: data.items,
+    }, executorId);
+  }
 }

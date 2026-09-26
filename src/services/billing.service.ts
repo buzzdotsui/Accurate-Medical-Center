@@ -147,6 +147,43 @@ export class BillingService {
   }
 
   /**
+   * List invoices with optional filters
+   */
+  static async listInvoices(params: {
+    branchId?: string;
+    patientId?: string;
+    status?: string;
+    skip?: number;
+    take?: number;
+  }) {
+    const { skip = 0, take = 50 } = params;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {};
+    if (params.branchId) where.branchId = params.branchId;
+    if (params.patientId) where.patientId = params.patientId;
+    if (params.status) where.status = params.status;
+
+    const [total, invoices] = await Promise.all([
+      prisma.invoice.count({ where }),
+      prisma.invoice.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          patient: { select: { id: true, firstName: true, lastName: true, patientId: true } },
+          branch: { select: { name: true, code: true } },
+          items: true,
+          payments: { select: { amount: true, method: true, createdAt: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    ]);
+
+    return { total, invoices };
+  }
+
+  /**
    * Aggregate billing stats for the finance/billing dashboard, scoped to a
    * branch (or organization-wide for SUPER_ADMIN when branchId is
    * undefined).

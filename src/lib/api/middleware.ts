@@ -15,7 +15,7 @@ type ApiHandler = (
   context: RouteContext,
 ) => Promise<NextResponse<unknown>> | NextResponse<unknown>;
 
-type AuthApiHandler = (
+export type AuthApiHandler = (
   req: NextRequest,
   session: { user: SessionUser },
   context: RouteContext,

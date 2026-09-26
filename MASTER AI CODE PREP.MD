@@ -659,6 +659,7 @@ Errors should be:
 Do not silently fail.
 
 ---
+h
 
 # 21. AUDIT FOR "VIBE-CODED" VISUAL TROPES
 

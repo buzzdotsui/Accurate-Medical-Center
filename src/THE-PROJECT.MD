@@ -3,7 +3,7 @@
 ## Hospital Management System (HMS) — Comprehensive Scope & Production Roadmap
 
 **Document Purpose:** Definitive scope of the Accurate Medical Center Hospital Management System, covering the functionality currently implemented in the codebase, the functionality already developed but requiring final verification, and the remaining work required to deliver a complete production-ready HMS.
-
+\
 **Project:** Accurate Medical Center HMS
 **Platform:** Web-based Hospital Management System
 **Application:** Next.js

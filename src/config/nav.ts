@@ -13,11 +13,13 @@ export interface NavItem {
  * Navigation structure per role. Each role gets its own sidebar
  * navigation tree. Items are rendered in order.
  *
- * Phase 1 commercial scope (invoice TTI/2026/HMS-P1-002):
- * auth, patients, staff, appointments, records, operational dashboards,
- * settings. Specialty modules that are incomplete (psych, ambulance,
- * theatre, maternal) and deferred areas (advanced analytics) are kept
- * out of the primary nav; their source routes remain for a future phase.
+ * Phase 1 commercial scope: Patients, Staff, Doctors, Appointments,
+ * Medical Records, Administrative Records, Dashboard/Operations,
+ * Profiles, Settings, Authentication/RBAC.
+ *
+ * Future modules (Pharmacy, Laboratory, Radiology, Finance, Billing,
+ * Lab Results) and their specialist roles are preserved in the codebase
+ * but hidden from the active Phase 1 navigation.
  */
 export const navConfig: Record<Role, NavItem[]> = {
   [ROLES.SUPER_ADMIN]: [
@@ -25,9 +27,6 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Patients', href: '/admin/patients', icon: 'users' },
     { title: 'Staff', href: '/admin/staff', icon: 'user-cog' },
     { title: 'Appointments', href: '/admin/appointments', icon: 'calendar-check' },
-    { title: 'Pharmacy', href: '/admin/pharmacy', icon: 'pill' },
-    { title: 'Laboratory', href: '/admin/laboratory', icon: 'flask-conical' },
-    { title: 'Finance', href: '/admin/finance', icon: 'banknote' },
     { title: 'Settings', href: '/settings', icon: 'settings' },
   ],
 
@@ -43,7 +42,6 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Dashboard', href: '/doctor', icon: 'layout-dashboard' },
     { title: 'Clinical Queue', href: '/doctor/queue', icon: 'list-ordered' },
     { title: 'My Patients', href: '/doctor/patients', icon: 'users' },
-    { title: 'Prescriptions', href: '/doctor/prescriptions', icon: 'pill' },
   ],
 
   [ROLES.NURSE]: [
@@ -59,26 +57,11 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Patients', href: '/reception/patients', icon: 'users' },
   ],
 
-  [ROLES.PHARMACIST]: [
-    { title: 'Dashboard', href: '/pharmacy', icon: 'layout-dashboard' },
-    { title: 'Prescriptions', href: '/pharmacy/prescriptions', icon: 'pill' },
-    { title: 'Inventory', href: '/pharmacy/inventory', icon: 'package' },
-  ],
-
-  [ROLES.LAB_SCIENTIST]: [
-    { title: 'Dashboard', href: '/laboratory', icon: 'layout-dashboard' },
-    { title: 'Lab Requests', href: '/laboratory/requests', icon: 'clipboard-list' },
-  ],
-
-  [ROLES.RADIOGRAPHER]: [
-    { title: 'Dashboard', href: '/radiology', icon: 'layout-dashboard' },
-    { title: 'Scan Requests', href: '/radiology/requests', icon: 'scan' },
-  ],
-
-  [ROLES.ACCOUNTANT]: [
-    { title: 'Dashboard', href: '/billing', icon: 'layout-dashboard' },
-    { title: 'Invoices', href: '/billing/invoices', icon: 'receipt' },
-  ],
+  // Future Phase roles - preserved but not in active Phase 1 navigation
+  [ROLES.PHARMACIST]: [],
+  [ROLES.LAB_SCIENTIST]: [],
+  [ROLES.RADIOGRAPHER]: [],
+  [ROLES.ACCOUNTANT]: [],
 
   // Deferred specialty roles: dashboard root only (no unfinished sub-flows in nav).
   [ROLES.THEATRE_STAFF]: [
@@ -101,15 +84,15 @@ export const navConfig: Record<Role, NavItem[]> = {
     { title: 'Dashboard', href: '/patient', icon: 'layout-dashboard' },
     { title: 'My Appointments', href: '/patient/appointments', icon: 'calendar-check' },
     { title: 'Medical Records', href: '/patient/records', icon: 'file-medical' },
-    { title: 'Lab Results', href: '/patient/lab-results', icon: 'flask-conical' },
-    { title: 'Prescriptions', href: '/patient/prescriptions', icon: 'pill' },
-    { title: 'Bills', href: '/patient/billing', icon: 'receipt' },
   ],
 };
 
 /**
  * Role-to-dashboard-root mapping.
  * Used after login to redirect user to their home dashboard.
+ *
+ * Future Phase roles (PHARMACIST, LAB_SCIENTIST, RADIOGRAPHER, ACCOUNTANT)
+ * are not part of active Phase 1 but their routes are preserved.
  */
 export const ROLE_DASHBOARD_ROOTS: Record<Role, string> = {
   SUPER_ADMIN: '/admin',

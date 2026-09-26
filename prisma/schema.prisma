@@ -152,35 +152,42 @@ model Department {
 }
 
 model Staff {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  staffId       String    @unique
-  departmentId  String?
-  department    Department? @relation(fields: [departmentId], references: [id])
-  branchId      String
-  branch        Branch    @relation(fields: [branchId], references: [id])
+  staffId           String    @unique
+  departmentId      String?
+  department        Department? @relation(fields: [departmentId], references: [id])
+  branchId          String
+  branch            Branch    @relation(fields: [branchId], references: [id])
   
-  specialization String?
-  licenseNumber  String?
-  phone         String?
-  address       String?
-  isActive      Boolean   @default(true)
+  // Staff-to-doctor assignment: a staff member (nurse, receptionist, etc.)
+  // can be assigned to work under a specific doctor. Only DOCTOR role staff
+  // are valid supervisors. This is an Administrator-controlled operation.
+  supervisingDoctorId String?
+  supervisingDoctor   Staff?    @relation("StaffSupervision", fields: [supervisingDoctorId], references: [id])
+  supervisedStaff     Staff[]   @relation("StaffSupervision")
   
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  specialization    String?
+  licenseNumber     String?
+  phone             String?
+  address           String?
+  isActive          Boolean   @default(true)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
 
-  appointments  Appointment[]
-  visits        Visit[]
-  prescriptions Prescription[]
-  labRequests   LabRequest[]
-  radRequests   RadiologyRequest[]
-  admissions    Admission[]
-  surgeries     SurgeryRecord[]
-  psychAssessments PsychologicalAssessment[]
-  therapySessions  TherapySession[]
+  appointments      Appointment[]
+  visits            Visit[]
+  prescriptions     Prescription[]
+  labRequests       LabRequest[]
+  radRequests       RadiologyRequest[]
+  admissions        Admission[]
+  surgeries         SurgeryRecord[]
+  psychAssessments  PsychologicalAssessment[]
+  therapySessions   TherapySession[]
 
   @@map("staff")
 }

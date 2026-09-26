@@ -146,11 +146,11 @@ export function Header() {
         transition={{ duration: 0.75, ease: EASE, delay: 0.1 }}
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: scrolled ? "rgba(3, 22, 26, 0.95)" : "rgba(3, 22, 26, 0.85)",
+          backgroundColor: scrolled ? "var(--header-bg-scrolled)" : "var(--header-bg)",
           backdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
           WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
-          borderBottom: scrolled ? "1px solid rgba(244, 242, 245, 0.12)" : "1px solid rgba(244, 242, 245, 0.06)",
-          boxShadow: scrolled ? "0 10px 40px rgba(0,0,0,0.25)" : "0 4px 24px rgba(0,0,0,0.15)",
+          borderBottom: scrolled ? "1px solid var(--header-border)" : "1px solid var(--header-border-default)",
+          boxShadow: scrolled ? "var(--header-shadow)" : "var(--header-shadow-default)",
           transition: "background-color var(--motion-base) ease, backdrop-filter var(--motion-base) ease, -webkit-backdrop-filter var(--motion-base) ease, border-color var(--motion-base) ease, box-shadow var(--motion-base) ease",
         }}
       >
@@ -189,10 +189,10 @@ export function Header() {
                     scrollTo(link.href);
                   }}
                   aria-current={activeSection === link.href.slice(1) ? "location" : undefined}
-                  className={`group relative text-[13px] font-medium tracking-[0.08em] uppercase transition-colors duration-300 hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-[#f4f2f5]" : "text-[#f4f2f5]/65"}`}
+                  className={`group relative text-[13px] font-medium tracking-[0.08em] uppercase transition-colors duration-300 hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-[var(--marketing-white)]" : "text-[var(--muted-text-on-dark)]"}`}
                 >
                   {link.label}
-                  <span className={`absolute -bottom-1.5 left-0 h-[1.5px] w-full origin-left rounded-full bg-[#f4f2f5] transition-transform duration-300 ease-out ${activeSection === link.href.slice(1) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
+                  <span className={`absolute -bottom-1.5 left-0 h-[1.5px] w-full origin-left rounded-full bg-[var(--marketing-white)] transition-transform duration-300 ease-out ${activeSection === link.href.slice(1) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} style={{ boxShadow: "0 0 8px rgba(244,242,245,0.4)" }} />
                 </a>
               ))}
             </nav>
@@ -200,7 +200,7 @@ export function Header() {
             <div className="hidden lg:flex items-center gap-6">
               <Link
                 href="/register"
-                className="text-[12px] font-medium tracking-wider uppercase text-[#f4f2f5]/40 transition-colors hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+                className="text-[12px] font-medium tracking-wider uppercase text-[var(--muted-text-on-dark)] transition-colors hover:text-[var(--marketing-white)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                 aria-label="Portal Login"
               >
                 Portal
@@ -270,13 +270,13 @@ export function Header() {
               aria-label="Navigation menu"
               className="fixed top-0 right-0 h-full w-[min(350px,92vw)] z-[70] flex flex-col lg:hidden shadow-[0_20px_60px_rgba(0,0,0,0.45)]"
               style={{
-                backgroundColor: "rgba(3, 22, 26, 0.97)",
+                backgroundColor: "var(--header-bg)",
                 backdropFilter: "blur(28px) saturate(1.2)",
                 WebkitBackdropFilter: "blur(28px) saturate(1.2)",
-                borderLeft: "1px solid rgba(244, 242, 245, 0.08)",
+                borderLeft: "1px solid var(--header-border)",
               }}
             >
-              <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.07]">
+              <div className="flex items-center justify-between px-6 py-5 border-b" style={{ borderColor: "var(--header-border)" }}>
                 <div className="flex items-center gap-3">
                   <Image
                     src="/marketing/images/logo.jpeg"
@@ -285,19 +285,19 @@ export function Header() {
                     height={46}
                     className="rounded-lg object-contain"
                   />
-                  <BrandLockup size="compact" className="text-[#f4f2f5]" />
+                  <BrandLockup size="compact" className="text-[var(--text-on-dark)]" />
                 </div>
                 <button
                   ref={closeButtonRef}
                   onClick={() => closeMenu(true)}
-                  className="-mr-3 rounded-xl p-3 text-[#f4f2f5]/55 transition-[background-color,color,transform] duration-200 hover:bg-white/10 hover:text-white active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+                  className="-mr-3 rounded-xl p-3 text-[var(--muted-text-on-dark)] transition-[background-color,color,transform] duration-200 hover:bg-white/10 hover:text-[var(--text-on-dark)] active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
 
-              <motion.nav
+<motion.nav
                 variants={drawerNavStagger}
                 initial="hidden"
                 animate="visible"
@@ -313,15 +313,15 @@ export function Header() {
                     event.preventDefault();
                     scrollTo(link.href);
                   }}
-                    aria-current={activeSection === link.href.slice(1) ? "location" : undefined}
-                    className={`group flex items-center justify-between border-b border-white/[0.05] py-4 text-left text-[23px] font-medium transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-white" : "text-[#f4f2f5]/78"}`}
-                  >
-                    <span className="tracking-tight">{link.label}</span>
-                    <span
-                      aria-hidden
-                      className="h-px w-10 origin-left scale-x-[0.6] bg-[#f4f2f5]/28 transition-[transform,background-color] duration-300 ease-out group-hover:scale-x-100 group-hover:bg-[#f4f2f5]/55"
-                    />
-                  </motion.a>
+                  aria-current={activeSection === link.href.slice(1) ? "location" : undefined}
+                  className={`group flex items-center justify-between border-b border-[var(--header-border)] py-4 text-left text-[23px] font-medium transition-colors hover:text-[var(--text-on-dark)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70 ${activeSection === link.href.slice(1) ? "text-[var(--text-on-dark)]" : "text-[var(--muted-text-on-dark)]"}`}
+                >
+                  <span className="tracking-tight">{link.label}</span>
+                  <span
+                    aria-hidden
+                    className="h-px w-10 origin-left scale-x-[0.6] bg-[var(--marketing-white)]/28 transition-[transform,background-color] duration-300 ease-out group-hover:scale-x-100 group-hover:bg-[var(--marketing-white)]/55"
+                  />
+                </motion.a>
                 ))}
               </motion.nav>
 

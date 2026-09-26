@@ -8,13 +8,24 @@ export class HrService {
    * Get all staff members with their departments.
    * When `branchId` is provided (i.e. caller is not SUPER_ADMIN), results
    * are scoped to that branch only.
+   * Optional `role` filter to get only staff with a specific role.
    */
-  static async getStaffDirectory(branchId?: string) {
+  static async getStaffDirectory(branchId?: string, role?: string) {
+    const where: { branchId?: string; user?: { role: string }; isActive?: boolean } = {};
+    if (branchId) where.branchId = branchId;
+    if (role) where.user = { role };
+    if (role === 'DOCTOR') where.isActive = true; // Only active doctors for assignment
+
     return await prisma.staff.findMany({
-      where: branchId ? { branchId } : undefined,
+      where,
       include: {
         user: { select: { name: true, email: true, role: true } },
-        department: true
+        department: true,
+        supervisingDoctor: {
+          include: {
+            user: { select: { name: true } },
+          },
+        },
       },
       orderBy: { isActive: 'desc' } // ACTIVE first
     });

@@ -211,23 +211,23 @@ export default function Hero() {
         animate="visible"
         className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-5 pt-24 pb-16 text-center sm:px-8 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24"
       >
-        <motion.h1
-          variants={heroHeadingReveal}
-          className={`mb-6 max-w-[15ch] ${displayHeadingClassName} ${displayHeadingVariantClassNames.hero} sm:mb-8`}
-          style={{
-            ...displayHeadingStyle,
-            color: "var(--marketing-white)",
-          }}
-        >
-          Leadin<span style={{ fontFamily: '"Segoe UI", Arial, Helvetica, sans-serif' }}>g</span> Infertility & Addiction Care in South-West Nigeria
-        </motion.h1>
+<motion.h1
+            variants={heroHeadingReveal}
+            className={`mb-6 max-w-[15ch] ${displayHeadingClassName} ${displayHeadingVariantClassNames.hero} sm:mb-8`}
+            style={{
+              ...displayHeadingStyle,
+              color: "var(--marketing-white)",
+            }}
+          >
+            Specialized Infertility & Addiction Care in South-West Nigeria
+          </motion.h1>
 
-        <motion.p
-          variants={fadeUp}
-          className="mx-auto mb-10 max-w-2xl text-pretty text-[16px] font-normal leading-[1.7] text-[var(--marketing-white)]/90 text-shadow-sm sm:mb-12 sm:text-[18px] lg:text-[19px]"
-        >
-          Specialized infertility and addiction care, supported by experienced healthcare professionals and compassionate, patient-first treatment.
-        </motion.p>
+          <motion.p
+            variants={fadeUp}
+            className="mx-auto mb-10 max-w-2xl text-pretty text-[16px] font-normal leading-[1.7] text-[var(--marketing-white)]/90 text-shadow-sm sm:mb-12 sm:text-[18px] lg:text-[19px]"
+          >
+            Evidence-based infertility treatments and structured addiction recovery programs, delivered by experienced specialists in a patient-first environment.
+          </motion.p>
 
         <motion.div
           variants={fadeUp}

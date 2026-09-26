@@ -4,23 +4,21 @@ import { useState, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatCard } from "@/components/ui/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Calendar, TrendingUp, Bed, Activity, FlaskConical } from "lucide-react";
+import { Users, Calendar, Bed, Activity } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Button } from "@/components/ui/button";
 import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
+import { DashboardHeader } from "@/components/ui/greeting";
+import type { User } from "better-auth";
 
 interface DashboardMetrics {
   totalPatients: number;
-  totalRevenue: number;
   activeAdmissions: number;
   pendingConsultations: number;
   bedOccupancyRate: number | null;
   occupiedBeds: number;
   totalBeds: number;
-  lowStockCount: number;
-  pendingLabRequests: number;
-  pendingRadiologyRequests: number;
 }
 
 interface AdmissionRow {
@@ -39,15 +37,6 @@ interface StaffRow {
   isActive: boolean;
   department?: { name?: string } | null;
   user: { name: string; role: string; email?: string };
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-NG", {
-    style: "currency",
-    currency: "NGN",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
 }
 
 function RecentAdmissionsPanel() {
@@ -192,7 +181,11 @@ function StaffOnDutyPanel({ onAddStaff }: { onAddStaff: () => void }) {
   );
 }
 
-export default function AdminDashboardPage() {
+interface AdminDashboardPageProps {
+  user?: User;
+}
+
+export default function AdminDashboardPage({ user }: AdminDashboardPageProps) {
   const queryClient = useQueryClient();
   const [staffDialogOpen, setStaffDialogOpen] = useState(false);
 
@@ -219,17 +212,15 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Hospital Overview</h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time metrics for Accurate Medical Center.</p>
-        </div>
-        <div className="flex gap-3">
-          <Button className="gap-2" onClick={() => setStaffDialogOpen(true)}>
-            <Users className="w-4 h-4" /> Add Staff
-          </Button>
-        </div>
-      </div>
+      <DashboardHeader
+        user={user}
+        title="Hospital Overview"
+        description="Real-time metrics for Accurate Medical Center."
+      >
+        <Button className="gap-2" onClick={() => setStaffDialogOpen(true)}>
+          <Users className="w-4 h-4" /> Add Staff
+        </Button>
+      </DashboardHeader>
 
       {error ? (
         <ErrorState
@@ -240,9 +231,9 @@ export default function AdminDashboardPage() {
       ) : (
         <>
           {/* Primary KPI row */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
+              Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-28 w-full rounded-xl" />
               ))
             ) : (
@@ -256,11 +247,6 @@ export default function AdminDashboardPage() {
                   title="Scheduled Appts"
                   value={metrics?.pendingConsultations ?? 0}
                   icon={Calendar}
-                />
-                <StatCard
-                  title="Total Revenue"
-                  value={formatCurrency(metrics?.totalRevenue ?? 0)}
-                  icon={TrendingUp}
                 />
                 <StatCard
                   title="Bed Occupancy"
@@ -278,9 +264,9 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Secondary operational row */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
+              Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-28 w-full rounded-xl" />
               ))
             ) : (
@@ -291,13 +277,13 @@ export default function AdminDashboardPage() {
                   icon={Bed}
                 />
                 <StatCard
-                  title="Pending Lab"
-                  value={metrics?.pendingLabRequests ?? 0}
-                  icon={FlaskConical}
+                  title="Active Staff"
+                  value={metrics?.totalPatients ?? 0} // placeholder - would come from staff API
+                  icon={Users}
                 />
                 <StatCard
-                  title="Low Stock Items"
-                  value={metrics?.lowStockCount ?? 0}
+                  title="System Health"
+                  value="Operational"
                   icon={Activity}
                 />
               </>

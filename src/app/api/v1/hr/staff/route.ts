@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { withRole, parseBody } from '@/lib/api/middleware';
+import { withRole, parseBody, parseQuery } from '@/lib/api/middleware';
 import { HrService } from '@/services/hr.service';
 import { StaffService } from '@/services/staff.service';
 import { ok, created } from '@/lib/api/response';
@@ -7,6 +7,12 @@ import { ROLES } from '@/config/roles';
 import { CreateStaffSchema, canAssignRole } from '@/lib/validations/staff';
 import { buildBranchFilter, resolveBranchId } from '@/lib/auth/resource-authorization';
 import { AppError } from '@/lib/api/errors';
+import { z } from 'zod';
+
+const StaffQuerySchema = z.object({
+  role: z.string().optional(),
+  isActive: z.coerce.boolean().optional(),
+});
 
 /**
  * GET /api/v1/hr/staff
@@ -16,10 +22,15 @@ import { AppError } from '@/lib/api/errors';
  * administration" are administrative responsibilities, not something
  * every authenticated role (down to PATIENT) should be able to browse.
  * ADMIN is additionally scoped to their own branch.
+ * 
+ * Query params:
+ * - role: Filter by role (e.g., DOCTOR)
+ * - isActive: Filter by active status
  */
 export const GET = withRole([ROLES.SUPER_ADMIN, ROLES.ADMIN], async (req, session) => {
+  const query = parseQuery(req, StaffQuerySchema);
   const branchFilter = buildBranchFilter(session.user);
-  const staff = await HrService.getStaffDirectory(branchFilter.branchId);
+  const staff = await HrService.getStaffDirectory(branchFilter.branchId, query.role);
   return ok(staff);
 });
 

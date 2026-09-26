@@ -4,13 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, FlaskConical, Receipt, RefreshCw } from "lucide-react";
+import { Calendar, FileText, RefreshCw } from "lucide-react";
+import { DashboardHeader } from "@/components/ui/greeting";
+import type { User } from "better-auth";
 
 interface PatientDashboardData {
   appointmentCount: number;
-  labRequestCount: number;
-  prescriptionCount: number;
-  pendingInvoiceTotal: number;
 }
 
 function formatNaira(value: number): string {
@@ -22,7 +21,11 @@ function formatNaira(value: number): string {
   }).format(value);
 }
 
-export default function PatientDashboard() {
+interface PatientDashboardProps {
+  user?: User;
+}
+
+export default function PatientDashboard({ user }: PatientDashboardProps) {
   const { data, isLoading, error, refetch, isFetching } = useQuery<PatientDashboardData>({
     queryKey: ["patient_self_dashboard"],
     queryFn: async () => {
@@ -44,31 +47,19 @@ export default function PatientDashboard() {
       icon: Calendar,
     },
     {
-      title: "Lab Results",
-      value: isLoading ? null : (data?.labRequestCount ?? 0).toString(),
-      icon: FlaskConical,
-    },
-    {
-      title: "Prescriptions",
-      value: isLoading ? null : (data?.prescriptionCount ?? 0).toString(),
+      title: "Medical Records",
+      value: isLoading ? null : "—",
       icon: FileText,
-    },
-    {
-      title: "Pending Bills",
-      value: isLoading ? null : formatNaira(data?.pendingInvoiceTotal ?? 0),
-      icon: Receipt,
     },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">My Patient Portal</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome to Accurate Medical Center. View your records and appointments here.
-          </p>
-        </div>
+      <DashboardHeader
+        user={user}
+        title="My Patient Portal"
+        description="Welcome to Accurate Medical Center. View your records and appointments here."
+      >
         {error && (
           <Button
             variant="outline"
@@ -81,7 +72,7 @@ export default function PatientDashboard() {
             Retry
           </Button>
         )}
-      </div>
+      </DashboardHeader>
 
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
@@ -89,7 +80,7 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">

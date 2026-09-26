@@ -58,6 +58,9 @@ export const UpdateStaffSchema = z.object({
   licenseNumber: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
+  // Administrator-controlled: assign or unassign a supervising doctor.
+  // Must be a staff member with DOCTOR role in the same branch.
+  supervisingDoctorId: z.string().min(1, 'Invalid doctor ID').optional().nullable(),
 });
 
 export type UpdateStaffInput = z.infer<typeof UpdateStaffSchema>;

@@ -17,21 +17,21 @@ import {
 import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 
 const { contact } = siteConfig;
-const phone = contact.phone.primary;
-const whatsapp = contact.phone.whatsapp;
-const display = contact.phone.displayPrimary;
-const email = contact.email.general;
+const phone = "+2347039092836";
+const whatsapp = "2347039092836";
+const display = "0703 909 2836";
+const email = "accuratemedicalcenterofficial@gmail.com";
 interface FormState { name: string; phone: string; email: string; message: string; }
 const INITIAL: FormState = { name: "", phone: "", email: "", message: "" };
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
 const INK = "var(--marketing-ink)";
-const INK_MUTED = "rgba(3,22,26,0.48)";
-const INK_SOFT = "rgba(3,22,26,0.65)";
+const INK_MUTED = "var(--muted-text-on-dark)";
+const INK_SOFT = "var(--muted-text-on-dark)";
 const PRIMARY = "var(--primary)";
 const BORDER = "var(--border)";
 const BG = "var(--marketing-bone)";
-const SURFACE = "rgba(255,255,255,0.55)";
+const SURFACE = "var(--card)";
 
 interface ContactApiResponse {
   success: boolean;
@@ -307,31 +307,31 @@ export function Contact() {
                 </InfoRow>
               </motion.div>
 
-              <motion.div variants={fadeUpSmall}>
-                <InfoRow icon={Mail} label="Email">
-                  <a
-                    href={`mailto:${email}`}
-                    className="hover:text-[var(--primary)] transition-colors break-all"
-                  >
-                    {email}
-                  </a>
-                </InfoRow>
-              </motion.div>
+<motion.div variants={fadeUpSmall}>
+            <InfoRow icon={Mail} label="Email">
+              <a
+                href={`mailto:${email}`}
+                className="hover:text-[var(--primary)] transition-colors break-all"
+              >
+                accuratemedicalcenterofficial@gmail.com
+              </a>
+            </InfoRow>
+          </motion.div>
 
               <motion.div variants={fadeUpSmall}>
                 <InfoRow icon={Clock} label="Working Hours">
                   <div className="space-y-2">
                     <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                       <span>Monday to Friday</span>
-                      <span className="font-medium">{siteConfig.contact.hours.weekdays}</span>
+                      <span className="font-medium">8:00 AM – 8:00 PM</span>
                     </div>
                     <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                       <span>Saturday</span>
-                      <span className="font-medium">{siteConfig.contact.hours.saturday}</span>
+                      <span className="font-medium">8:00 AM – 6:00 PM</span>
                     </div>
                     <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                       <span>Sunday</span>
-                      <span className="font-medium">{siteConfig.contact.hours.sunday}</span>
+                      <span className="font-medium">10:00 AM – 4:00 PM</span>
                     </div>
                     <div
                       className="mt-3 pt-3 flex items-center gap-2.5"
@@ -343,7 +343,7 @@ export function Contact() {
                         style={{ backgroundColor: "#ef4444" }}
                       />
                       <span className="font-semibold" style={{ color: INK }}>
-                        {siteConfig.contact.hours.emergency}
+                        24/7 Emergency Services Available
                       </span>
                     </div>
                   </div>

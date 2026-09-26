@@ -14,8 +14,14 @@ import { ErrorState } from "@/components/ui/error-state";
 import { DataTable, Column } from "@/components/ui/data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookAppointmentDialog } from "@/components/admin/appointments/book-appointment-dialog";
+import { DashboardHeader } from "@/components/ui/greeting";
+import type { User } from "better-auth";
 
-export default function ReceptionDashboard() {
+interface ReceptionDashboardProps {
+  user?: User;
+}
+
+export default function ReceptionDashboard({ user }: ReceptionDashboardProps) {
   const today = new Date();
   const queryClient = useQueryClient();
   const [bookOpen, setBookOpen] = React.useState(false);
@@ -95,16 +101,11 @@ export default function ReceptionDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Welcome Banner */}
-      <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-heading font-bold text-foreground">
-            Good {today.getHours() < 12 ? "morning" : today.getHours() < 17 ? "afternoon" : "evening"}.
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Today is {format(today, "EEEE, MMM d, yyyy")}.
-          </p>
-        </div>
+      <DashboardHeader
+        user={user}
+        title="Front Desk"
+        description={format(today, "EEEE, MMM d, yyyy")}
+      >
         <div className="flex gap-3 shrink-0">
           <Button className="gap-2" asChild>
             <Link href="/reception/patients/new">
@@ -117,7 +118,7 @@ export default function ReceptionDashboard() {
             Book Appointment
           </Button>
         </div>
-      </div>
+      </DashboardHeader>
 
       {/* Stats Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

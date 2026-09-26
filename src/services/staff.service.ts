@@ -139,12 +139,35 @@ export class StaffService {
 
   /**
    * Update a staff member's profile details (department, specialization,
-   * license, contact info). Does NOT touch authentication credentials —
-   * email/password changes go through the auth system, never through here.
+   * license, contact info, supervising doctor). Does NOT touch authentication
+   * credentials — email/password changes go through the auth system, never
+   * through here.
    */
   static async updateStaff(staffId: string, data: UpdateStaffInput, executorId: string) {
     const existing = await prisma.staff.findUnique({ where: { id: staffId } });
     if (!existing) throw new AppError('Staff member not found', 'NOT_FOUND', 404);
+
+    // If supervisingDoctorId is provided, validate it's a DOCTOR in the same branch
+    if (data.supervisingDoctorId !== undefined) {
+      if (data.supervisingDoctorId) {
+        const doctor = await prisma.staff.findUnique({
+          where: { id: data.supervisingDoctorId },
+          include: { user: { select: { role: true } } },
+        });
+        if (!doctor) {
+          throw new AppError('Supervising doctor not found', 'NOT_FOUND', 404);
+        }
+        if (doctor.user.role !== 'DOCTOR') {
+          throw new AppError('Supervising doctor must have DOCTOR role', 'BAD_REQUEST', 400);
+        }
+        if (doctor.branchId !== existing.branchId) {
+          throw new AppError('Supervising doctor must be in the same branch', 'BAD_REQUEST', 400);
+        }
+        if (!doctor.isActive) {
+          throw new AppError('Supervising doctor must be active', 'BAD_REQUEST', 400);
+        }
+      }
+    }
 
     const updated = await prisma.staff.update({
       where: { id: staffId },
@@ -154,6 +177,7 @@ export class StaffService {
         licenseNumber: data.licenseNumber,
         phone: data.phone,
         address: data.address,
+        supervisingDoctorId: data.supervisingDoctorId ?? undefined,
       },
     });
 

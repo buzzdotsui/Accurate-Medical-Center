@@ -99,6 +99,25 @@
   --marketing-bone:    #F8F8F5;  /* clean light neutral — contact section */
   --marketing-black:   #000000;  /* pure black — vision/mission panels, footer */
   --marketing-white:   #f4f2f5;  /* off-white — light sections, text-on-dark */
+
+  /* ── Semantic Dark-Surface Tokens ───────────────────────────────────────
+   * Prevent hardcoded rgba values on dark surfaces throughout marketing components.
+   * ─────────────────────────────────────────────────────────────────────── */
+  --marketing-border:  rgba(244,242,245,0.16); /* footer/divider on dark surfaces */
+  --icon-on-dark:      var(--marketing-white); /* icons on dark surfaces */
+  --text-on-dark:      var(--marketing-white); /* primary text on dark surfaces */
+  --muted-text-on-dark: rgba(244,242,245,0.6); /* muted text on dark surfaces */
+  --icon-on-dark-muted: rgba(244,242,245,0.4); /* muted icons on dark surfaces */
+
+  /* ── Header / Navigation Tokens ─────────────────────────────────────────
+   * Prevent hardcoded rgba values in header/navigation.
+   * ─────────────────────────────────────────────────────────────────────── */
+  --header-bg:         rgba(3,22,26,0.95); /* header background */
+  --header-bg-scrolled: rgba(3,22,26,0.85); /* header background when scrolled */
+  --header-border:     rgba(244,242,245,0.12); /* header border when scrolled */
+  --header-border-default: rgba(244,242,245,0.06); /* header border default */
+  --header-shadow:     0 10px 40px rgba(0,0,0,0.25); /* header shadow when scrolled */
+  --header-shadow-default: 0 4px 24px rgba(0,0,0,0.15); /* header shadow default */
 }
 
 

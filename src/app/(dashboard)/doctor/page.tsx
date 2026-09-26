@@ -4,9 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { StatCard } from "@/components/ui/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, CalendarCheck, Stethoscope, ClipboardList, Plus, RefreshCw } from "lucide-react";
+import { Users, CalendarCheck, Stethoscope, Plus, RefreshCw } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { DashboardHeader } from "@/components/ui/greeting";
+import type { User } from "better-auth";
 
 interface DoctorStats {
   todayAppointments: number;
@@ -14,12 +16,11 @@ interface DoctorStats {
   consultationsDone: number;
 }
 
-interface LabRequest {
-  id: string;
-  status: string;
+interface DoctorDashboardProps {
+  user?: User;
 }
 
-export default function DoctorDashboard() {
+export default function DoctorDashboard({ user }: DoctorDashboardProps) {
   const { data, isLoading, error, refetch, isFetching } = useQuery<DoctorStats>({
     queryKey: ["doctor_dashboard_stats"],
     queryFn: async () => {
@@ -34,34 +35,13 @@ export default function DoctorDashboard() {
     staleTime: 60_000,
   });
 
-  const { data: labData, isLoading: labLoading } = useQuery<LabRequest[]>({
-    queryKey: ["doctor_lab_requests_count"],
-    queryFn: async () => {
-      const res = await fetch("/api/v1/laboratory/requests?take=100");
-      if (!res.ok) {
-        const json = await res.json().catch(() => null);
-        throw new Error(json?.error?.message ?? "Failed to load lab requests");
-      }
-      const json = await res.json();
-      // The lab requests route returns ok(requests) — data is the array directly
-      return Array.isArray(json.data) ? json.data : [];
-    },
-    staleTime: 60_000,
-  });
-
-  const pendingLabCount = labData
-    ? labData.filter((r) => r.status !== "COMPLETED").length
-    : null;
-
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">My Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Your patients, appointments, and pending tasks for today.
-          </p>
-        </div>
+      <DashboardHeader
+        user={user}
+        title="My Dashboard"
+        description="Your patients, appointments, and pending tasks for today."
+      >
         <div className="flex gap-3">
           {error && (
             <Button
@@ -81,7 +61,7 @@ export default function DoctorDashboard() {
             </Link>
           </Button>
         </div>
-      </div>
+      </DashboardHeader>
 
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
@@ -89,9 +69,9 @@ export default function DoctorDashboard() {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
+          Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-28 w-full rounded-xl" />
           ))
         ) : (
@@ -106,15 +86,6 @@ export default function DoctorDashboard() {
               value={data?.todayAppointments ?? 0}
               icon={CalendarCheck}
             />
-            {labLoading ? (
-              <Skeleton className="h-28 w-full rounded-xl" />
-            ) : (
-              <StatCard
-                title="Pending Lab Results"
-                value={pendingLabCount ?? 0}
-                icon={ClipboardList}
-              />
-            )}
             <StatCard
               title="Consultations Done"
               value={data?.consultationsDone ?? 0}

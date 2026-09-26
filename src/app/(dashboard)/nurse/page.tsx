@@ -7,6 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Activity, Bed, Bell, Plus, CheckCircle } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { DashboardHeader } from "@/components/ui/greeting";
+import type { User } from "better-auth";
 
 interface AppointmentStats {
   todayTotal: number;
@@ -38,7 +40,11 @@ interface Admission {
   } | null;
 }
 
-export default function NurseDashboard() {
+interface NurseDashboardProps {
+  user?: User;
+}
+
+export default function NurseDashboard({ user }: NurseDashboardProps) {
   const {
     data: statsData,
     isLoading: statsLoading,
@@ -100,15 +106,11 @@ export default function NurseDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">
-            Nursing Station
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Triage queue, ward patients, and pending tasks.
-          </p>
-        </div>
+      <DashboardHeader
+        user={user}
+        title="Nursing Station"
+        description="Triage queue, ward patients, and pending tasks."
+      >
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2 bg-background" asChild>
             <Link href="/nurse/queue">
@@ -121,7 +123,7 @@ export default function NurseDashboard() {
             </Link>
           </Button>
         </div>
-      </div>
+      </DashboardHeader>
 
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center gap-3">

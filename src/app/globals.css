@@ -5,13 +5,13 @@
  * --------------------------------------------------------------------------- */
 
 :root {
-  /* Brand: Lemon (Primary: #C46A3F — warm terracotta) */
+  /* Brand: Lemon (Primary: #03161a) */
   --color-lemon-50: #fdf3f0;
   --color-lemon-100: #fae6df;
   --color-lemon-200: #f4cabf;
   --color-lemon-300: #eda894;
   --color-lemon-400: #e48463;
-  --color-lemon-500: #C46A3F; /* Primary Brand — warm terracotta */
+  --color-lemon-500: #03161a; /* Primary Brand */
   --color-lemon-600: #a85733;
   --color-lemon-700: #874529;
   --color-lemon-800: #6b3823;
@@ -91,8 +91,8 @@
   /* ── Marketing / Landing Page Brand Tokens ──────────────────────────────
    * Source-of-truth hex values as specified in the brand brief.
    * ─────────────────────────────────────────────────────────────────────── */
-  --marketing-lemon:   #C46A3F;  /* signature accent — CTAs, progress, highlights */
-  --marketing-lemon-dark: #A85733; /* hover accent — darker terracotta */
+  --marketing-lemon:   #03161a;  /* signature accent — CTAs, progress, highlights */
+  --marketing-lemon-dark: #bccb3c; /* hover accent */
   --marketing-ink:     #03161a;  /* deep ink-navy — hero, experience, dark surfaces */
   --marketing-ink-2:   #111312;  /* cinematic charcoal — experience background */
   --marketing-ivory:   #F7F6F1;  /* warm off-white — about section */

@@ -9,8 +9,6 @@ import { NotificationService } from './notification.service';
 import { ROLES } from '@/config/roles';
 import { logger } from '@/lib/utils/logger';
 
-type Vitals = z.infer<typeof RecordVitalsSchema>;
-
 export class ClinicalService {
   /**
    * Start a new patient visit (e.g. at triage or doctor's office)

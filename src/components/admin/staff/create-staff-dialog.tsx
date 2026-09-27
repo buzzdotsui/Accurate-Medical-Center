@@ -37,11 +37,10 @@ const ClientCreateStaffSchema = z.object({
   // SUPER_ADMIN is intentionally excluded: only a SUPER_ADMIN may mint
   // SUPER_ADMIN accounts, and that path is server-enforced in
   // POST /api/v1/hr/staff (see canAssignRole). The dialog never offers it.
+  // Phase 1 scope: only core clinical and administrative roles.
   role: z.enum([
     ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE,
-    ROLES.RECEPTIONIST, ROLES.PHARMACIST, ROLES.LAB_SCIENTIST,
-    ROLES.RADIOGRAPHER, ROLES.ACCOUNTANT, ROLES.THEATRE_STAFF,
-    ROLES.MATERNAL_STAFF, ROLES.MENTAL_HEALTH, ROLES.AMBULANCE,
+    ROLES.RECEPTIONIST,
   ]),
   departmentId: z.string().optional().or(z.literal("")),
   specialization: z.string().optional(),
@@ -204,16 +203,15 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
               {STAFF_ROLES.filter(
                 (r) =>
                   r !== ROLES.SUPER_ADMIN &&
-                  // Phase 1 scope (invoice TTI/2026/HMS-P1-002): roles for
-                  // modules outside Phase 1 (radiology workflows, additional
-                  // hospital departments) are not offered. Server schema is
-                  // preserved for a future phase.
-                  !([
-                    ROLES.RADIOGRAPHER,
-                    ROLES.THEATRE_STAFF,
-                    ROLES.MATERNAL_STAFF,
-                    ROLES.MENTAL_HEALTH,
-                    ROLES.AMBULANCE,
+                  // Phase 1 scope (invoice TTI/2026/HMS-P1-002): only core clinical
+                  // and administrative roles are offered. All specialty/finance/
+                  // deferred modules are excluded. Server schema is preserved
+                  // for future phases.
+                  ([
+                    ROLES.ADMIN,
+                    ROLES.DOCTOR,
+                    ROLES.NURSE,
+                    ROLES.RECEPTIONIST,
                   ] as readonly string[]).includes(r),
               ).map((r) => (
                 <option key={r} value={r}>

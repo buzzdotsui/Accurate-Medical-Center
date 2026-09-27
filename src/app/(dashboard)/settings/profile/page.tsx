@@ -149,6 +149,11 @@ export default function SettingsProfilePage() {
   const userInitials = user?.name ? user.name.substring(0, 2).toUpperCase() : "U";
   const displayAvatar = avatarPreview ?? user?.image ?? null;
 
+  const handleAvatarClick = () => {
+    const input = document.getElementById('avatar-upload');
+    input?.click();
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       <div>
@@ -172,7 +177,7 @@ export default function SettingsProfilePage() {
             <CardContent className="space-y-4">
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
-                  <Avatar className="h-24 w-24 bg-muted">
+                  <Avatar className="h-24 w-24 bg-muted cursor-pointer" onClick={handleAvatarClick}>
                     <AvatarImage src={displayAvatar || undefined} alt={user?.name || "User"} />
                     <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
                       {userInitials}
@@ -181,7 +186,7 @@ export default function SettingsProfilePage() {
                   {displayAvatar && (
                     <button
                       type="button"
-                      onClick={handleRemoveAvatar}
+                      onClick={(e) => { e.stopPropagation(); handleRemoveAvatar(); }}
                       className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive text-white hover:bg-destructive/90 transition-colors"
                       aria-label="Remove avatar"
                     >

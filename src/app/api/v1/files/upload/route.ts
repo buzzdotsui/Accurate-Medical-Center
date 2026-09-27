@@ -1,21 +1,31 @@
-import { withAuth, parseBody } from '@/lib/api/middleware';
+import { withAuth } from '@/lib/api/middleware';
 import { FileService } from '@/services/file.service';
 import { ok } from '@/lib/api/response';
-import { UploadFileSchema } from '@/lib/validations/document';
 
 /**
  * POST /api/v1/files/upload
- * Generic, authenticated file upload endpoint. Uploads a base64 data URI (or
- * remote URL) to Cloudinary via `FileService` and returns the resulting
- * asset metadata. This is the ONLY place uploads happen server-side —
- * Cloudinary credentials/env vars are never exposed to the client.
+ * Generic, authenticated file upload endpoint. Accepts multipart/form-data
+ * with a "file" field. Uploads to Cloudinary via `FileService` and returns
+ * the resulting asset metadata.
  *
  * Authorization: all authenticated users.
  */
 export const POST = withAuth(async (req) => {
-  const { file, folder } = await parseBody(req, UploadFileSchema);
+  const formData = await req.formData();
+  const file = formData.get('file') as File | null;
+  const folder = formData.get('folder') as string | null;
 
-  const result = await FileService.uploadFile(file, folder);
+  if (!file) {
+    return ok({ error: 'File is required' }, { status: 400 });
+  }
+
+  // Convert File to base64 data URI
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  const base64 = buffer.toString('base64');
+  const dataUri = `data:${file.type};base64,${base64}`;
+
+  const result = await FileService.uploadFile(dataUri, folder || 'accurate-medical/avatars');
 
   return ok(result);
 });

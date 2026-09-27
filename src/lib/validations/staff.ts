@@ -19,9 +19,7 @@ export const CreateStaffSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   role: z.enum([
     ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE,
-    ROLES.RECEPTIONIST, ROLES.PHARMACIST, ROLES.LAB_SCIENTIST,
-    ROLES.RADIOGRAPHER, ROLES.ACCOUNTANT, ROLES.THEATRE_STAFF,
-    ROLES.MATERNAL_STAFF, ROLES.MENTAL_HEALTH, ROLES.AMBULANCE
+    ROLES.RECEPTIONIST
   ]),
   // Optional — the API route resolves the correct branch from the session.
   branchId: z.string().min(1, 'Invalid branch ID').optional(),

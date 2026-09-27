@@ -55,7 +55,7 @@
   --popover-foreground: var(--color-black-950);
   
   --primary: var(--color-lemon-500);
-  --primary-foreground: #000000; /* Contrast against yellow/lemon is better with black */
+  --primary-foreground: #ffffff; /* White text on dark #03161a primary */
   
   --secondary: var(--color-black-950);
   --secondary-foreground: #ffffff;

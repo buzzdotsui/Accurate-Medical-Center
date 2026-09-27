@@ -235,7 +235,7 @@ export default function Hero() {
         >
           <Link
             href="/book-appointment"
-            className="group relative inline-flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
+            className="group relative inline-flex items-center justify-center overflow-hidden rounded-full px-6 py-3 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-8 sm:py-3.5 sm:text-[14px]"
             style={{
               backgroundColor: "#f4f2f5",
               color: "#03161a",
@@ -248,6 +248,7 @@ export default function Hero() {
               initial="rest"
               whileHover="hover"
               whileTap="tap"
+              className="inline-flex items-center gap-2.5"
             >
               <span
                 aria-hidden
@@ -257,7 +258,7 @@ export default function Hero() {
                 }}
               />
               <Calendar
-                className="relative z-10 h-[18px] w-[18px] shrink-0 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-6 sm:h-5 sm:w-5"
+                className="relative z-10 h-4 w-4 shrink-0 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-6"
                 aria-hidden
               />
               <span className="relative z-10 tracking-wide">Book an Appointment</span>

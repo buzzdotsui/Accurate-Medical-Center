@@ -6,6 +6,7 @@ import { Bell, Loader2, AlertCircle, CheckCheck } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils/cn";
+import { supabaseClient } from "@/lib/db/supabase";
 
 interface Notification {
   id: string;
@@ -28,7 +29,7 @@ interface Notification {
  * actually opened, so an idle dashboard tab isn't repeatedly re-fetching
  * notification bodies it isn't displaying.
  */
-export function NotificationBell() {
+export function NotificationBell({ userId }: { userId?: string }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -44,8 +45,39 @@ export function NotificationBell() {
       }
       return json.data as { unreadCount: number };
     },
-    refetchInterval: 30_000,
+    refetchInterval: 30_000, // Fallback polling
   });
+
+  // Supabase Realtime Subscription
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabaseClient
+      .channel(`notifications_for_${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `userId=eq.${userId}`,
+        },
+        (payload) => {
+          // Instantly refresh the notification queries when a new DB row arrives!
+          queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
+          queryClient.invalidateQueries({ queryKey: ["notifications", "list"] });
+          
+          // Optionally, play a sound here!
+          // const audio = new Audio("/ping.mp3");
+          // audio.play().catch(() => {});
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabaseClient.removeChannel(channel);
+    };
+  }, [userId, queryClient]);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["notifications", "list"],

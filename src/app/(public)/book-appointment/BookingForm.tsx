@@ -45,7 +45,7 @@ const bookingFieldClassName = (hasError: boolean, hasLeadingIcon = true) =>
   }`;
 
 const primaryButtonClassName =
-  "group relative flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-white py-3.5 font-semibold text-[#03161a] shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-[#f8f9f6] hover:shadow-[0_16px_34px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70";
+  "group relative flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-white px-6 py-3.5 font-semibold text-[#03161a] shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-[#f8f9f6] hover:shadow-[0_16px_34px_rgba(0,0,0,0.24)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-70";
 
 export default function BookingForm() {
   const searchParams = useSearchParams();
@@ -85,7 +85,12 @@ export default function BookingForm() {
         lastName: true,
         phone: true,
         email: true,
-      }).safeParse(formData);
+      }).safeParse({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email,
+      });
       if (!validation.success) {
         setValidationErrors(validation.error.issues);
         const firstFieldIssue = validation.error.issues.find((issue) => issue.path[0] in formData);
@@ -191,7 +196,7 @@ export default function BookingForm() {
       )}
 
       <form onSubmit={step === 1 ? (e) => { e.preventDefault(); handleNext(); } : handleSubmit} noValidate aria-busy={loading}>
-        <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[10000px] h-px w-px overflow-hidden" />
+
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" variants={currentStepVariant} initial="hidden" animate="visible" exit="exit" className="space-y-5">
@@ -289,9 +294,8 @@ export default function BookingForm() {
                     aria-hidden
                     className="absolute inset-0 bg-[linear-gradient(112deg,transparent_28%,rgba(212,232,66,0.28)_50%,transparent_72%)] opacity-0 transition-[opacity,transform] duration-500 group-hover:translate-x-2 group-hover:opacity-100"
                   />
-                  <span className="relative z-10 flex flex-1 flex-col items-start leading-tight">
-                    <span>Continue</span>
-                    <span className="mt-0.5 text-[10px] font-medium tracking-[0.08em] text-[#03161a]/55">Appointment details</span>
+                  <span className="relative z-10 font-semibold tracking-wide">
+                    Continue to Appointment Details
                   </span>
                   <span aria-hidden className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#03161a] text-white transition-[background-color,transform] duration-300 group-hover:translate-x-1 group-hover:bg-[#1b3135]">
                     <ArrowRight className="h-4 w-4" />

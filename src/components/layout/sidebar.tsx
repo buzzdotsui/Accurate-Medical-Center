@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { User } from "better-auth";
 import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -87,13 +88,21 @@ export function Sidebar({ role, user }: SidebarProps) {
                 key={index}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group relative",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group relative z-10",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                   isCollapsed && "justify-center px-0"
                 )}
               >
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebarActive"
+                    className="absolute inset-0 bg-primary/10 rounded-lg -z-10"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
                 {isActive && !isCollapsed && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
                 )}

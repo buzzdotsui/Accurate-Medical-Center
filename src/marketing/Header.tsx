@@ -40,7 +40,8 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    // Trigger header background change only when scrolling past the Hero section (100vh - header height)
+    const onScroll = () => setScrolled(window.scrollY > window.innerHeight - 88);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
@@ -146,12 +147,12 @@ export function Header() {
         transition={{ duration: 0.75, ease: EASE, delay: 0.1 }}
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: scrolled ? "rgba(3, 22, 26, 0.85)" : "rgba(3, 22, 26, 0.6)",
-          backdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
-          WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(16px) saturate(1.1)",
-          borderBottom: scrolled ? "1px solid rgba(244, 242, 245, 0.12)" : "1px solid rgba(244, 242, 245, 0.06)",
-          boxShadow: scrolled ? "0 10px 40px rgba(0,0,0,0.25)" : "0 4px 24px rgba(0,0,0,0.15)",
-          transition: "background-color var(--motion-base) ease, backdrop-filter var(--motion-base) ease, -webkit-backdrop-filter var(--motion-base) ease, border-color var(--motion-base) ease, box-shadow var(--motion-base) ease",
+          backgroundColor: scrolled ? "#03161a" : "transparent",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          borderBottom: scrolled ? "1px solid rgba(244, 242, 245, 0.08)" : "1px solid transparent",
+          boxShadow: scrolled ? "0 10px 40px rgba(0,0,0,0.25)" : "none",
+          transition: "background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease",
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -198,13 +199,19 @@ export function Header() {
             </nav>
 
             <div className="hidden lg:flex items-center gap-6">
-              <Link
-                href="/register"
-                className="text-[12px] font-medium tracking-wider uppercase text-[#f4f2f5]/40 transition-colors hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
-                aria-label="Portal Login"
+              <motion.div
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
               >
-                Portal
-              </Link>
+                <Link
+                  href="/register"
+                  className="block text-[12px] font-medium tracking-wider uppercase text-[#f4f2f5]/85 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+                  aria-label="Portal Login"
+                >
+                  Portal
+                </Link>
+              </motion.div>
               <Link href="/book-appointment">
                 <motion.button
                   variants={ctaLift}
@@ -345,7 +352,7 @@ export function Header() {
                 <Link
                   href="/register"
                   onClick={() => setMenuOpen(false)}
-                  className="py-2 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[#f4f2f5]/40 transition-colors hover:text-[#f4f2f5] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
+                  className="py-2 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[#f4f2f5]/85 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70"
                   aria-label="Portal Login"
                 >
                   Portal

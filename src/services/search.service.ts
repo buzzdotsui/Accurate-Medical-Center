@@ -33,7 +33,11 @@ const ENTITY_ROLES: Record<SearchResultType, Role[]> = {
   APPOINTMENT: [
     ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE, ROLES.RECEPTIONIST,
   ],
-  STAFF: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
+  STAFF: [
+    ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.DOCTOR, ROLES.NURSE, ROLES.RECEPTIONIST,
+    ROLES.PHARMACIST, ROLES.LAB_SCIENTIST, ROLES.RADIOGRAPHER, ROLES.ACCOUNTANT,
+    ROLES.THEATRE_STAFF, ROLES.MATERNAL_STAFF, ROLES.MENTAL_HEALTH,
+  ],
   INVOICE: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.ACCOUNTANT],
 };
 
@@ -42,9 +46,9 @@ const ENTITY_ROLES: Record<SearchResultType, Role[]> = {
 function resolveUrl(type: SearchResultType, id: string, role: Role): string | undefined {
   switch (type) {
     case 'PATIENT':
-      return role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN ? `/admin/patients/${id}` : undefined;
+      return role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN ? `/admin/patients/${id}` : `/records/patients/${id}`;
     case 'STAFF':
-      return role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN ? `/admin/staff` : undefined;
+      return role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN ? `/admin/staff` : `/records/staff/${id}`;
     case 'APPOINTMENT':
       if (role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN) return `/admin/appointments`;
       if (role === ROLES.RECEPTIONIST) return `/reception/appointments`;

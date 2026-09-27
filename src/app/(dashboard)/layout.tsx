@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
+import { PageTransition } from "@/components/layout/page-transition";
 import { auth } from "@/lib/auth/config";
 import { type Role } from "@/config/roles";
 
@@ -35,9 +36,11 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {children}
-          </div>
+          <PageTransition>
+            <div className="max-w-7xl mx-auto space-y-6">
+              {children}
+            </div>
+          </PageTransition>
         </main>
       </div>
     </div>

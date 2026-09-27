@@ -945,3 +945,4 @@ model ConsentForm {
 
   @@map("consent_forms")
 }
+

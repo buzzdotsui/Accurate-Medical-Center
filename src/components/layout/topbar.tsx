@@ -58,14 +58,21 @@ export function Topbar({ user, role }: TopbarProps) {
     router.push("/login");
   };
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = user?.name ? user.name.split(" ")[0] : "User";
+
   return (
     <header className="h-16 bg-background border-b flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shadow-sm">
       <div className="flex items-center gap-4">
         <MobileNav role={role} user={user} />
         
-        <div className="hidden md:flex">
+        <div className="hidden md:flex flex-col justify-center">
+          <span className="text-lg sm:text-xl font-bold text-primary tracking-tight leading-none mb-1.5 drop-shadow-sm">
+            {greeting}, {firstName} <span className="animate-pulse inline-block">👋</span>
+          </span>
           <Breadcrumb>
-            <BreadcrumbList>
+            <BreadcrumbList className="text-[11px] sm:text-xs">
               <BreadcrumbItem>
                 <BreadcrumbLink href={dashboardRoot} className="text-muted-foreground hover:text-foreground transition-colors">
                   Dashboard
@@ -110,7 +117,7 @@ export function Topbar({ user, role }: TopbarProps) {
 
         {/* Real in-app notifications (Stage 13) — backed by the
             Notification model / NotificationService / /api/v1/notifications. */}
-        <NotificationBell />
+        <NotificationBell userId={user?.id} />
 
         {/* User Profile menu — avatar opens dropdown with identity + logout */}
         <DropdownMenu>

@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { prisma } from "@/lib/db/client";
 import { error, ok, tooManyRequests } from "@/lib/api/response";
 import { AppError } from "@/lib/api/errors";
 import {
@@ -82,15 +83,68 @@ export async function POST(request: NextRequest) {
 
   try {
     const submissionId = generateAppointmentSubmissionId();
+    
+    // 1. Ensure a default branch exists (fallback)
+    let branch = await prisma.branch.findFirst();
+    if (!branch) {
+      branch = await prisma.branch.create({
+        data: {
+          name: "Main Branch",
+          address: "Accurate Medical Center",
+          phone: "+2348133583097",
+          email: "accuratemedicalcenterofficial@gmail.com",
+        },
+      });
+    }
+
+    // 2. Find or create the Patient
+    let patient = null;
+    if (parsed.data.email) {
+      patient = await prisma.patient.findFirst({
+        where: { email: parsed.data.email }
+      });
+    }
+    if (!patient && parsed.data.phone) {
+      patient = await prisma.patient.findFirst({
+        where: { phone: parsed.data.phone }
+      });
+    }
+    if (!patient) {
+      patient = await prisma.patient.create({
+        data: {
+          patientId: `PAT-${Date.now().toString().slice(-6)}`,
+          branchId: branch.id,
+          firstName: parsed.data.firstName,
+          lastName: parsed.data.lastName,
+          phone: parsed.data.phone,
+          email: parsed.data.email || undefined,
+        }
+      });
+    }
+
+    // 3. Create the Database Appointment
+    await prisma.appointment.create({
+      data: {
+        appointmentId: submissionId,
+        patientId: patient.id,
+        branchId: branch.id,
+        date: new Date(parsed.data.preferredDate),
+        status: "SCHEDULED",
+        reason: parsed.data.service,
+        notes: parsed.data.notes,
+      }
+    });
+
+    // 4. Send the Email Notification
     await sendAppointmentEmail(parsed.data, submissionId);
     return ok({ status: "submitted", submissionId });
-  } catch (sendError) {
-    logger.error("Appointment request could not be sent", {
-      error: sendError instanceof Error ? sendError.message : "Unknown error",
+  } catch (errorOrSendError) {
+    logger.error("Appointment request could not be processed", {
+      error: errorOrSendError instanceof Error ? errorOrSendError.message : "Unknown error",
       ip,
     });
 
-    if (sendError instanceof ContactEmailConfigurationError) {
+    if (errorOrSendError instanceof ContactEmailConfigurationError) {
       return error("SERVICE_UNAVAILABLE", "The appointment service is temporarily unavailable. Please call us directly.", 503);
     }
 

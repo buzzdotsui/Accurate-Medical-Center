@@ -18,7 +18,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (session.user.role !== 'PATIENT') {
+  if (((session.user as Record<string, unknown>)?.role as string) !== 'PATIENT') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/client';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { StartVisitSchema, RecordVitalsSchema, AddDiagnosisSchema } from '@/lib/validations/clinical';
 import { generateVisitId } from '@/lib/utils/generate-id';
@@ -7,6 +8,8 @@ import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
 import { ROLES } from '@/config/roles';
 import { logger } from '@/lib/utils/logger';
+
+type Vitals = z.infer<typeof RecordVitalsSchema>;
 
 export class ClinicalService {
   /**
@@ -224,7 +227,7 @@ export class ClinicalService {
         status: 'IN_PROGRESS',
         startedAt: new Date(),
         chiefComplaint: data.chiefComplaint ?? visit.chiefComplaint,
-        vitals: (data.vitals ?? visit.vitals) as any,
+        ...(data.vitals ?? visit.vitals ? { vitals: (data.vitals ?? visit.vitals) as Prisma.InputJsonValue } : {}),
       },
     });
 
@@ -275,7 +278,7 @@ export class ClinicalService {
       const updateData: Record<string, unknown> = {
         status: 'COMPLETED',
         completedAt: new Date(),
-        vitals: (data.vitals ?? visit.vitals) as any,
+        ...(data.vitals ?? visit.vitals ? { vitals: (data.vitals ?? visit.vitals) as Prisma.InputJsonValue } : {}),
       };
 
       if (data.treatmentPlan) {

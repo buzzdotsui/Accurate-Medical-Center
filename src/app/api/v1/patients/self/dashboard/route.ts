@@ -21,36 +21,23 @@ export const GET = withRole([ROLES.PATIENT], async (_req, session) => {
 
   const patientId = patient.id;
 
-  // Fetch all four counts in parallel for efficiency
-  const [appointmentCount, labRequestCount, prescriptionCount, pendingInvoices] =
+  // Fetch all counts in parallel for efficiency
+  const [appointmentCount, visitCount, prescriptionCount] =
     await Promise.all([
       prisma.appointment.count({
         where: { patientId },
       }),
-      prisma.labRequest.count({
-        where: { visit: { patientId } },
+      prisma.visit.count({
+        where: { patientId },
       }),
       prisma.prescription.count({
         where: { visit: { patientId } },
       }),
-      prisma.invoice.findMany({
-        where: {
-          patientId,
-          status: { in: ['DRAFT', 'ISSUED', 'PARTIAL'] },
-        },
-        select: { totalAmount: true },
-      }),
     ]);
-
-  const pendingInvoiceTotal = pendingInvoices.reduce(
-    (sum, inv) => sum + Number(inv.totalAmount ?? 0),
-    0
-  );
 
   return ok({
     appointmentCount,
-    labRequestCount,
+    visitCount,
     prescriptionCount,
-    pendingInvoiceTotal,
   });
 });

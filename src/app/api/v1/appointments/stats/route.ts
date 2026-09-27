@@ -46,7 +46,7 @@ export const GET = withAuth(async (_req: NextRequest, session) => {
     const endOfDay = new Date(today);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
-    const [todayCount, totalPatients, completedConsultations] = await Promise.all([
+    const [todayCount, totalPatients, completedConsultations, pendingPrescriptions] = await Promise.all([
       // Today's appointments for this doctor
       prisma.appointment.count({
         where: {
@@ -71,12 +71,20 @@ export const GET = withAuth(async (_req: NextRequest, session) => {
           status: 'COMPLETED',
         },
       }),
+      // Pending prescriptions (PENDING or PARTIAL status)
+      prisma.prescription.count({
+        where: {
+          doctorId: staff.id,
+          status: { in: ['PENDING', 'PARTIAL'] },
+        },
+      }),
     ]);
 
     return ok({
       todayAppointments: todayCount,
       myPatientsCount: totalPatients.length,
       consultationsDone: completedConsultations,
+      pendingPrescriptions,
     });
   }
 

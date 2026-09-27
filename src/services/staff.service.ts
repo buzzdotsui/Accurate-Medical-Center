@@ -7,6 +7,7 @@ import { AuditService } from './audit.service';
 import { NotificationService } from './notification.service';
 import { Prisma } from '@prisma/client';
 import { logger } from '@/lib/utils/logger';
+import { ROLES } from '@/config/roles';
 
 // ResolvedStaffInput is derived from CreateStaffInput but makes branchId
 // required. The API route always resolves the correct branch from the session
@@ -139,12 +140,31 @@ export class StaffService {
 
   /**
    * Update a staff member's profile details (department, specialization,
-   * license, contact info). Does NOT touch authentication credentials —
+   * license, contact info, assigned doctor). Does NOT touch authentication credentials —
    * email/password changes go through the auth system, never through here.
    */
   static async updateStaff(staffId: string, data: UpdateStaffInput, executorId: string) {
     const existing = await prisma.staff.findUnique({ where: { id: staffId } });
     if (!existing) throw new AppError('Staff member not found', 'NOT_FOUND', 404);
+
+    // If assignedDoctorId is being updated, validate that the target is a DOCTOR
+    if (data.assignedDoctorId !== undefined) {
+      if (data.assignedDoctorId !== null) {
+        const targetDoctor = await prisma.staff.findUnique({
+          where: { id: data.assignedDoctorId },
+          include: { user: { select: { role: true } } },
+        });
+        if (!targetDoctor) {
+          throw new AppError('Assigned doctor not found', 'NOT_FOUND', 404);
+        }
+        if (targetDoctor.user.role !== ROLES.DOCTOR) {
+          throw new AppError('Assigned doctor must have DOCTOR role', 'BAD_REQUEST', 400);
+        }
+        if (targetDoctor.id === staffId) {
+          throw new AppError('A staff member cannot be assigned to themselves', 'BAD_REQUEST', 400);
+        }
+      }
+    }
 
     const updated = await prisma.staff.update({
       where: { id: staffId },
@@ -154,6 +174,7 @@ export class StaffService {
         licenseNumber: data.licenseNumber,
         phone: data.phone,
         address: data.address,
+        assignedDoctorId: data.assignedDoctorId,
       },
     });
 

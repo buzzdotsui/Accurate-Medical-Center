@@ -14,11 +14,20 @@ import { ErrorState } from "@/components/ui/error-state";
 import { DataTable, Column } from "@/components/ui/data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookAppointmentDialog } from "@/components/admin/appointments/book-appointment-dialog";
+import { GreetingWithAvatar } from "@/components/layout/greeting";
 
 export default function ReceptionDashboard() {
   const today = new Date();
   const queryClient = useQueryClient();
   const [bookOpen, setBookOpen] = React.useState(false);
+  const [user, setUser] = React.useState<{ id: string; name: string; email: string; image?: string | null; role?: string } | null>(null);
+
+  React.useEffect(() => {
+    fetch("/api/auth/session")
+      .then(r => r.json())
+      .then(data => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
 
   const invalidateAppointments = React.useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["dashboard_appointments_today"] });
@@ -97,25 +106,22 @@ export default function ReceptionDashboard() {
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Welcome Banner */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-heading font-bold text-foreground">
-            Good {today.getHours() < 12 ? "morning" : today.getHours() < 17 ? "afternoon" : "evening"}.
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Today is {format(today, "EEEE, MMM d, yyyy")}.
-          </p>
-        </div>
-        <div className="flex gap-3 shrink-0">
-          <Button className="gap-2" asChild>
-            <Link href="/reception/patients/new">
-              <UserPlus className="w-4 h-4" />
-              Register Patient
-            </Link>
-          </Button>
-          <Button variant="outline" className="gap-2 bg-background" onClick={() => setBookOpen(true)}>
-            <CalendarPlus className="w-4 h-4" />
-            Book Appointment
-          </Button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+          <div>
+            {user && <GreetingWithAvatar user={user} />}
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <Button className="gap-2" asChild>
+              <Link href="/reception/patients/new">
+                <UserPlus className="w-4 h-4" />
+                Register Patient
+              </Link>
+            </Button>
+            <Button variant="outline" className="gap-2 bg-background" onClick={() => setBookOpen(true)}>
+              <CalendarPlus className="w-4 h-4" />
+              Book Appointment
+            </Button>
+          </div>
         </div>
       </div>
 

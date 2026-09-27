@@ -58,6 +58,7 @@ export const UpdateStaffSchema = z.object({
   licenseNumber: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
+  assignedDoctorId: z.string().min(1, 'Invalid doctor ID').optional().nullable(),
 });
 
 export type UpdateStaffInput = z.infer<typeof UpdateStaffSchema>;
@@ -67,3 +68,9 @@ export const SetStaffStatusSchema = z.object({
 });
 
 export type SetStaffStatusInput = z.infer<typeof SetStaffStatusSchema>;
+
+export const AssignStaffDoctorSchema = z.object({
+  assignedDoctorId: z.string().min(1, 'Invalid doctor ID').optional().nullable(),
+});
+
+export type AssignStaffDoctorInput = z.infer<typeof AssignStaffDoctorSchema>;

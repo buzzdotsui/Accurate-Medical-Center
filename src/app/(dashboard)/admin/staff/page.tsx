@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { DataTable, Column } from "@/components/ui/data-table";
-import { UserCog, Search, Users } from "lucide-react";
+import { UserCog, Search, Users, UserPlus, Edit2 } from "lucide-react";
 import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
-import { ROLE_LABELS, type Role } from "@/config/roles";
+import { ROLE_LABELS, ROLES, type Role } from "@/config/roles";
+import { Select } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,12 +38,16 @@ interface StaffMember {
   address: string | null;
   user: { name: string; email: string; role: string };
   department: { name: string; code: string } | null;
+  assignedDoctor: { id: string; user: { name: string }; staffId: string } | null;
 }
 
 export default function AdminStaffPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [assignDoctorDialogOpen, setAssignDoctorDialogOpen] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [availableDoctors, setAvailableDoctors] = useState<Array<{ id: string; name: string; staffId: string }>>([]);
 
   const {
     data,
@@ -52,6 +65,14 @@ export default function AdminStaffPage() {
       return res.json();
     },
   });
+
+  // Fetch available doctors for assignment
+  useEffect(() => {
+    fetch("/api/v1/hr/doctors")
+      .then((r) => r.json())
+      .then((data) => setAvailableDoctors(data?.data ?? []))
+      .catch(() => setAvailableDoctors([]));
+  }, []);
 
   const staff: StaffMember[] = data?.data ?? [];
 
@@ -96,6 +117,33 @@ export default function AdminStaffPage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const assignDoctorMutation = useMutation({
+    mutationFn: async ({ staffId, assignedDoctorId }: { staffId: string; assignedDoctorId: string | null }) => {
+      const res = await fetch(`/api/v1/hr/staff/${staffId}/assign-doctor`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedDoctorId }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error?.message ?? "Failed to assign doctor");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Doctor assignment updated");
+      queryClient.invalidateQueries({ queryKey: ["admin_staff"] });
+      setAssignDoctorDialogOpen(false);
+      setSelectedStaff(null);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const openAssignDoctorDialog = (staffMember: StaffMember) => {
+    setSelectedStaff(staffMember);
+    setAssignDoctorDialogOpen(true);
+  };
+
   const columns: Column<Record<string, unknown>>[] = [
     {
       accessorKey: "name",
@@ -139,6 +187,44 @@ export default function AdminStaffPage() {
           </span>
         ) : (
           <span className="text-muted-foreground text-sm">—</span>
+        );
+      },
+    },
+    {
+      accessorKey: "assignedDoctor",
+      header: "Assigned Doctor",
+      cell: (row) => {
+        const s = row as unknown as StaffMember;
+        if (s.user.role === ROLES.DOCTOR) {
+          return <span className="text-muted-foreground text-sm italic">— (Doctor)</span>;
+        }
+        return s.assignedDoctor ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">Dr. {s.assignedDoctor.user.name}</span>
+            <span className="text-xs text-muted-foreground font-mono">{s.assignedDoctor.staffId}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+              onClick={() => openAssignDoctorDialog(s)}
+              aria-label="Change assigned doctor"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">Not assigned</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+              onClick={() => openAssignDoctorDialog(s)}
+              aria-label="Assign doctor"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         );
       },
     },
@@ -232,6 +318,43 @@ export default function AdminStaffPage() {
         onOpenChange={setOpen}
         onSuccess={handleSuccess}
       />
+
+      {/* Assign Doctor Dialog */}
+      <Dialog open={assignDoctorDialogOpen} onOpenChange={setAssignDoctorDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Doctor</DialogTitle>
+            <DialogDescription>
+              {selectedStaff
+                ? `Assign a doctor to ${selectedStaff.user.name} (${selectedStaff.staffId})`
+                : "Select a doctor to assign to this staff member."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <Select
+              value={selectedStaff?.assignedDoctor?.id ?? ""}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                if (selectedStaff) {
+                  assignDoctorMutation.mutate({ staffId: selectedStaff.id, assignedDoctorId: e.target.value || null });
+                }
+              }}
+              disabled={assignDoctorMutation.isPending}
+            >
+              <option value="">— Remove Assignment —</option>
+              {availableDoctors.map((doc) => (
+                <option key={doc.id} value={doc.id}>
+                  Dr. {doc.name} ({doc.staffId})
+                </option>
+              ))}
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDoctorDialogOpen(false)} disabled={assignDoctorMutation.isPending}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

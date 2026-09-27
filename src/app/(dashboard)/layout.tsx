@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     redirect("/login");
   }
 
-  const userRole = (session.user.role as Role) || "PATIENT";
+  const userRole = ((session.user as Record<string, unknown>)?.role as Role) || "PATIENT";
 
   return (
     <div className="flex h-screen bg-grey-50">

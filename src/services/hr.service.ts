@@ -5,7 +5,7 @@ import { AuditService } from './audit.service';
 
 export class HrService {
   /**
-   * Get all staff members with their departments.
+   * Get all staff members with their departments and assigned doctor.
    * When `branchId` is provided (i.e. caller is not SUPER_ADMIN), results
    * are scoped to that branch only.
    */
@@ -14,7 +14,14 @@ export class HrService {
       where: branchId ? { branchId } : undefined,
       include: {
         user: { select: { name: true, email: true, role: true } },
-        department: true
+        department: true,
+        assignedDoctor: {
+          select: {
+            id: true,
+            staffId: true,
+            user: { select: { name: true } },
+          },
+        },
       },
       orderBy: { isActive: 'desc' } // ACTIVE first
     });

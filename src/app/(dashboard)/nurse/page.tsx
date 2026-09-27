@@ -1,12 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { StatCard } from "@/components/ui/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Activity, Bed, Bell, Plus, CheckCircle } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { GreetingWithAvatar } from "@/components/layout/greeting";
 
 interface AppointmentStats {
   todayTotal: number;
@@ -39,6 +41,15 @@ interface Admission {
 }
 
 export default function NurseDashboard() {
+  const [user, setUser] = useState<{ id: string; name: string; email: string; image?: string | null; role?: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then(r => r.json())
+      .then(data => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
+
   const {
     data: statsData,
     isLoading: statsLoading,
@@ -101,25 +112,26 @@ export default function NurseDashboard() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">
-            Nursing Station
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Triage queue, ward patients, and pending tasks.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="gap-2 bg-background" asChild>
-            <Link href="/nurse/queue">
-              <Activity className="w-4 h-4" /> Record Vitals
-            </Link>
-          </Button>
-          <Button className="gap-2" asChild>
-            <Link href="/nurse/queue">
-              <Plus className="w-4 h-4" /> New Triage
-            </Link>
-          </Button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+          <div>
+            {user && <GreetingWithAvatar user={user} />}
+            <h1 className="text-3xl font-heading font-bold text-foreground mt-1">Nursing Station</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Triage queue, ward patients, and pending tasks.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="gap-2 bg-background" asChild>
+              <Link href="/nurse/queue">
+                <Activity className="w-4 h-4" /> Record Vitals
+              </Link>
+            </Button>
+            <Button className="gap-2" asChild>
+              <Link href="/nurse/queue">
+                <Plus className="w-4 h-4" /> New Triage
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 

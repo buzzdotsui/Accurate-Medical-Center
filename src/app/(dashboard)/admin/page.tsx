@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatCard } from "@/components/ui/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Calendar, TrendingUp, Bed, Activity, FlaskConical } from "lucide-react";
+import { Users, Calendar, TrendingUp, Bed, Activity, Stethoscope, ClipboardList } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Button } from "@/components/ui/button";
 import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
+import { GreetingWithAvatar } from "@/components/layout/greeting";
 
 interface DashboardMetrics {
   totalPatients: number;
@@ -18,9 +19,8 @@ interface DashboardMetrics {
   bedOccupancyRate: number | null;
   occupiedBeds: number;
   totalBeds: number;
-  lowStockCount: number;
-  pendingLabRequests: number;
-  pendingRadiologyRequests: number;
+  activeStaff: number;
+  doctorsOnDuty: number;
 }
 
 interface AdmissionRow {
@@ -195,6 +195,15 @@ function StaffOnDutyPanel({ onAddStaff }: { onAddStaff: () => void }) {
 export default function AdminDashboardPage() {
   const queryClient = useQueryClient();
   const [staffDialogOpen, setStaffDialogOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; name: string; email: string; image?: string | null; role?: string } | null>(null);
+
+  // Fetch user session for greeting
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then(r => r.json())
+      .then(data => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
 
   const { data, isLoading, error, refetch } = useQuery<DashboardMetrics>({
     queryKey: ["admin_dashboard_metrics"],
@@ -220,14 +229,17 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Hospital Overview</h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time metrics for Accurate Medical Center.</p>
-        </div>
-        <div className="flex gap-3">
-          <Button className="gap-2" onClick={() => setStaffDialogOpen(true)}>
-            <Users className="w-4 h-4" /> Add Staff
-          </Button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+          <div>
+            {user && <GreetingWithAvatar user={user} />}
+            <h1 className="text-3xl font-heading font-bold text-foreground mt-1">Hospital Overview</h1>
+            <p className="text-sm text-muted-foreground mt-1">Real-time metrics for Accurate Medical Center.</p>
+          </div>
+          <div className="flex gap-3">
+            <Button className="gap-2" onClick={() => setStaffDialogOpen(true)}>
+              <Users className="w-4 h-4" /> Add Staff
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -277,7 +289,7 @@ export default function AdminDashboardPage() {
             )}
           </div>
 
-          {/* Secondary operational row */}
+{/* Secondary operational row — Phase 1 scope only */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
@@ -291,14 +303,19 @@ export default function AdminDashboardPage() {
                   icon={Bed}
                 />
                 <StatCard
-                  title="Pending Lab"
-                  value={metrics?.pendingLabRequests ?? 0}
-                  icon={FlaskConical}
+                  title="Active Staff"
+                  value={metrics?.activeStaff ?? 0}
+                  icon={Users}
                 />
                 <StatCard
-                  title="Low Stock Items"
-                  value={metrics?.lowStockCount ?? 0}
-                  icon={Activity}
+                  title="Doctors On Duty"
+                  value={metrics?.doctorsOnDuty ?? 0}
+                  icon={Stethoscope}
+                />
+                <StatCard
+                  title="Pending Tasks"
+                  value={metrics?.pendingConsultations ?? 0}
+                  icon={ClipboardList}
                 />
               </>
             )}

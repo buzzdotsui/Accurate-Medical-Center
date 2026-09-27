@@ -1,7 +1,6 @@
-import { withRole, parseBody } from '@/lib/api/middleware';
+import { withAuth, parseBody } from '@/lib/api/middleware';
 import { FileService } from '@/services/file.service';
 import { ok } from '@/lib/api/response';
-import { STAFF_ROLES } from '@/config/roles';
 import { UploadFileSchema } from '@/lib/validations/document';
 
 /**
@@ -11,10 +10,9 @@ import { UploadFileSchema } from '@/lib/validations/document';
  * asset metadata. This is the ONLY place uploads happen server-side —
  * Cloudinary credentials/env vars are never exposed to the client.
  *
- * Authorization: staff roles only (not PATIENT). Callers use the returned
- * `url` to persist metadata elsewhere (e.g. `POST /api/v1/patients/:id/documents`).
+ * Authorization: all authenticated users.
  */
-export const POST = withRole(STAFF_ROLES, async (req) => {
+export const POST = withAuth(async (req) => {
   const { file, folder } = await parseBody(req, UploadFileSchema);
 
   const result = await FileService.uploadFile(file, folder);

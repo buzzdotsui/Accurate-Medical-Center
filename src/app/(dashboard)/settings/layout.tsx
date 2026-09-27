@@ -1,13 +1,25 @@
 import { ReactNode } from "react";
 import { requireRole } from "@/lib/auth/require-role";
-import { ROLES } from "@/config/roles";
+import { ROLES, type Role } from "@/config/roles";
 
 /**
- * ADMIN may view this section (e.g. their own branch's audit trail), but
- * the underlying `PUT /api/v1/settings` mutation is SUPER_ADMIN-only at
- * the API layer — "configuration" is a SUPER_ADMIN responsibility.
+ * All authenticated users can access settings, but the admin section
+ * is restricted to ADMIN/SUPER_ADMIN roles.
  */
 export default async function SettingsSectionLayout({ children }: { children: ReactNode }) {
-  await requireRole([ROLES.ADMIN]);
-  return <>{children}</>;
+  const session = await requireRole([
+    ROLES.SUPER_ADMIN,
+    ROLES.ADMIN,
+    ROLES.DOCTOR,
+    ROLES.NURSE,
+    ROLES.RECEPTIONIST,
+    ROLES.PATIENT,
+  ]);
+  
+  // Pass the role to the client layout via a data attribute or context
+  return (
+    <div data-user-role={session.user.role as Role}>
+      {children}
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/client';
 import { GenerateReportInput } from '@/lib/validations/reporting';
+import { ROLES } from '@/config/roles';
 
 export class ReportingService {
   /**
@@ -49,22 +50,15 @@ export class ReportingService {
     const occupiedBeds = beds.filter((b) => b.status === 'OCCUPIED').length;
     const bedOccupancyRate = totalBeds > 0 ? Number(((occupiedBeds / totalBeds) * 100).toFixed(1)) : null;
 
-    // 6. Low-stock medicine count (hospital-wide — Medicine has no branchId,
-    // inventory is not currently branch-scoped in the schema).
-    const medicines = await prisma.medicine.findMany({ select: { stockQuantity: true, reorderLevel: true } });
-    const lowStockCount = medicines.filter((m) => m.stockQuantity <= m.reorderLevel).length;
+    // 6. Active staff count
+    const staffWhere = branchId ? { branchId, isActive: true } : { isActive: true };
+    const activeStaff = await prisma.staff.count({ where: staffWhere });
 
-    // 7. Active (unresolved) lab/radiology requests — operational load indicators.
-    const pendingLabRequests = await prisma.labRequest.count({
+    // 7. Doctors on duty (staff with DOCTOR role who are active)
+    const doctorsOnDuty = await prisma.staff.count({
       where: {
-        status: { in: ['REQUESTED', 'SAMPLED', 'ANALYZING'] },
-        ...(branchId ? { visit: { patient: { branchId } } } : {}),
-      },
-    });
-    const pendingRadiologyRequests = await prisma.radiologyRequest.count({
-      where: {
-        status: { in: ['REQUESTED', 'SCANNED'] },
-        ...(branchId ? { visit: { patient: { branchId } } } : {}),
+        ...staffWhere,
+        user: { role: ROLES.DOCTOR },
       },
     });
 
@@ -76,9 +70,8 @@ export class ReportingService {
       bedOccupancyRate,
       occupiedBeds,
       totalBeds,
-      lowStockCount,
-      pendingLabRequests,
-      pendingRadiologyRequests,
+      activeStaff,
+      doctorsOnDuty,
     };
   }
 

@@ -26,7 +26,7 @@ export async function requireRole(allowedRoles: Role[]) {
     redirect('/login');
   }
 
-  const role = (session.user.role as Role) || ROLES.PATIENT;
+  const role = ((session.user as Record<string, unknown>)?.role as Role) || ROLES.PATIENT;
 
   if (role !== ROLES.SUPER_ADMIN && !allowedRoles.includes(role)) {
     redirect('/dashboard');

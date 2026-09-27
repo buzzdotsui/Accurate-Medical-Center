@@ -1,16 +1,17 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, FlaskConical, Receipt, RefreshCw } from "lucide-react";
+import { Calendar, FileText, Pill, RefreshCw } from "lucide-react";
+import { GreetingWithAvatar } from "@/components/layout/greeting";
 
 interface PatientDashboardData {
   appointmentCount: number;
-  labRequestCount: number;
   prescriptionCount: number;
-  pendingInvoiceTotal: number;
+  visitCount: number;
 }
 
 function formatNaira(value: number): string {
@@ -23,6 +24,15 @@ function formatNaira(value: number): string {
 }
 
 export default function PatientDashboard() {
+  const [user, setUser] = useState<{ id: string; name: string; email: string; image?: string | null; role?: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then(r => r.json())
+      .then(data => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
+
   const { data, isLoading, error, refetch, isFetching } = useQuery<PatientDashboardData>({
     queryKey: ["patient_self_dashboard"],
     queryFn: async () => {
@@ -44,43 +54,41 @@ export default function PatientDashboard() {
       icon: Calendar,
     },
     {
-      title: "Lab Results",
-      value: isLoading ? null : (data?.labRequestCount ?? 0).toString(),
-      icon: FlaskConical,
+      title: "Medical Visits",
+      value: isLoading ? null : (data?.visitCount ?? 0).toString(),
+      icon: FileText,
     },
     {
       title: "Prescriptions",
       value: isLoading ? null : (data?.prescriptionCount ?? 0).toString(),
-      icon: FileText,
-    },
-    {
-      title: "Pending Bills",
-      value: isLoading ? null : formatNaira(data?.pendingInvoiceTotal ?? 0),
-      icon: Receipt,
+      icon: Pill,
     },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">My Patient Portal</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome to Accurate Medical Center. View your records and appointments here.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+          <div>
+            {user && <GreetingWithAvatar user={user} />}
+            <h1 className="text-3xl font-heading font-bold text-foreground mt-1">My Patient Portal</h1>
+            <p className="text-muted-foreground mt-1">
+              Welcome to Accurate Medical Center. View your records and appointments here.
+            </p>
+          </div>
+          {error && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 shrink-0"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
+              Retry
+            </Button>
+          )}
         </div>
-        {error && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 shrink-0"
-            onClick={() => refetch()}
-            disabled={isFetching}
-          >
-            <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
-            Retry
-          </Button>
-        )}
       </div>
 
       {error && (
@@ -89,7 +97,7 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">

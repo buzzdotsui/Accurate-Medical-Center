@@ -162,6 +162,11 @@ model Staff {
   branchId      String
   branch        Branch    @relation(fields: [branchId], references: [id])
   
+  // Staff-to-doctor assignment: non-doctor staff can be assigned to a doctor
+  assignedDoctorId String?
+  assignedDoctor   Staff?    @relation("StaffDoctorAssignment", fields: [assignedDoctorId], references: [id])
+  assignedStaff    Staff[]   @relation("StaffDoctorAssignment")
+  
   specialization String?
   licenseNumber  String?
   phone         String?

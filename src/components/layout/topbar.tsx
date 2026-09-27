@@ -47,9 +47,9 @@ export function Topbar({ user, role }: TopbarProps) {
   const userInitials = user?.name ? user.name.substring(0, 2).toUpperCase() : "U";
 
   const dashboardRoot = ROLE_DASHBOARD_ROOTS[role] || "/dashboard";
-  // Staff settings live under shared /settings; patients use their portal home.
-  const profileHref = role === ROLES.PATIENT ? "/patient" : "/settings";
-  const settingsHref = role === ROLES.SUPER_ADMIN ? "/admin/settings" : "/settings";
+  // Profile is now a dedicated section under /settings/profile for all roles
+  const profileHref = "/settings/profile";
+  const settingsHref = "/settings";
 
   // Same sign-out + cache clear as sidebar/mobile-nav — one auth system.
   const handleLogout = async () => {

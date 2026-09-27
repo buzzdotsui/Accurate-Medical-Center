@@ -57,7 +57,7 @@ export default function SettingsProfilePage() {
   }, [user, form]);
 
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: ProfileInput) => {
+    mutationFn: async (data: ProfileInput & { image?: string }) => {
       const res = await fetch("/api/v1/users/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -65,6 +65,7 @@ export default function SettingsProfilePage() {
           name: `${data.firstName} ${data.lastName}`,
           email: data.email,
           phone: data.phone,
+          image: data.image,
         }),
       });
       if (!res.ok) {
@@ -143,7 +144,10 @@ export default function SettingsProfilePage() {
   };
 
   const onSubmit = (data: ProfileInput) => {
-    updateProfileMutation.mutate(data);
+    updateProfileMutation.mutate({
+      ...data,
+      image: displayAvatar || undefined,
+    });
   };
 
   const userInitials = user?.name ? user.name.substring(0, 2).toUpperCase() : "U";

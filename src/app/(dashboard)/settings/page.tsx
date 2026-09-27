@@ -15,7 +15,7 @@ export default function SettingsRedirectPage() {
       const role = ((session.user as Record<string, unknown>)?.role as string) || ROLES.PATIENT;
       // Redirect to the first available section for the user's role
       if ([ROLES.SUPER_ADMIN, ROLES.ADMIN].includes(role as any)) {
-        router.push("/settings/profile");
+        router.push("/settings/admin");
       } else {
         router.push("/settings/profile");
       }

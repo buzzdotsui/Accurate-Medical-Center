@@ -1,1 +1,0 @@
-SELECT id, email, role, "branchId" FROM users WHERE role IN ('NURSE', 'DOCTOR', 'RECEPTIONIST', 'ADMIN') ORDER BY role;

@@ -82,6 +82,7 @@ Sign the AAB with the upload keystore (or configure `android/app/build.gradle` s
 
 ## Blocking items (mark in delivery report)
 
+v
 | Item | Owner | Status |
 |------|-------|--------|
 | Android SDK + JDK on build machine | Client / DevOps | `BLOCKED — EXTERNAL` |

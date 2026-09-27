@@ -213,4 +213,105 @@ export class ClinicalService {
       visits: filtered.slice(skip, skip + take),
     };
   }
+
+  static async startConsultation(visitId: string, data: { chiefComplaint?: string; vitals?: Record<string, unknown> }, executorId: string) {
+    const visit = await prisma.visit.findUnique({ where: { id: visitId } });
+    if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
+
+    const updated = await prisma.visit.update({
+      where: { id: visitId },
+      data: {
+        status: 'IN_PROGRESS',
+        startedAt: new Date(),
+        chiefComplaint: data.chiefComplaint ?? visit.chiefComplaint,
+        vitals: (data.vitals ?? visit.vitals) as any,
+      },
+    });
+
+    await AuditService.log({
+      userId: executorId,
+      userRole: 'DOCTOR',
+      action: 'START_CONSULTATION',
+      resource: 'VISIT',
+      resourceId: visit.id,
+    });
+
+    return updated;
+  }
+
+  static async completeConsultation(visitId: string, data: {
+    diagnoses?: Array<{ description: string; code?: string; type: 'PRIMARY' | 'SECONDARY'; notes?: string }>;
+    notes?: string;
+    treatmentPlan?: string;
+    vitals?: Record<string, unknown>;
+  }, executorId: string) {
+    const visit = await prisma.visit.findUnique({ where: { id: visitId } });
+    if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
+
+    return await prisma.$transaction(async (tx) => {
+      if (data.diagnoses && data.diagnoses.length > 0) {
+        for (const diag of data.diagnoses) {
+          await tx.diagnosis.create({
+            data: {
+              visitId,
+              code: diag.code || null,
+              description: diag.description,
+              type: diag.type,
+              notes: diag.notes || null,
+            },
+          });
+        }
+      }
+
+      if (data.notes) {
+        await tx.clinicalNote.create({
+          data: {
+            visitId,
+            noteText: data.notes,
+          },
+        });
+      }
+
+      const updateData: Record<string, unknown> = {
+        status: 'COMPLETED',
+        completedAt: new Date(),
+        vitals: (data.vitals ?? visit.vitals) as any,
+      };
+
+      if (data.treatmentPlan) {
+        updateData.treatmentPlan = {
+          upsert: {
+            create: {
+              instructions: data.treatmentPlan,
+            },
+            update: {
+              instructions: data.treatmentPlan,
+            },
+          },
+        };
+      }
+
+      const updated = await tx.visit.update({
+        where: { id: visitId },
+        data: updateData,
+      });
+
+      if (visit.appointmentId) {
+        await tx.appointment.update({
+          where: { id: visit.appointmentId },
+          data: { status: 'COMPLETED' },
+        });
+      }
+
+      await AuditService.log({
+        userId: executorId,
+        userRole: 'DOCTOR',
+        action: 'COMPLETE_CONSULTATION',
+        resource: 'VISIT',
+        resourceId: visit.id,
+      });
+
+      return updated;
+    });
+  }
 }

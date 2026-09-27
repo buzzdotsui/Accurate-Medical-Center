@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db/client';
 import { generatePrescriptionId } from '@/lib/utils/generate-id';
 import { AuditService } from './audit.service';
+import { AppError } from '@/lib/api/errors';
 
 export class PrescriptionService {
   /**
@@ -55,5 +56,30 @@ export class PrescriptionService {
 
       return prescription;
     });
+  }
+
+  static async createPrescriptionFromVisit(visitId: string, data: {
+    items: Array<{
+      medicineId: string;
+      dosage: string;
+      frequency: string;
+      duration: string;
+      quantity: number;
+      instructions?: string;
+    }>;
+  }, executorId: string) {
+    const visit = await prisma.visit.findUnique({
+      where: { id: visitId },
+      select: { patientId: true, doctorId: true },
+    });
+    if (!visit) throw new AppError('Visit not found', 'NOT_FOUND', 404);
+    if (!visit.doctorId) throw new AppError('Visit has no assigned doctor', 'BAD_REQUEST', 400);
+
+    return this.createPrescription({
+      visitId,
+      patientId: visit.patientId,
+      doctorId: visit.doctorId,
+      items: data.items,
+    }, executorId);
   }
 }

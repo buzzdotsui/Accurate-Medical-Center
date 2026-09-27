@@ -10,12 +10,12 @@ import { checkRateLimit } from '@/lib/security/rate-limit';
 
 type RouteContext = { params: Promise<Record<string, string>> };
 
-type ApiHandler = (
+export type ApiHandler = (
   req: NextRequest,
   context: RouteContext,
 ) => Promise<NextResponse<unknown>> | NextResponse<unknown>;
 
-type AuthApiHandler = (
+export type AuthApiHandler = (
   req: NextRequest,
   session: { user: SessionUser },
   context: RouteContext,

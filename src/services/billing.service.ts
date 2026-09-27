@@ -276,4 +276,36 @@ export class BillingService {
       return result;
     });
   }
+
+  static async listInvoices(params: {
+    skip?: number;
+    take?: number;
+    status?: string;
+    patientId?: string;
+    branchId?: string;
+  }) {
+    const { skip = 0, take = 50, status, patientId, branchId } = params;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {};
+    if (status) where.status = status;
+    if (patientId) where.patientId = patientId;
+    if (branchId) where.branchId = branchId;
+
+    const [total, invoices] = await Promise.all([
+      prisma.invoice.count({ where }),
+      prisma.invoice.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          patient: { select: { id: true, firstName: true, lastName: true, patientId: true } },
+          _count: { select: { items: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return { total, invoices };
+  }
 }

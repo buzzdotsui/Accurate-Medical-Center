@@ -581,4 +581,14 @@ export class AppointmentService {
       noShowCount: noShow,
     };
   }
+
+  static async listQueue(params: {
+    skip?: number;
+    take?: number;
+    status?: string;
+    doctorId?: string;
+    branchId?: string;
+  }) {
+    return this.listAppointments(params);
+  }
 }

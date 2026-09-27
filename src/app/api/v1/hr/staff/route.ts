@@ -17,7 +17,7 @@ import { AppError } from '@/lib/api/errors';
  * every authenticated role (down to PATIENT) should be able to browse.
  * ADMIN is additionally scoped to their own branch.
  */
-export const GET = withRole([ROLES.SUPER_ADMIN, ROLES.ADMIN], async (req, session) => {
+export const GET = withRole([ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.NURSE, ROLES.DOCTOR, ROLES.RECEPTIONIST], async (req, session) => {
   const branchFilter = buildBranchFilter(session.user);
   const staff = await HrService.getStaffDirectory(branchFilter.branchId);
   return ok(staff);

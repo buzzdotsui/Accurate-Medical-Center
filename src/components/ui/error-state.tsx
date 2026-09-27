@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils/cn"
@@ -16,6 +16,12 @@ export function ErrorState({
   className,
   ...props
 }: ErrorStateProps) {
+  useEffect(() => {
+    if (description && description !== "We encountered an error loading this data. Please try again.") {
+      console.error('[ErrorState]', title, description);
+    }
+  }, [title, description]);
+
   return (
     <div
       className={cn(

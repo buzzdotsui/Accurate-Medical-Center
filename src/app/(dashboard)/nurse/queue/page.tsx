@@ -41,7 +41,9 @@ export default function NurseTriageQueue() {
       const res = await fetch("/api/v1/clinical/visits?status=IN_PROGRESS&hasVitals=false&take=50");
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        throw new Error(json?.error?.message ?? "Failed to load triage queue");
+        const msg = json?.error?.message ?? `HTTP ${res.status}: Failed to load triage queue`;
+        console.error('[NurseTriageQueue]', msg, { status: res.status, body: json });
+        throw new Error(msg);
       }
       const json = await res.json();
       return json.data;

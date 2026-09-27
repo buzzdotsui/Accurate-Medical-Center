@@ -60,7 +60,9 @@ export default function AdminStaffPage() {
       const res = await fetch("/api/v1/hr/staff");
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        throw new Error(json?.error?.message ?? "Failed to load staff members");
+        const msg = json?.error?.message ?? `HTTP ${res.status}: Failed to load staff members`;
+        console.error('[AdminStaffPage]', msg, { status: res.status, body: json });
+        throw new Error(msg);
       }
       return res.json();
     },
@@ -71,7 +73,10 @@ export default function AdminStaffPage() {
     fetch("/api/v1/hr/doctors")
       .then((r) => r.json())
       .then((data) => setAvailableDoctors(data?.data ?? []))
-      .catch(() => setAvailableDoctors([]));
+      .catch((err) => {
+        console.error('[AdminStaffPage:doctors]', err);
+        setAvailableDoctors([]);
+      });
   }, []);
 
   const staff: StaffMember[] = data?.data ?? [];

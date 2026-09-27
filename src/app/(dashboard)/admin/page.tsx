@@ -38,7 +38,8 @@ interface StaffRow {
   staffId: string;
   isActive: boolean;
   department?: { name?: string } | null;
-  user: { name: string; role: string; email?: string };
+  user: { name: string; email: string; role: string };
+  assignedDoctor?: { id: string; staffId: string; user: { name: string } } | null;
 }
 
 function formatCurrency(value: number): string {
@@ -54,10 +55,12 @@ function RecentAdmissionsPanel() {
   const { data, isLoading, error, refetch, isFetching } = useQuery<AdmissionRow[]>({
     queryKey: ["admin_recent_admissions"],
     queryFn: async () => {
-      const res = await fetch("/api/v1/inpatient/admissions?take=8");
+      const res = await fetch("/api/v1/inpatient/admissions");
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        throw new Error(json?.error?.message ?? "Failed to load admissions");
+        const msg = json?.error?.message ?? `HTTP ${res.status}: Failed to load admissions`;
+        console.error('[RecentAdmissionsPanel]', msg, { status: res.status, body: json });
+        throw new Error(msg);
       }
       const json = await res.json();
       return json.data as AdmissionRow[];
@@ -136,7 +139,9 @@ function StaffOnDutyPanel({ onAddStaff }: { onAddStaff: () => void }) {
       const res = await fetch("/api/v1/hr/staff");
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        throw new Error(json?.error?.message ?? "Failed to load staff");
+        const msg = json?.error?.message ?? `HTTP ${res.status}: Failed to load staff`;
+        console.error('[StaffOnDutyPanel]', msg, { status: res.status, body: json });
+        throw new Error(msg);
       }
       const json = await res.json();
       return json.data as StaffRow[];

@@ -62,7 +62,9 @@ export default function NurseDashboard() {
       const res = await fetch("/api/v1/appointments/stats");
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        throw new Error(json?.error?.message ?? "Failed to load stats");
+        const msg = json?.error?.message ?? `HTTP ${res.status}: Failed to load stats`;
+        console.error('[NurseDashboard:stats]', msg, { status: res.status, body: json });
+        throw new Error(msg);
       }
       const json = await res.json();
       return json.data;
@@ -79,7 +81,9 @@ export default function NurseDashboard() {
         );
         if (!res.ok) {
           const json = await res.json().catch(() => null);
-          throw new Error(json?.error?.message ?? "Failed to load vitals data");
+          const msg = json?.error?.message ?? `HTTP ${res.status}: Failed to load vitals data`;
+          console.error('[NurseDashboard:vitals]', msg, { status: res.status, body: json });
+          throw new Error(msg);
         }
         const json = await res.json();
         return json.data;
@@ -98,7 +102,9 @@ export default function NurseDashboard() {
       const res = await fetch("/api/v1/inpatient/admissions");
       if (!res.ok) {
         const json = await res.json().catch(() => null);
-        throw new Error(json?.error?.message ?? "Failed to load admissions");
+        const msg = json?.error?.message ?? `HTTP ${res.status}: Failed to load admissions`;
+        console.error('[NurseDashboard:admissions]', msg, { status: res.status, body: json });
+        throw new Error(msg);
       }
       const json = await res.json();
       return json.data;

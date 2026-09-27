@@ -7,7 +7,7 @@ import { contentReveal, EASE_OUT, headingReveal, mediaReveal, sectionReveal } fr
 import { displayHeadingClassName, displayHeadingStyle } from "./typography";
 import { MEDIA_CONFIG } from "@/config/media";
 
-const BG           = "#0b0f11";
+const BG           = "#000000";
 const TEXT         = "#f4f2f5";
 const TEXT_SOFT    = "rgba(244,242,245,0.62)";
 const TEXT_MUTED   = "rgba(244,242,245,0.38)";
@@ -398,14 +398,27 @@ export function LookInside() {
       style={{ backgroundColor: BG }}
       aria-label="Experience: A Look Inside Accurate Medical Center"
     >
-      {/* Dot grid texture */}
+      {/* Layered radial gradients — matching VisionMission background */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none"
         style={{
+          background:
+            "radial-gradient(ellipse 85% 55% at 50% -8%, rgba(244,242,245,0.05) 0%, transparent 62%), radial-gradient(ellipse 75% 48% at 50% 108%, rgba(244,242,245,0.03) 0%, transparent 70%)",
+        }}
+      />
+      {/* Subtle grid pattern */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none opacity-[0.05]"
+        style={{
           backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgba(244,242,245,0.055) 1px, transparent 0)",
-          backgroundSize: "32px 32px",
+            "linear-gradient(rgba(244,242,245,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(244,242,245,0.8) 1px, transparent 1px)",
+          backgroundSize: "68px 68px",
+          maskImage:
+            "radial-gradient(ellipse 62% 52% at 50% 50%, black 18%, transparent 72%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 62% 52% at 50% 50%, black 18%, transparent 72%)",
         }}
       />
 

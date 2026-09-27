@@ -1,6 +1,5 @@
 import { withAuth, parseBody } from '@/lib/api/middleware';
 import { ok } from '@/lib/api/response';
-import { prisma } from '@/lib/db/client';
 import { z } from 'zod';
 
 const PreferencesSchema = z.object({
@@ -17,7 +16,7 @@ const PreferencesSchema = z.object({
  * GET /api/v1/users/preferences
  * Get the authenticated user's preferences.
  */
-export const GET = withAuth(async (_req, session) => {
+export const GET = withAuth(async (_req, _session) => {
   // For now, return defaults since we don't have a preferences table
   // In the future, this would query a UserPreferences model
   return ok({
@@ -35,7 +34,7 @@ export const GET = withAuth(async (_req, session) => {
  * PATCH /api/v1/users/preferences
  * Update the authenticated user's preferences.
  */
-export const PATCH = withAuth(async (req, session) => {
+export const PATCH = withAuth(async (req, _session) => {
   const body = await parseBody(req, PreferencesSchema);
 
   // For now, just return success since we don't have a preferences table

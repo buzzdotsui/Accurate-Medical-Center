@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
   env: {
     // Injected at build time so server components can build Cloudinary URLs.
     // The actual value is read from .env / docker-compose environment.
-    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || "hefhxm1l",
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || "",
   },
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname),

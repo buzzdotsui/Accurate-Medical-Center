@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { withRole, parseQuery } from '@/lib/api/middleware';
-import { PrescriptionService } from '@/services/prescription.service';
 import { ok } from '@/lib/api/response';
 import { z } from 'zod';
 import { ROLES } from '@/config/roles';

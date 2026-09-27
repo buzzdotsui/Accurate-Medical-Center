@@ -1,8 +1,6 @@
-import { withAuth, parseBody } from '@/lib/api/middleware';
+import { withAuth } from '@/lib/api/middleware';
 import { ok } from '@/lib/api/response';
 import { prisma } from '@/lib/db/client';
-import { RouteContext, getParam } from '@/lib/utils/route-types';
-import { z } from 'zod';
 
 /**
  * GET /api/v1/users/sessions

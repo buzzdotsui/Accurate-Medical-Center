@@ -3,8 +3,7 @@ import { withAuth, parseQuery } from '@/lib/api/middleware';
 import { ClinicalService } from '@/services/clinical.service';
 import { ok } from '@/lib/api/response';
 import { z } from 'zod';
-import { ROLES } from '@/config/roles';
-import { buildBranchFilter, verifyPatientAccess } from '@/lib/auth/resource-authorization';
+import { buildBranchFilter } from '@/lib/auth/resource-authorization';
 import { PatientService } from '@/services/patient.service';
 
 const ListSelfRecordsQuerySchema = z.object({

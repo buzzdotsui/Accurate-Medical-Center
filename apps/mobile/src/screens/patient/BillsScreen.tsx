@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { View, Text, ScrollView, RefreshControl, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { usePatientStore } from '../../store/patientStore';
 import { 
   styles, 

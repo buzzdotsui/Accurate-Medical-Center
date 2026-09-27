@@ -206,19 +206,22 @@ export function Services() {
             const isHovered = hoveredIdx === idx;
 
             return (
-              <Link href={`/book-appointment?service=${encodeURIComponent(APPOINTMENT_SERVICE_BY_MARKETING_TITLE[srv.title])}`} key={srv.id} passHref legacyBehavior>
-                <motion.a
-                  whileHover="hover"
-                  whileFocus="hover"
-                  whileTap={{ scale: 0.995 }}
-                  variants={serviceRowReveal}
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                  onFocus={() => setHoveredIdx(idx)}
-                  onBlur={() => setHoveredIdx(null)}
-                  className="group relative block min-h-20 cursor-pointer overflow-hidden border-b py-10 transition-[background-color,border-color,transform] duration-300 active:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:py-14 md:flex md:items-center"
-                  style={{ borderColor: BORDER }}
-                >
+              <Link
+              href={`/book-appointment?service=${encodeURIComponent(APPOINTMENT_SERVICE_BY_MARKETING_TITLE[srv.title])}`}
+              key={srv.id}
+              className="group relative block min-h-20 cursor-pointer overflow-hidden border-b py-10 transition-[background-color,border-color,transform] duration-300 active:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a] sm:py-14 md:flex md:items-center"
+              style={{ borderColor: BORDER }}
+            >
+              <motion.div
+                whileHover="hover"
+                whileFocus="hover"
+                whileTap={{ scale: 0.995 }}
+                variants={serviceRowReveal}
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                onFocus={() => setHoveredIdx(idx)}
+                onBlur={() => setHoveredIdx(null)}
+              >
                 {/* Hover Background Reveal */}
                 <div 
                   className="absolute inset-0 transition-opacity duration-500 ease-out pointer-events-none"
@@ -282,8 +285,8 @@ export function Services() {
                     />
                   </div>
                 </div>
-                </motion.a>
-              </Link>
+              </motion.div>
+            </Link>
             );
           })}
         </motion.div>
@@ -295,18 +298,20 @@ export function Services() {
           variants={contentReveal}
           className="mt-20 flex justify-center lg:justify-start"
         >
-          <Link href="/book-appointment" passHref legacyBehavior>
-            <motion.a
+          <Link
+            href="/book-appointment"
+            className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-[18px] text-[15px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
+            style={{
+              backgroundColor: CHARCOAL,
+              color: "#fff",
+              boxShadow: "0 10px 30px rgba(26,31,34,0.15)",
+            }}
+          >
+            <motion.span
               variants={ctaLift}
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-[18px] text-[15px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
-              style={{
-                backgroundColor: CHARCOAL,
-                color: "#fff",
-                boxShadow: "0 10px 30px rgba(26,31,34,0.15)",
-              }}
             >
               <span
                 aria-hidden
@@ -317,7 +322,7 @@ export function Services() {
               />
               <span className="relative z-10 tracking-wide">Book an Appointment</span>
               <ArrowRight className="relative z-10 w-[18px] h-[18px] transition-transform duration-300 group-hover:translate-x-1" />
-            </motion.a>
+            </motion.span>
           </Link>
         </motion.div>
       </div>

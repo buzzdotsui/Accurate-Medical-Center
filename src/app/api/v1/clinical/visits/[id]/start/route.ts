@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withRole, parseBody, parseQuery, AuthApiHandler } from '@/lib/api/middleware';
+import { NextRequest } from 'next/server';
+import { withRole, parseBody, AuthApiHandler } from '@/lib/api/middleware';
 import { ClinicalService } from '@/services/clinical.service';
-import { ok, created } from '@/lib/api/response';
+import { created } from '@/lib/api/response';
 import { z } from 'zod';
 import { ROLES } from '@/config/roles';
 import { verifyVisitAccess } from '@/lib/auth/resource-authorization';

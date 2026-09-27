@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Patient, Appointment, Visit, LabRequest, Prescription, Invoice, DashboardStats } from '../types';
+import { Appointment, Visit, LabRequest, Prescription, Invoice, DashboardStats } from '../types';
 import { apiClient } from '../api/client';
 
 interface PatientState {
@@ -23,7 +23,7 @@ interface PatientState {
   reset: () => void;
 }
 
-export const usePatientStore = create<PatientState>((set, get) => ({
+export const usePatientStore = create<PatientState>((set, _get) => ({
   dashboardStats: null,
   appointments: [],
   records: [],

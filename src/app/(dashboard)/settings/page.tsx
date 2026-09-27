@@ -1,30 +1,27 @@
-"use client";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth/config";
+import { ROLES, type Role } from "@/config/roles";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth/client";
-import type { User } from "@/lib/auth/user";
-import { ROLES } from "@/config/roles";
+/**
+ * /settings (index page)
+ *
+ * Server-side redirect — ADMIN/SUPER_ADMIN goes to the admin settings hub,
+ * everyone else to their profile. No client-side spinner required.
+ */
+export default async function SettingsRedirectPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
 
-export default function SettingsRedirectPage() {
-  const router = useRouter();
-  const { data: session } = useSession();
+  if (!session?.user) {
+    redirect("/login");
+  }
 
-  useEffect(() => {
-    if (session?.user) {
-      const role = ((session.user as Record<string, unknown>)?.role as string) || ROLES.PATIENT;
-      // Redirect to the first available section for the user's role
-      if ([ROLES.SUPER_ADMIN, ROLES.ADMIN].includes(role as any)) {
-        router.push("/settings/admin");
-      } else {
-        router.push("/settings/profile");
-      }
-    }
-  }, [session, router]);
+  const role =
+    ((session.user as Record<string, unknown>)?.role as Role) || ROLES.PATIENT;
 
-  return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-    </div>
-  );
+  if (role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN) {
+    redirect("/settings/admin");
+  }
+
+  redirect("/settings/profile");
 }

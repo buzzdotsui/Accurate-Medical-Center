@@ -1,7 +1,6 @@
 import { withAuth, parseBody } from '@/lib/api/middleware';
 import { ok } from '@/lib/api/response';
 import { auth } from '@/lib/auth/config';
-import { prisma } from '@/lib/db/client';
 import { z } from 'zod';
 import { AuditService } from '@/services/audit.service';
 

@@ -233,19 +233,21 @@ export default function Hero() {
           variants={fadeUp}
           className="flex w-full max-w-sm flex-col justify-center gap-3 sm:max-w-none sm:flex-row sm:gap-4"
         >
-          <Link href="/book-appointment" passHref legacyBehavior>
-            <motion.a
+          <Link
+            href="/book-appointment"
+            className="group relative inline-flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
+            style={{
+              backgroundColor: "#f4f2f5",
+              color: "#03161a",
+              boxShadow: "0 14px 36px rgba(3,22,26,0.32)",
+              border: "1px solid rgba(244,242,245,0.72)",
+            }}
+          >
+            <motion.span
               variants={ctaLift}
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="group relative inline-flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-10 sm:py-[18px] sm:text-[15px]"
-              style={{
-                backgroundColor: "#f4f2f5",
-                color: "#03161a",
-                boxShadow: "0 14px 36px rgba(3,22,26,0.32)",
-                border: "1px solid rgba(244,242,245,0.72)",
-              }}
             >
               <span
                 aria-hidden
@@ -259,7 +261,7 @@ export default function Hero() {
                 aria-hidden
               />
               <span className="relative z-10 tracking-wide">Book an Appointment</span>
-            </motion.a>
+            </motion.span>
           </Link>
 
           <motion.a

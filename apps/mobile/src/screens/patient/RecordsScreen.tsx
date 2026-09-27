@@ -9,7 +9,7 @@ import {
   Divider 
 } from '../../components/common';
 import { Visit, Diagnosis, Prescription } from '../../types';
-import { formatDate, formatDateTime } from '../../components/common';
+import { formatDateTime } from '../../components/common';
 
 export const PatientRecordsScreen = () => {
   const { 

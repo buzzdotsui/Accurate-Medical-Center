@@ -205,8 +205,8 @@ export function Header() {
               >
                 Portal
               </Link>
-              <Link href="/book-appointment" passHref legacyBehavior>
-                <motion.a
+              <Link href="/book-appointment">
+                <motion.button
                   variants={ctaLift}
                   initial="rest"
                   whileHover="hover"
@@ -224,7 +224,7 @@ export function Header() {
                   />
                   <Calendar className="relative z-10 w-4 h-4 shrink-0 transition-transform duration-400 ease-out group-hover:scale-110 group-hover:-rotate-6" aria-hidden="true" />
                   <span className="relative z-10">Book an Appointment</span>
-                </motion.a>
+                </motion.button>
               </Link>
             </div>
 

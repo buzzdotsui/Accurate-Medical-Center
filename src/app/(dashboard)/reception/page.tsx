@@ -23,7 +23,7 @@ export default function ReceptionDashboard() {
   const [user, setUser] = React.useState<{ id: string; name: string; email: string; image?: string | null; role?: string } | null>(null);
 
   React.useEffect(() => {
-    fetch("/api/auth/session")
+    fetch("/api/auth/get-session")
       .then(r => r.json())
       .then(data => setUser(data?.user ?? null))
       .catch(() => setUser(null));

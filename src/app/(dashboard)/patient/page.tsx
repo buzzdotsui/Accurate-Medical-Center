@@ -27,7 +27,7 @@ export default function PatientDashboard() {
   const [user, setUser] = useState<{ id: string; name: string; email: string; image?: string | null; role?: string } | null>(null);
 
   useEffect(() => {
-    fetch("/api/auth/session")
+    fetch("/api/auth/get-session")
       .then(r => r.json())
       .then(data => setUser(data?.user ?? null))
       .catch(() => setUser(null));

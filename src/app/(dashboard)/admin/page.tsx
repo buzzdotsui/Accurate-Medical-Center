@@ -205,7 +205,7 @@ export default function AdminDashboardPage() {
 
   // Fetch user session for greeting
   useEffect(() => {
-    fetch("/api/auth/session")
+    fetch("/api/auth/get-session")
       .then(r => r.json())
       .then(data => setUser(data?.user ?? null))
       .catch(() => setUser(null));

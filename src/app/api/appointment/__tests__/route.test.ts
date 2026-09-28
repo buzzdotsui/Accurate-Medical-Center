@@ -88,6 +88,14 @@ describe("POST /api/appointment", () => {
     expect(sendAppointmentEmailMock).toHaveBeenCalledWith(validAppointment, "AMC-APT-TEST-001");
   });
 
+  it("returns 200 even when the DB write fails after a successful email", async () => {
+    branchFindFirstMock.mockRejectedValue(new Error("relation \"Branch\" does not exist"));
+    const response = await POST(makeRequest(validAppointment));
+
+    expect(response.status).toBe(200);
+    expect(sendAppointmentEmailMock).toHaveBeenCalledWith(validAppointment, "AMC-APT-TEST-001");
+  });
+
   it("rejects a past appointment date before rate limiting or email submission", async () => {
     const response = await POST(makeRequest({ ...validAppointment, preferredDate: "2000-01-01" }));
 

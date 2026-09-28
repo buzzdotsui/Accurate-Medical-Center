@@ -81,10 +81,31 @@ export async function POST(request: NextRequest) {
     return error("SERVICE_UNAVAILABLE", "The appointment service is temporarily unavailable.", 503);
   }
 
+  const submissionId = generateAppointmentSubmissionId();
+
+  // ── Step 1: Send email notification (primary — must succeed) ────────────
+  // Email is the hospital's immediate alert. We attempt this first so that
+  // even if the database is not yet initialised, the appointment request is
+  // never silently lost.
   try {
-    const submissionId = generateAppointmentSubmissionId();
-    
-    // 1. Ensure a default branch exists (fallback)
+    await sendAppointmentEmail(parsed.data, submissionId);
+  } catch (emailError) {
+    logger.error("Appointment email failed", {
+      error: emailError instanceof Error ? emailError.message : "Unknown error",
+      ip,
+    });
+    if (emailError instanceof ContactEmailConfigurationError) {
+      return error("SERVICE_UNAVAILABLE", "The appointment service is temporarily unavailable. Please call us directly.", 503);
+    }
+    return error("EMAIL_SEND_FAILED", "We could not submit your appointment request right now. Please try again or call us directly.", 502);
+  }
+
+  // ── Step 2: Persist to the database (secondary — fail-soft) ─────────────
+  // Once the email is sent the patient's request is received. DB errors here
+  // (e.g. schema not yet pushed, transient connection issue) must not cause
+  // the user to see a failure — they will receive an email confirmation and
+  // staff can manually log the visit if the record is missing.
+  try {
     let branch = await prisma.branch.findFirst();
     if (!branch) {
       branch = await prisma.branch.create({
@@ -98,17 +119,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 2. Find or create the Patient
     let patient = null;
     if (parsed.data.email) {
-      patient = await prisma.patient.findFirst({
-        where: { email: parsed.data.email }
-      });
+      patient = await prisma.patient.findFirst({ where: { email: parsed.data.email } });
     }
     if (!patient && parsed.data.phone) {
-      patient = await prisma.patient.findFirst({
-        where: { phone: parsed.data.phone }
-      });
+      patient = await prisma.patient.findFirst({ where: { phone: parsed.data.phone } });
     }
     if (!patient) {
       patient = await prisma.patient.create({
@@ -119,11 +135,10 @@ export async function POST(request: NextRequest) {
           lastName: parsed.data.lastName,
           phone: parsed.data.phone,
           email: parsed.data.email || undefined,
-        }
+        },
       });
     }
 
-    // 3. Create the Database Appointment
     await prisma.appointment.create({
       data: {
         appointmentId: submissionId,
@@ -133,22 +148,16 @@ export async function POST(request: NextRequest) {
         status: "SCHEDULED",
         reason: parsed.data.service,
         notes: parsed.data.notes,
-      }
+      },
     });
-
-    // 4. Send the Email Notification
-    await sendAppointmentEmail(parsed.data, submissionId);
-    return ok({ status: "submitted", submissionId });
-  } catch (errorOrSendError) {
-    logger.error("Appointment request could not be processed", {
-      error: errorOrSendError instanceof Error ? errorOrSendError.message : "Unknown error",
+  } catch (dbError) {
+    // Log for ops visibility but do not fail the request — email was sent.
+    logger.error("Appointment DB write failed (email already sent)", {
+      error: dbError instanceof Error ? dbError.message : "Unknown error",
+      submissionId,
       ip,
     });
-
-    if (errorOrSendError instanceof ContactEmailConfigurationError) {
-      return error("SERVICE_UNAVAILABLE", "The appointment service is temporarily unavailable. Please call us directly.", 503);
-    }
-
-    return error("EMAIL_SEND_FAILED", "We could not submit your appointment request right now. Please try again or call us directly.", 502);
   }
+
+  return ok({ status: "submitted", submissionId });
 }

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInYears } from "date-fns";
+import { formatDate } from "@/lib/utils/format-date";
 import {
   ArrowLeft,
   UserCheck,
@@ -246,7 +247,7 @@ export default function ReceptionPatientDetailPage() {
       accessorKey: "date",
       header: "Date",
       cell: (row) =>
-        row.date ? format(new Date(String(row.date)), "dd MMM yyyy") : "—",
+        row.date ? format(new Date(String(row.date)), "dd/MM/yyyy") : "—",
     },
     {
       accessorKey: "timeSlot",
@@ -384,7 +385,7 @@ export default function ReceptionPatientDetailPage() {
           <span className="text-sm text-muted-foreground">{age} yrs old</span>
         )}
         <span className="text-xs text-muted-foreground ml-auto">
-          Registered {format(new Date(patient.createdAt), "dd MMM yyyy")}
+          Registered {format(new Date(patient.createdAt), "dd/MM/yyyy")}
         </span>
       </div>
 
@@ -461,7 +462,7 @@ export default function ReceptionPatientDetailPage() {
                     label="Date of Birth"
                     value={
                       patient.dateOfBirth
-                        ? `${format(new Date(patient.dateOfBirth), "dd MMM yyyy")} (${age} yrs)`
+                        ? `${formatDate(patient.dateOfBirth)} (${age} yrs)`
                         : null
                     }
                   />
@@ -559,7 +560,7 @@ export default function ReceptionPatientDetailPage() {
                       {event.type}
                     </span>
                     <time className="text-xs text-muted-foreground sm:ml-2">
-                      {format(new Date(event.date), "dd MMM yyyy")}
+                      {format(new Date(event.date), "dd/MM/yyyy")}
                     </time>
                   </div>
                   <p className="mt-1 text-sm font-medium text-foreground">{event.title}</p>

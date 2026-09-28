@@ -129,7 +129,7 @@ export function GlobalSearch() {
 
   return (
     <div ref={containerRef} className="relative hidden md:block group">
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors z-10" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 group-focus-within:text-primary transition-colors z-10" />
       <input
         ref={inputRef}
         type="text"
@@ -140,16 +140,16 @@ export function GlobalSearch() {
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={handleKeyDown}
-        placeholder="Search patients, staff, appointments..."
+        placeholder="Search patients, staff..."
         aria-label="Global search"
         role="combobox"
         aria-expanded={showDropdown}
         aria-controls="global-search-results"
         aria-autocomplete="list"
-        className="h-9 w-64 rounded-md border border-input bg-card px-9 py-1 text-sm shadow-sm transition-all focus:w-80 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-10 w-64 rounded-xl border border-transparent bg-black/[0.03] px-10 py-1 text-sm text-foreground shadow-none transition-all duration-300 focus:w-80 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:bg-white focus-visible:border-primary/30 focus-visible:shadow-[0_0_0_4px_rgba(212,232,66,0.15)] disabled:cursor-not-allowed disabled:opacity-50 hover:bg-black/[0.05]"
       />
       {!query && (
-        <kbd className="absolute right-2 top-2 pointer-events-none inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+        <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none inline-flex h-5 items-center gap-1 rounded bg-black/[0.05] px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
           <span className="text-xs">⌘</span>K
         </kbd>
       )}

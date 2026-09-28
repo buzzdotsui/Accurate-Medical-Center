@@ -81,7 +81,7 @@ export default function ReceptionPatientsList() {
       cell: (row) =>
         row.createdAt ? (
           <span className="text-sm text-muted-foreground">
-            {format(new Date(String(row.createdAt)), "dd MMM yyyy")}
+            {format(new Date(String(row.createdAt)), "dd/MM/yyyy")}
           </span>
         ) : (
           "—"

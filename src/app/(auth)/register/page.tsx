@@ -88,101 +88,101 @@ export default function RegisterPage() {
   }
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={pageReveal} className="space-y-8 sm:space-y-9">
-      <motion.div variants={contentReveal} className="space-y-3">
-        <motion.p variants={contentReveal} className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">Patient registration</motion.p>
+    <motion.div initial="hidden" animate="visible" variants={pageReveal} className="space-y-10 sm:space-y-12">
+      <motion.div variants={contentReveal} className="space-y-4">
+        <motion.p variants={contentReveal} className="text-xs font-bold uppercase tracking-[0.2em] text-primary/70">Patient registration</motion.p>
         <motion.h1
           variants={headingReveal}
-          className={`${displayHeadingClassName} ${displayHeadingVariantClassNames.auth} text-foreground`}
+          className={`${displayHeadingClassName} text-4xl sm:text-5xl text-foreground`}
           style={displayHeadingStyle}
         >
           Create Patient Account
         </motion.h1>
-        <motion.p variants={contentReveal} className="max-w-sm text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">
+        <motion.p variants={contentReveal} className="max-w-sm text-base leading-7 text-muted-foreground sm:text-lg">
           Sign up to access your medical records and appointments.
         </motion.p>
       </motion.div>
 
-      <motion.form variants={contentReveal} className="space-y-5" onSubmit={handleSubmit} aria-busy={loading}>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="firstName" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
+      <motion.form variants={contentReveal} className="space-y-6" onSubmit={handleSubmit} aria-busy={loading}>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="space-y-3">
+            <label htmlFor="firstName" className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 ml-2">
               First name
             </label>
-            <Input 
-              id="firstName" 
-              required 
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              disabled={loading}
-              icon={<UserRound aria-hidden className="h-4 w-4" />}
-              className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
-            />
+              <Input 
+                id="firstName" 
+                required 
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                disabled={loading}
+                icon={<UserRound aria-hidden className="h-5 w-5 text-muted-foreground/50" />}
+                className="h-14 text-base bg-black/[0.03] border-transparent hover:bg-black/[0.05] focus-visible:bg-white focus-visible:border-primary/30 focus-visible:shadow-[0_0_0_4px_rgba(212,232,66,0.15)] transition-all rounded-2xl px-5"
+              />
+            </div>
+            <div className="space-y-3">
+              <label htmlFor="lastName" className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 ml-2">
+                Last name
+              </label>
+              <Input 
+                id="lastName" 
+                required 
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                disabled={loading}
+                icon={<UserRound aria-hidden className="h-5 w-5 text-muted-foreground/50" />}
+                className="h-14 text-base bg-black/[0.03] border-transparent hover:bg-black/[0.05] focus-visible:bg-white focus-visible:border-primary/30 focus-visible:shadow-[0_0_0_4px_rgba(212,232,66,0.15)] transition-all rounded-2xl px-5"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="lastName" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
-              Last name
+
+          <div className="space-y-3">
+            <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 ml-2">
+              Email address
             </label>
             <Input 
-              id="lastName" 
+              id="email" 
+              type="email" 
               required 
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
-              icon={<UserRound aria-hidden className="h-4 w-4" />}
-              className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
+              icon={<Mail aria-hidden className="h-5 w-5 text-muted-foreground/50" />}
+              className="h-14 text-base bg-black/[0.03] border-transparent hover:bg-black/[0.05] focus-visible:bg-white focus-visible:border-primary/30 focus-visible:shadow-[0_0_0_4px_rgba(212,232,66,0.15)] transition-all rounded-2xl px-5"
             />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
-            Email address
-          </label>
-          <Input 
-            id="email" 
-            type="email" 
-            required 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-            icon={<Mail aria-hidden className="h-4 w-4" />}
-            className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <label htmlFor="password" className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-foreground/65">
-            Password
-          </label>
-          <Input 
-            id="password" 
-            type="password" 
-            required 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-            icon={<LockKeyhole aria-hidden className="h-4 w-4" />}
-            className="h-12 rounded-2xl bg-white px-4 pl-11 text-[0.95rem] shadow-[0_6px_20px_rgba(3,22,26,0.04)] transition-[border-color,box-shadow,transform] duration-200 focus-visible:-translate-y-px focus-visible:border-primary focus-visible:ring-primary/20 focus-visible:shadow-[0_10px_24px_rgba(3,22,26,0.08)]"
-          />
-        </div>
-
-        {error && (
-          <div id="register-error" role="alert" aria-live="polite" className="flex items-start gap-3 rounded-2xl border border-destructive/20 bg-destructive/[0.06] px-4 py-3 text-sm leading-5 text-destructive">
-            <AlertCircle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
-            {error}
+          
+          <div className="space-y-3">
+            <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/60 ml-2">
+              Password
+            </label>
+            <Input 
+              id="password" 
+              type="password" 
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              icon={<LockKeyhole aria-hidden className="h-5 w-5 text-muted-foreground/50" />}
+              className="h-14 text-base bg-black/[0.03] border-transparent hover:bg-black/[0.05] focus-visible:bg-white focus-visible:border-primary/30 focus-visible:shadow-[0_0_0_4px_rgba(212,232,66,0.15)] transition-all rounded-2xl px-5"
+            />
           </div>
-        )}
 
-        <Button type="submit" className="h-12 w-full rounded-2xl bg-primary text-[0.95rem] font-bold tracking-wide text-primary-foreground shadow-[0_12px_28px_rgba(3,22,26,0.16)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-[0_18px_36px_rgba(3,22,26,0.22)] active:translate-y-0 active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4" disabled={loading}>
-          {loading ? "Creating account…" : "Create account"}
-        </Button>
-      </motion.form>
+          {error && (
+            <div id="register-error" role="alert" aria-live="polite" className="flex items-start gap-3 rounded-2xl border-none bg-destructive/[0.08] px-5 py-4 text-sm leading-5 text-destructive font-medium">
+              <AlertCircle aria-hidden className="mt-0.5 h-5 w-5 shrink-0" />
+              {error}
+            </div>
+          )}
 
-      <motion.div variants={contentReveal} className="rounded-2xl border border-black/[0.07] bg-white/60 px-4 py-4 text-center text-sm leading-5 text-muted-foreground shadow-sm">
+          <Button type="submit" className="w-full mt-6 h-14 text-lg rounded-2xl shadow-lg shadow-primary/20" size="lg" disabled={loading}>
+            {loading ? "Creating account…" : "Create account"}
+          </Button>
+        </motion.form>
+
+      <motion.div variants={contentReveal} className="rounded-2xl border-none bg-black/[0.02] px-5 py-6 text-center text-base leading-5 text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-primary hover:underline">
-          Sign in
+        <Link href="/login" className="font-semibold text-foreground hover:text-primary transition-colors">
+          Sign in to your portal
         </Link>
       </motion.div>
     </motion.div>

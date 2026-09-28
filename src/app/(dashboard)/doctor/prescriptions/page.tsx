@@ -38,7 +38,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return new Date(iso).toLocaleDateString('en-GB', {
     year: "numeric",
     month: "short",
     day: "numeric",

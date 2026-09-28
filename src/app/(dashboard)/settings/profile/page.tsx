@@ -22,6 +22,14 @@ const ProfileSchema = z.object({
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
+  dateOfBirth: z.string().optional(),
+  gender: z.string().optional(),
+  bloodGroup: z.string().optional(),
+  maritalStatus: z.string().optional(),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+  bio: z.string().optional(),
+  occupation: z.string().optional(),
 });
 
 type ProfileInput = z.infer<typeof ProfileSchema>;
@@ -40,21 +48,51 @@ export default function SettingsProfilePage() {
       lastName: "",
       email: "",
       phone: "",
+      dateOfBirth: "",
+      gender: "",
+      bloodGroup: "",
+      maritalStatus: "",
+      emergencyContactName: "",
+      emergencyContactPhone: "",
+      bio: "",
+      occupation: "",
+    },
+  });
+
+  // Fetch user profile from API to get extended fields
+  const { data: profileData } = useQuery({
+    queryKey: ["user_profile"],
+    queryFn: async () => {
+      const res = await fetch("/api/v1/users/profile");
+      if (!res.ok) throw new Error("Failed to load profile");
+      const json = await res.json();
+      return json.data;
     },
   });
 
   // Extract first/last name from full name
   useEffect(() => {
-    if (user?.name) {
-      const parts = user.name.trim().split(/\s+/);
+    if (user?.name || profileData) {
+      const nameStr = user?.name || profileData?.name || "";
+      const parts = nameStr.trim().split(/\s+/);
+      const dobStr = profileData?.dateOfBirth ? new Date(profileData.dateOfBirth).toISOString().split('T')[0] : "";
+      
       form.reset({
         firstName: parts[0] || "",
         lastName: parts.slice(1).join(" ") || "",
-        email: user.email || "",
-        phone: "",
+        email: user?.email || profileData?.email || "",
+        phone: profileData?.phone || "",
+        dateOfBirth: dobStr,
+        gender: profileData?.gender || "",
+        bloodGroup: profileData?.bloodGroup || "",
+        maritalStatus: profileData?.maritalStatus || "",
+        emergencyContactName: profileData?.emergencyContactName || "",
+        emergencyContactPhone: profileData?.emergencyContactPhone || "",
+        bio: profileData?.bio || "",
+        occupation: profileData?.occupation || "",
       });
     }
-  }, [user, form]);
+  }, [user, profileData, form]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileInput & { image?: string }) => {
@@ -66,6 +104,14 @@ export default function SettingsProfilePage() {
           email: data.email,
           phone: data.phone,
           image: data.image,
+          dateOfBirth: data.dateOfBirth || null,
+          gender: data.gender || null,
+          bloodGroup: data.bloodGroup || null,
+          maritalStatus: data.maritalStatus || null,
+          emergencyContactName: data.emergencyContactName || null,
+          emergencyContactPhone: data.emergencyContactPhone || null,
+          bio: data.bio || null,
+          occupation: data.occupation || null,
         }),
       });
       if (!res.ok) {
@@ -77,6 +123,9 @@ export default function SettingsProfilePage() {
     onSuccess: () => {
       toast.success("Profile updated successfully");
       queryClient.invalidateQueries({ queryKey: ["session"] });
+      queryClient.invalidateQueries({ queryKey: ["user_profile"] });
+      // Force reload the page to refresh Better Auth session state and sidebar avatar
+      window.location.reload();
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -284,12 +333,119 @@ export default function SettingsProfilePage() {
                   />
                 </div>
 
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Input
+                      id="dateOfBirth"
+                      type="date"
+                      {...form.register("dateOfBirth")}
+                      disabled={updateProfileMutation.isPending}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Gender</Label>
+                    <select
+                      id="gender"
+                      {...form.register("gender")}
+                      disabled={updateProfileMutation.isPending}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="bloodGroup">Blood Group</Label>
+                    <select
+                      id="bloodGroup"
+                      {...form.register("bloodGroup")}
+                      disabled={updateProfileMutation.isPending}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select Blood Group</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="maritalStatus">Marital Status</Label>
+                    <select
+                      id="maritalStatus"
+                      {...form.register("maritalStatus")}
+                      disabled={updateProfileMutation.isPending}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="SINGLE">Single</option>
+                      <option value="MARRIED">Married</option>
+                      <option value="DIVORCED">Divorced</option>
+                      <option value="WIDOWED">Widowed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
+                    <Input
+                      id="emergencyContactName"
+                      placeholder="e.g. John Doe"
+                      {...form.register("emergencyContactName")}
+                      disabled={updateProfileMutation.isPending}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyContactPhone">Emergency Contact Phone</Label>
+                    <Input
+                      id="emergencyContactPhone"
+                      type="tel"
+                      placeholder="e.g. +1 (555) 000-0000"
+                      {...form.register("emergencyContactPhone")}
+                      disabled={updateProfileMutation.isPending}
+                    />
+                  </div>
+                </div>
+
+                {(user as any)?.role === "PATIENT" ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="occupation">Occupation</Label>
+                    <Input
+                      id="occupation"
+                      placeholder="e.g. Software Engineer"
+                      {...form.register("occupation")}
+                      disabled={updateProfileMutation.isPending}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Input
+                      id="bio"
+                      placeholder="e.g. Brief professional bio..."
+                      {...form.register("bio")}
+                      disabled={updateProfileMutation.isPending}
+                    />
+                  </div>
+                )}
+
                 <Separator className="my-4" />
 
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p><strong>Role:</strong> {(user as Record<string, unknown>)?.role?.toString().replace(/_/g, " ") ?? "—"}</p>
-                  <p><strong>Account Created:</strong> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}</p>
-                  <p><strong>Last Updated:</strong> {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : "—"}</p>
+                  <p><strong>Account Created:</strong> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : "—"}</p>
+                  <p><strong>Last Updated:</strong> {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString('en-GB') : "—"}</p>
                 </div>
 
                 <Button type="submit" className="w-full md:w-auto mt-4" disabled={updateProfileMutation.isPending}>

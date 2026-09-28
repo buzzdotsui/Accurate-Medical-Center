@@ -123,7 +123,7 @@ export default function ActiveAdmissions() {
                   {admissions.map((adm) => (
                     <tr key={adm.id} className="border-b transition-colors hover:bg-muted/30 group">
                       <td className="p-6 align-middle font-medium text-muted-foreground whitespace-nowrap">
-                        {format(new Date(adm.admittedAt), "dd MMM yyyy, HH:mm")}
+                        {format(new Date(adm.admittedAt), "dd/MM/yyyy, HH:mm")}
                       </td>
                       <td className="p-6 align-middle">
                         <div className="font-bold text-base">

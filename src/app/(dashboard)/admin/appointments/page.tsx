@@ -113,7 +113,7 @@ export default function AdminAppointmentsPage() {
       cell: (row) => (
         <div>
           <p className="text-sm font-medium">
-            {row.date ? format(new Date(String(row.date)), "dd MMM yyyy") : "—"}
+            {row.date ? format(new Date(String(row.date)), "dd/MM/yyyy") : "—"}
           </p>
           <p className="text-xs text-muted-foreground">{String(row.timeSlot ?? "Any time")}</p>
         </div>

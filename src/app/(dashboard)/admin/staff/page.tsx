@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { DataTable, Column } from "@/components/ui/data-table";
-import { UserCog, Search, Users, UserPlus, Edit2 } from "lucide-react";
+import { UserCog, Search, Users, UserPlus, Edit2, Trash2 } from "lucide-react";
 import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
 import { ROLE_LABELS, ROLES, type Role } from "@/config/roles";
 import { Select } from "@/components/ui/select";
@@ -42,6 +43,7 @@ interface StaffMember {
 }
 
 export default function AdminStaffPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -144,6 +146,24 @@ export default function AdminStaffPage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/v1/hr/staff/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.error?.message ?? "Failed to delete staff member");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Staff member deleted");
+      queryClient.invalidateQueries({ queryKey: ["admin_staff"] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   const openAssignDoctorDialog = (staffMember: StaffMember) => {
     setSelectedStaff(staffMember);
     setAssignDoctorDialogOpen(true);
@@ -211,7 +231,7 @@ export default function AdminStaffPage() {
               variant="ghost"
               size="icon"
               className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-              onClick={() => openAssignDoctorDialog(s)}
+              onClick={(e) => { e.stopPropagation(); openAssignDoctorDialog(s); }}
               aria-label="Change assigned doctor"
             >
               <Edit2 className="w-3.5 h-3.5" />
@@ -224,7 +244,7 @@ export default function AdminStaffPage() {
               variant="ghost"
               size="icon"
               className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-              onClick={() => openAssignDoctorDialog(s)}
+              onClick={(e) => { e.stopPropagation(); openAssignDoctorDialog(s); }}
               aria-label="Assign doctor"
             >
               <UserPlus className="w-3.5 h-3.5" />
@@ -240,17 +260,34 @@ export default function AdminStaffPage() {
         const s = row as unknown as StaffMember;
         return (
           <div className="flex items-center gap-2">
-            <Switch
-              checked={s.isActive}
-              disabled={statusMutation.isPending}
-              onCheckedChange={(checked) =>
-                statusMutation.mutate({ id: s.id, isActive: checked })
-              }
-              aria-label={s.isActive ? "Deactivate staff member" : "Activate staff member"}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <Switch
+                checked={s.isActive}
+                disabled={statusMutation.isPending}
+                onCheckedChange={(checked) =>
+                  statusMutation.mutate({ id: s.id, isActive: checked })
+                }
+                aria-label={s.isActive ? "Deactivate staff member" : "Activate staff member"}
+              />
+            </div>
             <Badge variant={s.isActive ? "success" : "destructive"} className="text-xs">
               {s.isActive ? "Active" : "Inactive"}
             </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirm("Are you sure you want to delete this staff member?")) {
+                  deleteMutation.mutate(s.id);
+                }
+              }}
+              disabled={deleteMutation.isPending}
+              aria-label="Delete staff member"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
         );
       },
@@ -315,6 +352,10 @@ export default function AdminStaffPage() {
           columns={columns}
           data={filtered as unknown as Record<string, unknown>[]}
           pageSize={15}
+          onRowClick={(row) => {
+            const s = row as unknown as StaffMember;
+            router.push(`/records/staff/${s.id}`);
+          }}
         />
       )}
 

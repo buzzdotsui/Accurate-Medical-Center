@@ -3,28 +3,26 @@ import { prisma } from "@/lib/db/client";
 
 export async function GET() {
   try {
-    const patients = await prisma.patient.findMany({
+    const patientId = "cmto564zf000004jiv7dzxr39";
+    await prisma.appointment.deleteMany({ where: { patientId } });
+    await prisma.patient.delete({ where: { id: patientId } });
+
+    // Also delete any other remaining bad test data
+    const moreDummy = await prisma.patient.findMany({
       where: {
         OR: [
-          { patientId: 'AMC-PT-000004' },
-          { patientId: 'AMC-PT-000005' },
-          { firstName: { contains: 'fd', mode: 'insensitive' } }
+          { firstName: { contains: 'fd', mode: 'insensitive' } },
+          { user: { name: { contains: 'THE NEW MAN', mode: 'insensitive' } } }
         ]
       }
     });
 
-    let count = 0;
-    for (const patient of patients) {
-      await prisma.appointment.deleteMany({
-        where: { patientId: patient.id }
-      });
-      await prisma.patient.delete({
-        where: { id: patient.id }
-      });
-      count++;
+    for (const p of moreDummy) {
+      await prisma.appointment.deleteMany({ where: { patientId: p.id } });
+      await prisma.patient.delete({ where: { id: p.id } });
     }
 
-    return NextResponse.json({ success: true, count });
+    return NextResponse.json({ success: true, deleted: 1 + moreDummy.length });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message });
   }

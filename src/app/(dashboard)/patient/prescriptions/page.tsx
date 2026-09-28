@@ -87,7 +87,7 @@ export default function MyPrescriptionsPage() {
                     {rx.prescriptionId}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {new Date(rx.createdAt).toLocaleDateString()}
+                    {new Date(rx.createdAt).toLocaleDateString('en-GB')}
                     {rx.visit?.doctor?.user?.name
                       ? ` · Dr. ${rx.visit.doctor.user.name}`
                       : ""}

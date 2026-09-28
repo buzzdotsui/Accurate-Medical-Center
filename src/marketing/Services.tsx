@@ -300,11 +300,11 @@ export function Services() {
         >
           <Link
             href="/book-appointment"
-            className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-[18px] text-[15px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
+            className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
             style={{
               backgroundColor: CHARCOAL,
               color: "#fff",
-              boxShadow: "0 10px 30px rgba(26,31,34,0.15)",
+              boxShadow: "0 8px 24px rgba(26,31,34,0.12)",
             }}
           >
             <motion.span

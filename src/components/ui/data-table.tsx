@@ -30,6 +30,7 @@ interface DataTableProps<TData> {
   searchKey?: keyof TData
   searchPlaceholder?: string
   pageSize?: number
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData extends Record<string, unknown>>({
@@ -39,6 +40,7 @@ export function DataTable<TData extends Record<string, unknown>>({
   searchKey,
   searchPlaceholder = "Search...",
   pageSize = 10,
+  onRowClick,
 }: DataTableProps<TData>) {
   const [search, setSearch] = React.useState("")
   const [page, setPage] = React.useState(0)
@@ -95,7 +97,11 @@ export function DataTable<TData extends Record<string, unknown>>({
           <TableBody>
             {paginated.length ? (
               paginated.map((row, i) => (
-                <TableRow key={i} className="hover:bg-muted/50 transition-colors">
+                <TableRow 
+                  key={i} 
+                  className={`transition-colors ${onRowClick ? 'cursor-pointer hover:bg-muted/50' : 'hover:bg-muted/50'}`}
+                  onClick={() => onRowClick?.(row)}
+                >
                   {columns.map((col) => {
                     const k = getColKey(col)
                     return (

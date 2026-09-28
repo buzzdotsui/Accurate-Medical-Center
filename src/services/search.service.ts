@@ -46,9 +46,9 @@ const ENTITY_ROLES: Record<SearchResultType, Role[]> = {
 function resolveUrl(type: SearchResultType, id: string, role: Role): string | undefined {
   switch (type) {
     case 'PATIENT':
-      return role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN ? `/admin/patients/${id}` : `/records/patients/${id}`;
+      return `/records/patients/${id}`;
     case 'STAFF':
-      return role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN ? `/admin/staff` : `/records/staff/${id}`;
+      return `/records/staff/${id}`;
     case 'APPOINTMENT':
       if (role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN) return `/admin/appointments`;
       if (role === ROLES.RECEPTIONIST) return `/reception/appointments`;
@@ -170,7 +170,7 @@ export class SearchService {
           id: a.id,
           displayId: a.appointmentId,
           title: `${a.patient.firstName} ${a.patient.lastName}`,
-          subtitle: `${a.appointmentId} · ${a.status} · ${new Date(a.date).toLocaleDateString()}`,
+          subtitle: `${a.appointmentId} · ${a.status} · ${new Date(a.date).toLocaleDateString('en-GB')}`,
           url: resolveUrl('APPOINTMENT', a.id, role),
         });
       }

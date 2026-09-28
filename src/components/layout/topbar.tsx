@@ -63,14 +63,11 @@ export function Topbar({ user, role }: TopbarProps) {
   const firstName = user?.name ? user.name.split(" ")[0] : "User";
 
   return (
-    <header className="h-16 bg-background border-b flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shadow-sm">
+    <header className="h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
       <div className="flex items-center gap-4">
         <MobileNav role={role} user={user} />
         
         <div className="hidden md:flex flex-col justify-center">
-          <span className="text-lg sm:text-xl font-bold text-primary tracking-tight leading-none mb-1.5 drop-shadow-sm">
-            {greeting}, {firstName} <span className="animate-pulse inline-block">👋</span>
-          </span>
           <Breadcrumb>
             <BreadcrumbList className="text-[11px] sm:text-xs">
               <BreadcrumbItem>

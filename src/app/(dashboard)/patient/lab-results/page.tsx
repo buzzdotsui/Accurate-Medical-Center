@@ -91,7 +91,7 @@ export default function MyLabResultsPage() {
                     {row.category?.name ? ` · ${row.category.name}` : ""}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Ordered {new Date(row.createdAt).toLocaleDateString()}
+                    Ordered {new Date(row.createdAt).toLocaleDateString('en-GB')}
                     {row.visit?.doctor?.user?.name
                       ? ` by ${row.visit.doctor.user.name}`
                       : ""}

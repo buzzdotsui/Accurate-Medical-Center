@@ -317,7 +317,7 @@ export default function SettingsSecurityPage() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Password Last Changed</dt>
-                <dd className="font-medium">{user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : "Unknown"}</dd>
+                <dd className="font-medium">{user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString('en-GB') : "Unknown"}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Account Type</dt>

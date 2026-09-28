@@ -62,6 +62,64 @@ export class ReportingService {
       },
     });
 
+    // 8. 7-Day Flow Data (Visits and Revenue)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+    const recentVisits = await prisma.visit.findMany({
+      where: {
+        startedAt: { gte: sevenDaysAgo },
+        ...(branchId ? { patient: { branchId } } : {}),
+      },
+      select: { startedAt: true },
+    });
+
+    const recentPayments = await prisma.payment.findMany({
+      where: {
+        createdAt: { gte: sevenDaysAgo },
+        ...(branchId ? { invoice: { branchId } } : {}),
+      },
+      select: { createdAt: true, amount: true },
+    });
+
+    const flowDataMap = new Map<string, { patients: number; revenue: number }>();
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    
+    // Initialize last 7 days
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sevenDaysAgo);
+      d.setDate(d.getDate() + i);
+      const dayName = days[d.getDay()];
+      flowDataMap.set(dayName, { patients: 0, revenue: 0 });
+    }
+
+    recentVisits.forEach((v) => {
+      const dayName = days[v.startedAt.getDay()];
+      if (flowDataMap.has(dayName)) {
+        flowDataMap.get(dayName)!.patients += 1;
+      }
+    });
+
+    recentPayments.forEach((p) => {
+      const dayName = days[p.createdAt.getDay()];
+      if (flowDataMap.has(dayName)) {
+        flowDataMap.get(dayName)!.revenue += Number(p.amount);
+      }
+    });
+
+    // Ensure order is chronological from 6 days ago to today
+    const flowData = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date(sevenDaysAgo);
+      d.setDate(d.getDate() + i);
+      const dayName = days[d.getDay()];
+      return {
+        name: dayName,
+        patients: flowDataMap.get(dayName)?.patients || 0,
+        revenue: flowDataMap.get(dayName)?.revenue || 0,
+      };
+    });
+
     return {
       totalPatients,
       totalRevenue,
@@ -72,6 +130,7 @@ export class ReportingService {
       totalBeds,
       activeStaff,
       doctorsOnDuty,
+      flowData,
     };
   }
 

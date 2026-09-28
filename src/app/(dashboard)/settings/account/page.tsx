@@ -250,11 +250,11 @@ export default function SettingsAccountPage() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Account Created</dt>
-                <dd className="font-medium">{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}</dd>
+                <dd className="font-medium">{user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : "—"}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Last Updated</dt>
-                <dd className="font-medium">{user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : "—"}</dd>
+                <dd className="font-medium">{user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString('en-GB') : "—"}</dd>
               </div>
             </dl>
           </CardContent>

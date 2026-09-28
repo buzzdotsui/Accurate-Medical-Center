@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Button } from "@/components/ui/button";
 import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
+import { DashboardChart } from "@/components/admin/dashboard-chart";
 import { GreetingWithAvatar } from "@/components/layout/greeting";
 
 interface DashboardMetrics {
@@ -120,7 +121,7 @@ function RecentAdmissionsPanel() {
                     {a.bed?.room?.ward?.name ?? "—"}
                   </td>
                   <td className="px-3 py-2 text-muted-foreground text-xs">
-                    {new Date(a.admittedAt).toLocaleDateString()}
+                    {new Date(a.admittedAt).toLocaleDateString('en-GB')}
                   </td>
                 </tr>
               ))}
@@ -325,6 +326,8 @@ export default function AdminDashboardPage() {
               </>
             )}
           </div>
+          
+          <DashboardChart />
 
           <div className="grid gap-6 lg:grid-cols-2">
             <RecentAdmissionsPanel />

@@ -14,6 +14,10 @@ export const CreatePatientSchema = z.object({
   bloodGroup: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional(),
   genotype: z.enum(['AA', 'AS', 'SS', 'AC', 'SC']).optional(),
   address: z.string().optional(),
+  maritalStatus: z.string().optional().nullable(),
+  emergencyContactName: z.string().optional().nullable(),
+  emergencyContactPhone: z.string().optional().nullable(),
+  occupation: z.string().optional().nullable(),
   branchId: z.string().min(1, 'Invalid branch ID').optional(),
   userId: z.string().min(1, 'Invalid user ID').optional(),
 });

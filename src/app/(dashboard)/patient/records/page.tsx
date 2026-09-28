@@ -209,7 +209,7 @@ export default function MyRecordsPage() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm font-medium">
                           <Badge variant="outline" className="text-xs">COMPLETED</Badge>
-                          {new Date(apt.date).toLocaleDateString("en-NG", {
+                          {new Date(apt.date).toLocaleDateString('en-GB', {
                             weekday: "long",
                             year: "numeric",
                             month: "long",
@@ -254,7 +254,7 @@ export default function MyRecordsPage() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm font-medium">
                           <Badge variant="secondary" className="text-xs">{apt.status}</Badge>
-                          {new Date(apt.date).toLocaleDateString("en-NG", {
+                          {new Date(apt.date).toLocaleDateString('en-GB', {
                             weekday: "long",
                             year: "numeric",
                             month: "long",

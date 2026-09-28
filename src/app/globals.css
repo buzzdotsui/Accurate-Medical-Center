@@ -83,7 +83,7 @@
   --input: var(--color-grey-200);
   --ring: var(--color-lemon-500);
 
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 
   /* Shared interaction timing for calm, responsive marketing feedback. */
   --motion-base: 240ms;

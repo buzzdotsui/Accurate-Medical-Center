@@ -25,15 +25,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {icon}
           </div>
         )}
-        <input
-          type={currentType}
-          className={cn(
-            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
-            icon && "pl-9",
-            isPassword && "pr-10",
-            error && "border-destructive focus-visible:ring-destructive",
-            className
-          )}
+          <input
+            type={currentType}
+            className={cn(
+              "flex h-12 w-full rounded-xl border border-transparent bg-black/[0.03] px-4 py-2 text-sm text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:bg-white focus-visible:border-primary/30 focus-visible:shadow-[0_0_0_4px_rgba(212,232,66,0.15)] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-black/[0.05]",
+              className,
+              icon && "pl-11",
+              isPassword && "pr-11",
+              error && "border-destructive/30 focus-visible:border-destructive/50 focus-visible:shadow-[0_0_0_4px_rgba(220,38,38,0.1)] bg-destructive/[0.02]"
+            )}
           ref={ref}
           {...props}
         />

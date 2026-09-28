@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
     if (!branch) {
       branch = await prisma.branch.create({
         data: {
+          code: "MAIN",
           name: "Main Branch",
           address: "Accurate Medical Center",
           phone: "+2348133583097",

@@ -164,7 +164,7 @@ export default function MyBillingPage() {
                   >
                     <td className="px-4 py-3 font-mono text-xs">{invoice.invoiceId}</td>
                     <td className="whitespace-nowrap px-4 py-3">
-                      {new Date(invoice.createdAt).toLocaleDateString("en-NG", {
+                      {new Date(invoice.createdAt).toLocaleDateString('en-GB', {
                         year: "numeric",
                         month: "short",
                         day: "numeric",

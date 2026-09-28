@@ -597,8 +597,8 @@ export function Contact() {
                   initial="rest"
                   whileHover="hover"
                   whileTap="tap"
-                  className="group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl py-[18px] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
-                  style={{ backgroundColor: "#03161a", color: "#f4f2f5" }}
+                  className="group relative inline-flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-xl py-3.5 text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#03161a]"
+                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 24px rgba(3,22,26,0.12)" }}
                 >
                   <span
                     aria-hidden

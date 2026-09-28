@@ -235,11 +235,11 @@ export default function Hero() {
         >
           <Link
             href="/book-appointment"
-            className="group relative inline-flex items-center justify-center overflow-hidden rounded-full px-6 py-3 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-8 sm:py-3.5 sm:text-[14px]"
+            className="group relative inline-flex items-center justify-center overflow-hidden rounded-full px-5 py-2.5 text-[13px] font-semibold transition-transform duration-200 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:px-6 sm:py-3 sm:text-sm"
             style={{
               backgroundColor: "#f4f2f5",
               color: "#03161a",
-              boxShadow: "0 14px 36px rgba(3,22,26,0.32)",
+              boxShadow: "0 10px 24px rgba(3,22,26,0.25)",
               border: "1px solid rgba(244,242,245,0.72)",
             }}
           >

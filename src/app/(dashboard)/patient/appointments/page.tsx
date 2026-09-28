@@ -142,7 +142,7 @@ export default function MyAppointmentsPage() {
                   className="border-b last:border-0 hover:bg-muted/30 transition-colors"
                 >
                   <td className="px-4 py-3 whitespace-nowrap">
-                    {new Date(apt.date).toLocaleDateString("en-NG", {
+                    {new Date(apt.date).toLocaleDateString('en-GB', {
                       year: "numeric",
                       month: "short",
                       day: "numeric",

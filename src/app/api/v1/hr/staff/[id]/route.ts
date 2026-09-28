@@ -5,6 +5,7 @@ import { ROLES } from '@/config/roles';
 import { UpdateStaffSchema } from '@/lib/validations/staff';
 import { verifyStaffAccess } from '@/lib/auth/resource-authorization';
 import { RouteContext, getParam } from '@/lib/utils/route-types';
+import { prisma } from '@/lib/db/client';
 
 /**
  * PATCH /api/v1/hr/staff/[id]
@@ -24,5 +25,22 @@ export const PATCH = withRole(
 
     const staff = await StaffService.updateStaff(staffId, body, session.user.id);
     return ok(staff);
+  }
+);
+
+export const DELETE = withRole(
+  [ROLES.SUPER_ADMIN, ROLES.ADMIN],
+  async (req, session, ctx: RouteContext) => {
+    const staffId = await getParam(ctx, 'id');
+
+    await prisma.staff.update({
+      where: { id: staffId },
+      data: {
+        deletedAt: new Date(),
+        isActive: false
+      }
+    });
+
+    return ok({ success: true });
   }
 );

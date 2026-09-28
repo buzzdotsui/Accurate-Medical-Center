@@ -1,6 +1,6 @@
 import { withAuth } from '@/lib/api/middleware';
 import { FileService } from '@/services/file.service';
-import { ok } from '@/lib/api/response';
+import { ok, badRequest } from '@/lib/api/response';
 
 /**
  * POST /api/v1/files/upload
@@ -16,7 +16,7 @@ export const POST = withAuth(async (req) => {
   const folder = formData.get('folder') as string | null;
 
   if (!file) {
-    return ok({ error: 'File is required' }, { status: 400 });
+    return badRequest('File is required');
   }
 
   // Convert File to base64 data URI

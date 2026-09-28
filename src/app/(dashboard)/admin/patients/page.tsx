@@ -13,7 +13,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { RegisterPatientDialog } from "@/components/admin/patients/register-patient-dialog";
 import { UserPlus, Search, Users, Eye } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils/format-date";
 
 export default function AdminPatientsPage() {
   const router = useRouter();
@@ -103,7 +103,7 @@ export default function AdminPatientsPage() {
       cell: (row) =>
         row.dateOfBirth ? (
           <span className="text-muted-foreground text-sm">
-            {format(new Date(String(row.dateOfBirth)), "dd MMM yyyy")}
+            {formatDate(row.dateOfBirth as string)}
           </span>
         ) : (
           <span className="text-muted-foreground text-sm">—</span>
@@ -127,7 +127,7 @@ export default function AdminPatientsPage() {
       cell: (row) =>
         row.createdAt ? (
           <span className="text-muted-foreground text-sm">
-            {format(new Date(String(row.createdAt)), "dd MMM yyyy")}
+            {formatDate(row.createdAt as string)}
           </span>
         ) : (
           "—"

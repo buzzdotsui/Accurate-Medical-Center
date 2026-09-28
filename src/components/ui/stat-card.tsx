@@ -25,26 +25,32 @@ export function StatCard({
   ...props
 }: StatCardProps) {
   return (
-    <Card className={cn("overflow-hidden", className)} {...props}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <div
+      className={cn(
+        "group relative flex flex-col bg-white border border-black/[0.04] p-5 rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5",
+        className
+      )}
+      {...props}
+    >
+      <div className="flex flex-row items-center justify-between pb-2">
+        <h3 className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
           {title}
-        </CardTitle>
+        </h3>
         {Icon && (
-          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Icon className="h-4 w-4 text-primary" />
+          <div className="h-10 w-10 rounded-full bg-black/[0.03] flex items-center justify-center transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+            <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
         )}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-heading">{value}</div>
+      </div>
+      <div className="mt-2">
+        <div className="text-3xl font-bold font-heading tracking-tight text-foreground">{value}</div>
         {(description || trend) && (
-          <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
+          <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
             {trend && (
               <span
                 className={cn(
-                  "inline-flex items-center gap-0.5 font-medium",
-                  trend.isPositive ? "text-green-600" : "text-destructive"
+                  "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md",
+                  trend.isPositive ? "bg-green-500/10 text-green-700" : "bg-destructive/10 text-destructive"
                 )}
               >
                 {trend.isPositive
@@ -54,10 +60,10 @@ export function StatCard({
                 {trend.value > 0 ? "+" : ""}{trend.value}%
               </span>
             )}
-            {description ?? (trend ? "from yesterday" : "")}
+            <span className="opacity-80">{description ?? (trend ? "from yesterday" : "")}</span>
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

@@ -46,7 +46,7 @@ export function Sidebar({ role, user }: SidebarProps) {
   return (
     <aside 
       className={cn(
-        "bg-card border-r flex flex-col hidden md:flex transition-all duration-300",
+        "bg-white/80 backdrop-blur-xl border border-black/[0.04] rounded-2xl shadow-xl shadow-black/[0.02] flex flex-col h-full transition-all duration-300 overflow-hidden",
         isCollapsed ? "w-20" : "w-64"
       )}
     >

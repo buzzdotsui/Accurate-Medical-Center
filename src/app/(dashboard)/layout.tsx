@@ -25,19 +25,21 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const userRole = ((session.user as Record<string, unknown>)?.role as Role) || "PATIENT";
 
   return (
-    <div className="flex h-screen bg-grey-50">
+    <div className="flex h-screen bg-[#f7f8f5] p-0 md:p-4 md:gap-4 overflow-hidden">
       {/* Sidebar */}
-      <Sidebar role={userRole} user={session.user} />
+      <div className="hidden md:block h-full">
+        <Sidebar role={userRole} user={session.user} />
+      </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-white md:rounded-2xl md:shadow-xl md:shadow-black/[0.02] md:border border-black/[0.04] overflow-hidden">
         {/* Topbar */}
         <Topbar user={session.user} role={userRole} />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-10">
           <PageTransition>
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="max-w-7xl mx-auto space-y-8">
               {children}
             </div>
           </PageTransition>

@@ -138,7 +138,7 @@ export default function ProcessPayment() {
             <CardHeader className="border-b pb-4 mb-4 flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Invoice Details</CardTitle>
               <div className="text-sm font-medium text-muted-foreground">
-                Generated: {new Date(invoice.createdAt).toLocaleDateString()}
+                Generated: {new Date(invoice.createdAt).toLocaleDateString('en-GB')}
               </div>
             </CardHeader>
             <CardContent>

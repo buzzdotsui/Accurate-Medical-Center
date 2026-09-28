@@ -171,6 +171,13 @@ model Staff {
   licenseNumber  String?
   phone         String?
   address       String?
+  dateOfBirth   DateTime?
+  gender        String?
+  bloodGroup    String?
+  maritalStatus String?
+  emergencyContactName String?
+  emergencyContactPhone String?
+  bio           String?
   isActive      Boolean   @default(true)
   
   createdAt     DateTime  @default(now())
@@ -212,6 +219,10 @@ model Patient {
   phone         String?
   email         String?
   address       String?
+  maritalStatus String?
+  emergencyContactName String?
+  emergencyContactPhone String?
+  occupation    String?
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

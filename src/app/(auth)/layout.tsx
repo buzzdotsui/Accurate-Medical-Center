@@ -6,6 +6,7 @@ import { Logo } from "@/components/ui/logo";
 import { BrandLockup } from "@/marketing/BrandLockup";
 import { displayHeadingClassName, displayHeadingStyle } from "@/marketing/typography";
 import { MotionConfig } from "framer-motion";
+import { AuthBrandAnim } from "./_components/AuthBrandAnim";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -14,84 +15,77 @@ export const metadata: Metadata = {
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
-    <div data-auth className="flex min-h-screen min-h-[100svh] flex-col overflow-hidden bg-[#f7f8f5] lg:grid lg:grid-cols-[minmax(24rem,0.82fr)_minmax(34rem,1.18fr)]">
-      {/* Left Pane - Auth Form */}
-      <div className="order-2 flex min-w-0 flex-1 flex-col justify-center border-t border-black/[0.07] px-5 py-9 sm:px-10 sm:py-12 lg:order-1 lg:min-h-screen lg:border-r lg:border-t-0 lg:px-[clamp(2.5rem,6vw,7rem)] lg:py-16">
-        <div className="mx-auto w-full max-w-md">
-          <div className="mb-10 flex items-center justify-between gap-4 sm:mb-12">
-            <Link href="/" className="group flex min-w-0 items-center gap-3 text-primary transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4">
-              <Logo className="h-8 w-8 shrink-0 text-primary sm:h-9 sm:w-9" />
-              <BrandLockup size="header" className="text-primary" />
+      <div data-auth className="flex min-h-screen min-h-[100svh] w-full flex-col bg-[#fdfdfc] lg:flex-row">
+        
+        {/* Left Side: Auth Form (40%) */}
+        <div className="order-2 flex w-full flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:order-1 lg:w-[40%] lg:flex-none lg:px-16 xl:px-24">
+          <div className="mx-auto w-full max-w-md lg:mx-0 lg:max-w-lg">
+            {/* Mobile Logo */}
+            <div className="mb-10 lg:hidden">
+              <Link href="/" className="group flex items-center gap-3 text-primary transition-opacity hover:opacity-80">
+                <Logo className="h-8 w-8 shrink-0 text-primary" />
+                <BrandLockup size="header" className="text-primary" />
+              </Link>
+            </div>
+            
+            {children}
+          </div>
+        </div>
+
+        {/* Right Side: Massive Brand Area (60%) */}
+        <div className="order-1 relative hidden w-full flex-1 lg:order-2 lg:flex lg:w-[60%]">
+          {/* Background Image with Perfect Cinematic Overlay */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ 
+              backgroundImage: 'url("/images/IMG-20260813-WA0025.jpg")' 
+            }}
+          />
+          {/* Deepen the contrast with a multiply blend */}
+          <div className="absolute inset-0 bg-[#061815]/90 mix-blend-multiply" />
+          
+          {/* Add the brand primary color as a rich gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary/95 via-primary/70 to-transparent mix-blend-color" />
+          
+          {/* Soft vignette and vertical gradient for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/40 to-primary/95" />
+          
+          {/* Add a very subtle noise/glow effect for texture */}
+          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
+
+          {/* Brand Content */}
+          <div className="relative z-10 flex h-full w-full flex-col justify-between px-16 py-20 xl:px-24 xl:py-24">
+            <Link href="/" className="group flex items-center gap-3 text-white transition-transform hover:scale-105 focus-visible:outline-none">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-primary shadow-2xl">
+                <Logo className="h-8 w-8 shrink-0" />
+              </div>
+              <BrandLockup size="header" className="text-white" />
             </Link>
-            <span className="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/40 sm:block">
-              Portal access
-            </span>
-          </div>
-          {children}
-        </div>
-      </div>
 
-      {/* Right Pane - Visual/Brand */}
-      <div className="order-1 relative flex min-h-[300px] w-full overflow-hidden bg-primary sm:min-h-[360px] lg:order-2 lg:min-h-screen">
-        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(244,242,245,0.14),transparent_42%),radial-gradient(circle_at_0%_100%,rgba(244,242,245,0.08),transparent_38%)]" />
-        <div aria-hidden className="absolute inset-4 rounded-[1.5rem] border border-white/[0.09] sm:inset-7 sm:rounded-[2rem] lg:inset-12 xl:inset-16" />
-
-        <div className="relative flex w-full flex-col justify-end px-7 pb-10 pt-20 sm:px-12 sm:pb-14 lg:justify-center lg:px-16 lg:py-16 xl:px-24">
-          <div className="max-w-2xl space-y-7 text-white sm:space-y-10 lg:space-y-12">
-            <div className="space-y-5">
-              <p className="auth-reveal text-[9px] font-bold uppercase tracking-[0.3em] text-white/55 sm:text-[10px]" style={{ animationDelay: "80ms" }}>
-                Secure staff portal
-              </p>
-              <h2 className={`auth-reveal max-w-xl text-[clamp(2.35rem,7vw,5.3rem)] ${displayHeadingClassName}`} style={{ ...displayHeadingStyle, animationDelay: "160ms" }}>
-                Healing Minds.<br />Restoring Lives.
-              </h2>
-              <p className="auth-reveal max-w-xl text-sm leading-[1.75] text-white/70 sm:text-lg" style={{ animationDelay: "260ms" }}>
-                Welcome to the staff and administrative portal for Accurate Medical Center.
-                <br />
-                Sign in to access your workspace.
-              </p>
-            </div>
-
-            <div className="auth-reveal flex items-center gap-3 text-[11px] font-semibold tracking-wide text-white/60 lg:hidden" style={{ animationDelay: "340ms" }}>
-              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.16] bg-white/[0.08]">
-                <ShieldCheck aria-hidden className="h-4 w-4 text-white/80" />
-              </span>
-              Secure, private clinical workspace
-            </div>
-
-            <div className="auth-reveal hidden grid-cols-1 gap-7 border-t border-white/[0.14] pt-8 sm:grid-cols-3 sm:gap-6 lg:grid" style={{ animationDelay: "360ms" }}>
-              <div className="space-y-3 border-l border-white/[0.12] pl-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.16] bg-white/[0.08]">
-                  <Stethoscope aria-hidden className="h-4 w-4 text-white/80" />
+            <div className="flex flex-col justify-end space-y-10 pb-8 h-full">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-md">
+                  <ShieldCheck className="h-4 w-4 text-[#d4e842]" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                    Secure Portal Access
+                  </span>
                 </div>
-                <h3 className="text-sm font-semibold tracking-tight">Clinical Excellence</h3>
-                <p className="text-sm leading-relaxed text-white/55">
-                  Delivering precise, evidence-based care to every patient, every time.
-                </p>
+                <h2 
+                  className="max-w-2xl text-[clamp(3rem,8vw,6.5rem)] font-extrabold leading-[1.05] tracking-tight text-white" 
+                  style={{ fontFamily: "var(--font-playfair)" }}
+                >
+                  Healing Minds.<br />Restoring Lives.
+                </h2>
               </div>
-              <div className="space-y-3 border-l border-white/[0.12] pl-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.16] bg-white/[0.08]">
-                  <ShieldCheck aria-hidden className="h-4 w-4 text-white/80" />
-                </div>
-                <h3 className="text-sm font-semibold tracking-tight">Patient Privacy</h3>
-                <p className="text-sm leading-relaxed text-white/55">
-                  Strict confidentiality and HIPAA-compliant data practices.
-                </p>
-              </div>
-              <div className="space-y-3 border-l border-white/[0.12] pl-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.16] bg-white/[0.08]">
-                  <Clock aria-hidden className="h-4 w-4 text-white/80" />
-                </div>
-                <h3 className="text-sm font-semibold tracking-tight">Timely Service</h3>
-                <p className="text-sm leading-relaxed text-white/55">
-                  Optimized workflows to reduce wait times and improve outcomes.
-                </p>
+              
+              <div className="pt-6 border-t border-white/10">
+                <AuthBrandAnim />
               </div>
             </div>
           </div>
         </div>
+
       </div>
-    </div>
     </MotionConfig>
   );
 }

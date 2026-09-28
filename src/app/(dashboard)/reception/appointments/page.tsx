@@ -250,7 +250,7 @@ export default function ReceptionAppointmentsPage() {
               title={dateFilter || statusFilter ? "No appointments match filters" : "No appointments scheduled"}
               description={
                 dateFilter
-                  ? `There are no appointments for ${dateFilter ? format(new Date(dateFilter), "dd MMM yyyy") : "this date"}.`
+                  ? `There are no appointments for ${dateFilter ? format(new Date(dateFilter), "dd/MM/yyyy") : "this date"}.`
                   : "Appointments will appear here once they are booked."
               }
               action={

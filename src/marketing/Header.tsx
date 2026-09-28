@@ -218,8 +218,8 @@ export function Header() {
                   initial="rest"
                   whileHover="hover"
                   whileTap="tap"
-                  className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-[26px] py-[11px] text-[13px] font-semibold tracking-wide focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 28px rgba(3,22,26,0.25)" }}
+                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-2 text-xs font-semibold tracking-wide focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 6px 20px rgba(3,22,26,0.2)" }}
                 >
                   <span
                     aria-hidden
@@ -342,10 +342,10 @@ export function Header() {
                 <Link
                   href="/book-appointment"
                   onClick={() => setMenuOpen(false)}
-                  className="flex w-full items-center justify-center gap-2.5 rounded-2xl py-4 text-sm font-semibold transition-transform hover:brightness-[0.98] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 10px 32px rgba(3,22,26,0.2)" }}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-[13px] font-semibold transition-transform hover:brightness-[0.98] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  style={{ backgroundColor: "#03161a", color: "#f4f2f5", boxShadow: "0 8px 24px rgba(3,22,26,0.15)" }}
                 >
-                  <Calendar className="w-5 h-5" aria-hidden="true" />
+                  <Calendar className="w-4 h-4" aria-hidden="true" />
                   Book an Appointment
                 </Link>
                 

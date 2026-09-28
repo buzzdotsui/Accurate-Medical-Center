@@ -57,6 +57,13 @@ export const UpdateStaffSchema = z.object({
   phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   assignedDoctorId: z.string().min(1, 'Invalid doctor ID').optional().nullable(),
+  dateOfBirth: z.union([z.date(), z.string()]).transform(d => new Date(d)).optional().nullable(),
+  gender: z.string().optional().nullable(),
+  bloodGroup: z.string().optional().nullable(),
+  maritalStatus: z.string().optional().nullable(),
+  emergencyContactName: z.string().optional().nullable(),
+  emergencyContactPhone: z.string().optional().nullable(),
+  bio: z.string().optional().nullable(),
 });
 
 export type UpdateStaffInput = z.infer<typeof UpdateStaffSchema>;

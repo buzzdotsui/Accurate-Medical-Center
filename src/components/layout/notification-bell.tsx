@@ -48,9 +48,9 @@ export function NotificationBell({ userId }: { userId?: string }) {
     refetchInterval: 30_000, // Fallback polling
   });
 
-  // Supabase Realtime Subscription
+  // Supabase Realtime Subscription — only active when env vars are configured
   useEffect(() => {
-    if (!userId) return;
+    if (!supabaseClient || !userId) return;
 
     const channel = supabaseClient
       .channel(`notifications_for_${userId}`)
@@ -75,7 +75,7 @@ export function NotificationBell({ userId }: { userId?: string }) {
       .subscribe();
 
     return () => {
-      supabaseClient.removeChannel(channel);
+      supabaseClient?.removeChannel(channel);
     };
   }, [userId, queryClient]);
 

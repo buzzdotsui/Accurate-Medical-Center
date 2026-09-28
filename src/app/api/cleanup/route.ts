@@ -23,7 +23,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, deleted: 1 + moreDummy.length });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message });
+  } catch (error: unknown) {
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
   }
 }

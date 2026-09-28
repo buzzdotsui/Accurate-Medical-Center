@@ -62,7 +62,7 @@ export function NotificationBell({ userId }: { userId?: string }) {
           table: "notifications",
           filter: `userId=eq.${userId}`,
         },
-        (payload) => {
+        (_payload) => {
           // Instantly refresh the notification queries when a new DB row arrives!
           queryClient.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
           queryClient.invalidateQueries({ queryKey: ["notifications", "list"] });

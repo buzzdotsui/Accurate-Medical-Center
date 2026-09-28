@@ -91,7 +91,7 @@ export async function sendContactEmail(contact: ContactFormData, submissionId: s
     `Submission ID: ${submissionId}`,
   ].join("\n");
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://accurate-medical.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://accuratemedicalcentre.com";
   const logoUrl = `${appUrl}/marketing/images/logo.jpeg`;
 
   const html = `

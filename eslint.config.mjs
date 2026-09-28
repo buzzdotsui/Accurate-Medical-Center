@@ -20,6 +20,10 @@ const eslintConfig = defineConfig([
   ]),
   {
     rules: {
+      // React Compiler's memoization warning for react-hook-form's watch() API.
+      // watch() is a well-established react-hook-form pattern; the compiler
+      // cannot safely memoize it but the code is correct and functional.
+      "react-hooks/incompatible-library": "off",
       // Allow _-prefixed variables to be unused (standard convention)
       "@typescript-eslint/no-unused-vars": [
         "warn",

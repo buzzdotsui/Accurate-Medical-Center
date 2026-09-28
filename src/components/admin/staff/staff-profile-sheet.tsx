@@ -3,7 +3,8 @@
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Phone, Mail, MapPin, Building, Hash, CheckCircle, XCircle } from "lucide-react";
+import Image from "next/image";
+import { Phone, Mail, MapPin, CheckCircle, XCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDOB, calculateAge } from "@/lib/utils/format-date";
 
@@ -19,7 +20,19 @@ export function StaffProfileSheet({ staffId, onClose }: StaffProfileSheetProps) 
       if (!staffId) return null;
       const res = await fetch(`/api/v1/hr/staff`);
       const json = await res.json();
-      return (json.data as any[]).find((s: any) => s.id === staffId) ?? null;
+      type StaffEntry = {
+        id: string;
+        staffId: string;
+        phone?: string;
+        address?: string;
+        dateOfBirth?: string;
+        specialization?: string;
+        licenseNumber?: string;
+        isActive?: boolean;
+        department?: { name: string };
+        user: { name: string; email: string; role: string; image?: string };
+      };
+      return (json.data as StaffEntry[]).find((s) => s.id === staffId) ?? null;
     },
     enabled: !!staffId,
   });
@@ -38,10 +51,13 @@ export function StaffProfileSheet({ staffId, onClose }: StaffProfileSheetProps) 
             {/* Header */}
             <div className="bg-gradient-to-br from-primary/20 to-primary/5 px-8 pt-8 pb-6 flex flex-col items-center text-center">
               {data.user.image ? (
-                <img
+                <Image
                   src={data.user.image}
                   alt={data.user.name}
+                  width={96}
+                  height={96}
                   className="w-24 h-24 rounded-2xl border-4 border-white shadow-md object-cover bg-muted mb-4"
+                  unoptimized
                 />
               ) : (
                 <div className="h-24 w-24 rounded-2xl border-4 border-white shadow-md bg-white flex items-center justify-center font-bold text-3xl text-primary mb-4">

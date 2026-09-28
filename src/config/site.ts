@@ -11,7 +11,7 @@ export const siteConfig = {
     'Accurate Medical Center in Akure, Ondo State provides patient-first infertility, addiction, mental health, maternal, diagnostic, and general medical care.',
   // Public metadata must never inherit a local development or deployment-preview URL.
   // NEXT_PUBLIC_APP_URL remains available to runtime application code where needed.
-  url: 'https://accuratemedicalcenter.com',
+  url: 'https://accuratemedicalcentre.com',
   ogImage: '/images/hero-poster.jpg',
 
   contact: {

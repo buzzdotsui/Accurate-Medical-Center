@@ -30,7 +30,7 @@ export const PATCH = withAuth(async (req, session) => {
     include: { staffProfile: true, patientProfile: true }
   });
 
-  const updateData: any = {
+  const updateData: Record<string, unknown> = {
     name: body.name,
     email: body.email,
     image: body.image !== undefined ? body.image : undefined,
@@ -120,7 +120,7 @@ export const GET = withAuth(async (_req, session) => {
   }
 
   // Flatten the profile data for the frontend
-  let profileData: any = {
+  let profileData: Record<string, unknown> = {
     id: user.id,
     name: user.name,
     email: user.email,

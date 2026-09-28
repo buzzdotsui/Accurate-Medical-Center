@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { withRole } from "@/lib/api/middleware";
 import { ok, noContent, badRequest, notFound } from "@/lib/api/response";
-import { buildBranchFilter } from "@/lib/auth/resource-authorization";
+
 import { ROLES } from "@/config/roles";
 import { prisma } from "@/lib/db/client";
 import { z } from "zod";

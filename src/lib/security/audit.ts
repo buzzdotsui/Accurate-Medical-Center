@@ -27,7 +27,7 @@ export async function logAudit({ action, resource, resourceId, details, branchId
 
     const ip = reqHeaders.get("x-forwarded-for") || reqHeaders.get("x-real-ip") || "unknown";
     const userAgent = reqHeaders.get("user-agent") || "unknown";
-    const userRole = (session.user as any).role || "UNKNOWN";
+    const userRole = (session.user as { role?: string }).role ?? "UNKNOWN";
 
     await prisma.auditLog.create({
       data: {

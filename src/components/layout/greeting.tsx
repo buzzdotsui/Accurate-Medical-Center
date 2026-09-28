@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
 interface GreetingUser {
@@ -106,7 +107,7 @@ export function GreetingWithAvatar({ user, className }: GreetingProps) {
       </div>
       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
         {user?.image ? (
-          <img src={user.image} alt={user.name || "User"} className="h-10 w-10 rounded-full object-cover" />
+          <Image src={user.image} alt={user.name || "User"} width={40} height={40} className="h-10 w-10 rounded-full object-cover" unoptimized />
         ) : (
           userInitials
         )}

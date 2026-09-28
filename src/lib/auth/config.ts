@@ -11,7 +11,13 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql', // or "mysql", "sqlite"
   }),
-  trustedOrigins: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'https://your-domain.com'],
+  trustedOrigins: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+  ].filter((o): o is string => Boolean(o)),
   emailAndPassword: {
     enabled: true,
     autoSignIn: false, // Don't auto sign in after registration (requires verification/approval)

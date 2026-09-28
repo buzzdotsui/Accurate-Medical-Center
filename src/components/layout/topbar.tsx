@@ -58,10 +58,6 @@ export function Topbar({ user, role }: TopbarProps) {
     router.push("/login");
   };
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const firstName = user?.name ? user.name.split(" ")[0] : "User";
-
   return (
     <header className="h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
       <div className="flex items-center gap-4">

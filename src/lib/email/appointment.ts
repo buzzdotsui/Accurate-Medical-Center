@@ -51,7 +51,7 @@ export async function sendAppointmentEmail(
     ...values.map(([label, value]) => `${label}: ${value}`),
   ].join("\n");
   
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://accurate-medical.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://accuratemedicalcentre.com";
   const logoUrl = `${appUrl}/marketing/images/logo.jpeg`;
   
   const html = `

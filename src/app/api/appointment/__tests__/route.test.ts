@@ -4,6 +4,27 @@ import { NextRequest } from "next/server";
 const checkRateLimitMock = vi.fn();
 const sendAppointmentEmailMock = vi.fn();
 
+const branchFindFirstMock = vi.fn();
+const patientFindFirstMock = vi.fn();
+const patientCreateMock = vi.fn();
+const appointmentCreateMock = vi.fn();
+
+vi.mock("@/lib/db/client", () => ({
+  prisma: {
+    branch: {
+      findFirst: (...args: unknown[]) => branchFindFirstMock(...args),
+      create: vi.fn().mockResolvedValue({ id: "branch-1", code: "MAIN", name: "Main Branch" }),
+    },
+    patient: {
+      findFirst: (...args: unknown[]) => patientFindFirstMock(...args),
+      create: (...args: unknown[]) => patientCreateMock(...args),
+    },
+    appointment: {
+      create: (...args: unknown[]) => appointmentCreateMock(...args),
+    },
+  },
+}));
+
 vi.mock("@/lib/security/rate-limit", () => ({
   checkRateLimit: (...args: unknown[]) => checkRateLimitMock(...args),
 }));
@@ -42,8 +63,17 @@ describe("POST /api/appointment", () => {
   beforeEach(() => {
     checkRateLimitMock.mockReset();
     sendAppointmentEmailMock.mockReset();
+    branchFindFirstMock.mockReset();
+    patientFindFirstMock.mockReset();
+    patientCreateMock.mockReset();
+    appointmentCreateMock.mockReset();
+
     checkRateLimitMock.mockResolvedValue(undefined);
     sendAppointmentEmailMock.mockResolvedValue(undefined);
+    branchFindFirstMock.mockResolvedValue({ id: "branch-1", code: "MAIN", name: "Main Branch" });
+    patientFindFirstMock.mockResolvedValue(null);
+    patientCreateMock.mockResolvedValue({ id: "patient-1" });
+    appointmentCreateMock.mockResolvedValue({ id: "apt-1" });
   });
 
   it("passes a valid appointment payload to the email submission stage", async () => {

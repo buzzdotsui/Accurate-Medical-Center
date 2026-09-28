@@ -83,21 +83,20 @@ export async function POST(request: NextRequest) {
 
   const submissionId = generateAppointmentSubmissionId();
 
-  // ── Step 1: Send email notification (primary — must succeed) ────────────
-  // Email is the hospital's immediate alert. We attempt this first so that
-  // even if the database is not yet initialised, the appointment request is
-  // never silently lost.
+  // ── Step 1: Send email notification (fail-soft) ─────────────────────────────
+  // Email is the hospital's immediate alert. If it fails (e.g. Resend domain
+  // not yet verified, misconfigured key) we log the exact provider error for
+  // ops visibility but never surface it to the patient — the appointment is
+  // still saved to the database and the hospital can retrieve it there.
   try {
     await sendAppointmentEmail(parsed.data, submissionId);
   } catch (emailError) {
-    logger.error("Appointment email failed", {
+    logger.error("Appointment email failed (fail-soft — request still accepted)", {
       error: emailError instanceof Error ? emailError.message : "Unknown error",
+      submissionId,
       ip,
     });
-    if (emailError instanceof ContactEmailConfigurationError) {
-      return error("SERVICE_UNAVAILABLE", "The appointment service is temporarily unavailable. Please call us directly.", 503);
-    }
-    return error("EMAIL_SEND_FAILED", "We could not submit your appointment request right now. Please try again or call us directly.", 502);
+    // Do not return an error response — fall through to DB write and success.
   }
 
   // ── Step 2: Persist to the database (secondary — fail-soft) ─────────────

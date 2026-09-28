@@ -10,7 +10,13 @@ import { Receipt, Loader2, Search, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
 import {
   Dialog,
@@ -66,11 +72,13 @@ export function CreateInvoiceDialog({ open, onOpenChange, onSuccess }: CreateInv
   const [created, setCreated] = useState<{ invoiceId: string; totalAmount: number } | null>(null);
   const loadingPatients = open && patients === null;
 
-  const {
+const {
     register,
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClientCreateInvoiceInput>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,13 +209,22 @@ export function CreateInvoiceDialog({ open, onOpenChange, onSuccess }: CreateInv
                       className="pl-8"
                     />
                   </div>
-                  <Select id="inv-patientId" disabled={isSubmitting || loadingPatients} {...register("patientId")}>
-                    <option value="">{loadingPatients ? "Loading patients…" : "— Select Patient —"}</option>
-                    {(patients ?? []).map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.firstName} {p.lastName} ({p.patientId})
-                      </option>
-                    ))}
+<Select
+                    value={watch("patientId")}
+                    onValueChange={(value) => setValue("patientId", value)}
+                    disabled={isSubmitting || loadingPatients}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingPatients ? "Loading patients…" : "— Select Patient —"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">— Select Patient —</SelectItem>
+                      {(patients ?? []).map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.firstName} {p.lastName} ({p.patientId})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </FormField>

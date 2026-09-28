@@ -8,7 +8,13 @@ import { toast } from "sonner";
 import { Loader2, Save, Monitor, Bell, Globe, Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -115,27 +121,32 @@ export default function SettingsPreferencesPage() {
                 <Label htmlFor="theme">Theme</Label>
                 <Select
                   value={form.watch("theme")}
-                  onChange={(e) => form.setValue("theme", e.target.value as any)}
+                  onValueChange={(value) => form.setValue("theme", value as any)}
                   disabled={updatePreferencesMutation.isPending}
                 >
-                  <option value="system">
-                    <div className="flex items-center gap-2">
-                      <Monitor className="w-4 h-4" />
-                      <span>System Default</span>
-                    </div>
-                  </option>
-                  <option value="light">
-                    <div className="flex items-center gap-2">
-                      <Sun className="w-4 h-4" />
-                      <span>Light</span>
-                    </div>
-                  </option>
-                  <option value="dark">
-                    <div className="flex items-center gap-2">
-                      <Moon className="w-4 h-4" />
-                      <span>Dark</span>
-                    </div>
-                  </option>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="system">
+                      <div className="flex items-center gap-2">
+                        <Monitor className="w-4 h-4" />
+                        <span>System Default</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="light">
+                      <div className="flex items-center gap-2">
+                        <Sun className="w-4 h-4" />
+                        <span>Light</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="dark">
+                      <div className="flex items-center gap-2">
+                        <Moon className="w-4 h-4" />
+                        <span>Dark</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
             </form>
@@ -160,27 +171,37 @@ export default function SettingsPreferencesPage() {
                   <Label htmlFor="language">Language</Label>
                   <Select
                     value={form.watch("language")}
-                    onChange={(e) => form.setValue("language", e.target.value)}
+                    onValueChange={(value) => form.setValue("language", value)}
                     disabled={updatePreferencesMutation.isPending}
                   >
-                    <option value="en">English</option>
-                    <option value="yo">Yoruba</option>
-                    <option value="ig">Igbo</option>
-                    <option value="ha">Hausa</option>
-                    <option value="fr">French</option>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="yo">Yoruba</SelectItem>
+                      <SelectItem value="ig">Igbo</SelectItem>
+                      <SelectItem value="ha">Hausa</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Timezone</Label>
                   <Select
                     value={form.watch("timezone")}
-                    onChange={(e) => form.setValue("timezone", e.target.value)}
+                    onValueChange={(value) => form.setValue("timezone", value)}
                     disabled={updatePreferencesMutation.isPending}
                   >
-                    <option value="Africa/Lagos">West Africa Time (WAT)</option>
-                    <option value="UTC">UTC</option>
-                    <option value="Europe/London">GMT</option>
-                    <option value="America/New_York">Eastern Time</option>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select timezone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Africa/Lagos">West Africa Time (WAT)</SelectItem>
+                      <SelectItem value="UTC">UTC</SelectItem>
+                      <SelectItem value="Europe/London">GMT</SelectItem>
+                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
               </div>

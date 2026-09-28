@@ -9,7 +9,13 @@ import { UserCog, Loader2, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
 import {
   Dialog,
@@ -65,10 +71,12 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
   const [showPassword, setShowPassword] = useState(false);
   const loadingDepts = open && departments === null;
 
-  const {
+const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClientCreateStaffInput>({
     resolver: zodResolver(ClientCreateStaffSchema),
@@ -199,36 +207,54 @@ export function CreateStaffDialog({ open, onOpenChange, onSuccess }: CreateStaff
           </FormField>
 
           <FormField label="Role" htmlFor="staff-role" error={errors.role?.message} required>
-            <Select id="staff-role" disabled={isSubmitting} {...register("role")}>
-              {STAFF_ROLES.filter(
-                (r) =>
-                  r !== ROLES.SUPER_ADMIN &&
-                  // Phase 1 scope (invoice TTI/2026/HMS-P1-002): only core clinical
-                  // and administrative roles are offered. All specialty/finance/
-                  // deferred modules are excluded. Server schema is preserved
-                  // for future phases.
-                  ([
-                    ROLES.ADMIN,
-                    ROLES.DOCTOR,
-                    ROLES.NURSE,
-                    ROLES.RECEPTIONIST,
-                  ] as readonly string[]).includes(r),
-              ).map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABELS[r]}
-                </option>
-              ))}
+            <Select
+              value={watch("role")}
+              onValueChange={(value) => setValue("role", value as "ADMIN" | "DOCTOR" | "NURSE" | "RECEPTIONIST")}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                {STAFF_ROLES.filter(
+                  (r) =>
+                    r !== ROLES.SUPER_ADMIN &&
+                    // Phase 1 scope (invoice TTI/2026/HMS-P1-002): only core clinical
+                    // and administrative roles are offered. All specialty/finance/
+                    // deferred modules are excluded. Server schema is preserved
+                    // for future phases.
+                    ([
+                      ROLES.ADMIN,
+                      ROLES.DOCTOR,
+                      ROLES.NURSE,
+                      ROLES.RECEPTIONIST,
+                    ] as readonly string[]).includes(r),
+                ).map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {ROLE_LABELS[r]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </FormField>
 
-          <FormField label="Department" htmlFor="staff-department" error={errors.departmentId?.message}>
-            <Select id="staff-department" disabled={isSubmitting || loadingDepts} {...register("departmentId")}>
-              <option value="">— No Department —</option>
-              {(departments ?? []).map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
+<FormField label="Department" htmlFor="staff-department" error={errors.departmentId?.message}>
+            <Select
+              value={watch("departmentId")}
+              onValueChange={(value) => setValue("departmentId", value)}
+              disabled={isSubmitting || loadingDepts}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingDepts ? "Loading departments…" : "— No Department —"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">— No Department —</SelectItem>
+                {(departments ?? []).map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </FormField>
 

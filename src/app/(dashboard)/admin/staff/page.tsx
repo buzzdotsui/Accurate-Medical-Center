@@ -15,7 +15,13 @@ import { DataTable, Column } from "@/components/ui/data-table";
 import { UserCog, Search, Users, UserPlus, Edit2, Trash2 } from "lucide-react";
 import { CreateStaffDialog } from "@/components/admin/staff/create-staff-dialog";
 import { ROLE_LABELS, ROLES, type Role } from "@/config/roles";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -379,19 +385,24 @@ export default function AdminStaffPage() {
           <div className="space-y-4 py-2">
             <Select
               value={selectedStaff?.assignedDoctor?.id ?? ""}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              onValueChange={(value) => {
                 if (selectedStaff) {
-                  assignDoctorMutation.mutate({ staffId: selectedStaff.id, assignedDoctorId: e.target.value || null });
+                  assignDoctorMutation.mutate({ staffId: selectedStaff.id, assignedDoctorId: value || null });
                 }
               }}
               disabled={assignDoctorMutation.isPending}
             >
-              <option value="">— Remove Assignment —</option>
-              {availableDoctors.map((doc) => (
-                <option key={doc.id} value={doc.id}>
-                  Dr. {doc.name} ({doc.staffId})
-                </option>
-              ))}
+              <SelectTrigger>
+                <SelectValue placeholder="— Remove Assignment —" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">— Remove Assignment —</SelectItem>
+                {availableDoctors.map((doc) => (
+                  <SelectItem key={doc.id} value={doc.id}>
+                    Dr. {doc.name} ({doc.staffId})
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <DialogFooter>

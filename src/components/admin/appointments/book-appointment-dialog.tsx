@@ -10,7 +10,13 @@ import { CalendarPlus, Loader2, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
 import {
   Dialog,
@@ -62,10 +68,12 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
   const loadingPatients = open && patients === null;
   const loadingDoctors = open && doctors === null;
 
-  const {
+const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClientBookAppointmentInput>({
     resolver: zodResolver(ClientBookAppointmentSchema),
@@ -242,34 +250,44 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
                   className="pl-8"
                 />
               </div>
-              <Select
-                id="appt-patientId"
+<Select
+                value={watch("patientId")}
+                onValueChange={(value) => setValue("patientId", value)}
                 disabled={isSubmitting || loadingPatients}
-                {...register("patientId")}
               >
-                <option value="">
-                  {loadingPatients ? "Loading patients…" : "— Select Patient —"}
-                </option>
-                {(patients ?? []).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.firstName} {p.lastName} ({p.patientId})
-                  </option>
-                ))}
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingPatients ? "Loading patients…" : "— Select Patient —"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— Select Patient —</SelectItem>
+                  {(patients ?? []).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.firstName} {p.lastName} ({p.patientId})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           </FormField>
 
           {/* Doctor */}
-          <FormField label="Doctor / Provider" htmlFor="appt-doctorId" error={errors.doctorId?.message}>
-            <Select id="appt-doctorId" disabled={isSubmitting || loadingDoctors} {...register("doctorId")}>
-              <option value="">
-                {loadingDoctors ? "Loading staff…" : "— No preference —"}
-              </option>
-              {(doctors ?? []).map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.user.name} · {s.department?.name ?? s.user.role}
-                </option>
-              ))}
+<FormField label="Doctor / Provider" htmlFor="appt-doctorId" error={errors.doctorId?.message}>
+            <Select
+              value={watch("doctorId")}
+              onValueChange={(value) => setValue("doctorId", value)}
+              disabled={isSubmitting || loadingDoctors}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingDoctors ? "Loading staff…" : "— No preference —"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">— No preference —</SelectItem>
+                {(doctors ?? []).map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.user.name} · {s.department?.name ?? s.user.role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </FormField>
 
@@ -293,10 +311,19 @@ export function BookAppointmentDialog({ open, onOpenChange, onSuccess }: BookApp
             </FormField>
           </div>
 
-          <FormField label="Appointment Type" htmlFor="appt-type" error={errors.type?.message} required>
-            <Select id="appt-type" disabled={isSubmitting} {...register("type")}>
-              <option value="IN_PERSON">In Person</option>
-              <option value="ONLINE">Online / Telemedicine</option>
+<FormField label="Appointment Type" htmlFor="appt-type" error={errors.type?.message} required>
+            <Select
+              value={watch("type")}
+              onValueChange={(value) => setValue("type", value as "IN_PERSON" | "ONLINE")}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="IN_PERSON">In Person</SelectItem>
+                <SelectItem value="ONLINE">Online / Telemedicine</SelectItem>
+              </SelectContent>
             </Select>
           </FormField>
 

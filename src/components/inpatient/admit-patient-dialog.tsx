@@ -10,7 +10,13 @@ import { BedDouble, Loader2, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/ui/form-field";
 import {
@@ -88,6 +94,8 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<AdmitPatientClientInput>({
     resolver: zodResolver(AdmitPatientClientSchema),
@@ -227,56 +235,65 @@ export function AdmitPatientDialog({ open, onOpenChange, onSuccess }: AdmitPatie
                   className="pl-8"
                 />
               </div>
-              <Select
-                id="admit-patientId"
+<Select
+                value={watch("patientId")}
+                onValueChange={(value) => setValue("patientId", value)}
                 disabled={isSubmitting || loadingPatients}
-                {...register("patientId")}
               >
-                <option value="">
-                  {loadingPatients ? "Loading patients…" : "— Select Patient —"}
-                </option>
-                {(patients ?? []).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.firstName} {p.lastName} ({p.patientId})
-                  </option>
-                ))}
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingPatients ? "Loading patients…" : "— Select Patient —"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">— Select Patient —</SelectItem>
+                  {(patients ?? []).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.firstName} {p.lastName} ({p.patientId})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           </FormField>
 
           {/* Doctor */}
-          <FormField label="Admitting Doctor" htmlFor="admit-doctorId" error={errors.doctorId?.message} required>
-            <Select id="admit-doctorId" disabled={isSubmitting || loadingDoctors} {...register("doctorId")}>
-              <option value="">
-                {loadingDoctors
-                  ? "Loading doctors…"
-                  : (doctors ?? []).length === 0
-                  ? "No doctors available"
-                  : "— Select Doctor —"}
-              </option>
-              {(doctors ?? []).map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.user.name} {d.department?.name ? `· ${d.department.name}` : ""}
-                </option>
-              ))}
+<FormField label="Admitting Doctor" htmlFor="admit-doctorId" error={errors.doctorId?.message} required>
+            <Select
+              value={watch("doctorId")}
+              onValueChange={(value) => setValue("doctorId", value)}
+              disabled={isSubmitting || loadingDoctors}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingDoctors ? "Loading doctors…" : (doctors ?? []).length === 0 ? "No doctors available" : "— Select Doctor —"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">— Select Doctor —</SelectItem>
+                {(doctors ?? []).map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.user.name} {d.department?.name ? `· ${d.department.name}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </FormField>
 
           {/* Bed */}
-          <FormField label="Bed" htmlFor="admit-bedId" error={errors.bedId?.message} required>
-            <Select id="admit-bedId" disabled={isSubmitting || loadingBeds} {...register("bedId")}>
-              <option value="">
-                {loadingBeds
-                  ? "Loading beds…"
-                  : (availableBeds ?? []).length === 0
-                  ? "No available beds"
-                  : "— Select Bed —"}
-              </option>
-              {(availableBeds ?? []).map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.label}
-                </option>
-              ))}
+<FormField label="Bed" htmlFor="admit-bedId" error={errors.bedId?.message} required>
+            <Select
+              value={watch("bedId")}
+              onValueChange={(value) => setValue("bedId", value)}
+              disabled={isSubmitting || loadingBeds}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={loadingBeds ? "Loading beds…" : (availableBeds ?? []).length === 0 ? "No available beds" : "— Select Bed —"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">— Select Bed —</SelectItem>
+                {(availableBeds ?? []).map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    {b.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </FormField>
 

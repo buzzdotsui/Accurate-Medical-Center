@@ -9,7 +9,13 @@ import { UserPlus, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
 import {
   Dialog,
@@ -51,6 +57,8 @@ export function RegisterPatientDialog({ open, onOpenChange, onSuccess }: Registe
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClientRegisterPatientInput>({
     resolver: zodResolver(ClientRegisterPatientSchema),
@@ -216,21 +224,38 @@ export function RegisterPatientDialog({ open, onOpenChange, onSuccess }: Registe
                   />
                 </FormField>
                 <FormField label="Gender" htmlFor="pat-gender" error={errors.gender?.message}>
-                  <Select id="pat-gender" disabled={isSubmitting} {...register("gender")}>
-                    <option value="">— Select —</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
+                  <Select
+                    value={watch("gender")}
+                    onValueChange={(value) => setValue("gender", value as "MALE" | "FEMALE" | "OTHER" | undefined)}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="— Select —" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MALE">Male</SelectItem>
+                      <SelectItem value="FEMALE">Female</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
+                    </SelectContent>
                   </Select>
                 </FormField>
               </div>
 
               <FormField label="Blood Group" htmlFor="pat-bloodGroup" error={errors.bloodGroup?.message}>
-                <Select id="pat-bloodGroup" disabled={isSubmitting} {...register("bloodGroup")}>
-                  <option value="">— Unknown —</option>
-                  {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
+                <Select
+                  value={watch("bloodGroup")}
+                  onValueChange={(value) => setValue("bloodGroup", value as "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | undefined)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="— Unknown —" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">— Unknown —</SelectItem>
+                    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((g) => (
+                      <SelectItem key={g} value={g}>{g}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </FormField>
 

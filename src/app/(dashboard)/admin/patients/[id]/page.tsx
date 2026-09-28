@@ -29,7 +29,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { FormField } from "@/components/ui/form-field";
 import { DataTable, Column } from "@/components/ui/data-table";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -489,11 +495,18 @@ export default function AdminPatientDetailPage() {
                     </FormField>
                   </div>
                   <FormField label="Gender" htmlFor="edit-gender">
-                    <Select id="edit-gender" {...form.register("gender")}>
-                      <option value="">— Select —</option>
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
+                    <Select
+                      value={form.watch("gender")}
+                      onValueChange={(value) => form.setValue("gender", value as "MALE" | "FEMALE" | "OTHER" | undefined)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="— Select —" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MALE">Male</SelectItem>
+                        <SelectItem value="FEMALE">Female</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
+                      </SelectContent>
                     </Select>
                   </FormField>
                   <FormField label="Date of Birth" htmlFor="edit-dob">
@@ -501,19 +514,35 @@ export default function AdminPatientDetailPage() {
                   </FormField>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField label="Blood Group" htmlFor="edit-bloodGroup">
-                      <Select id="edit-bloodGroup" {...form.register("bloodGroup")}>
-                        <option value="">— Unknown —</option>
-                        {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((g) => (
-                          <option key={g} value={g}>{g}</option>
-                        ))}
+                      <Select
+                        value={form.watch("bloodGroup")}
+                        onValueChange={(value) => form.setValue("bloodGroup", value as "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | undefined)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="— Unknown —" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">— Unknown —</SelectItem>
+                          {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((g) => (
+                            <SelectItem key={g} value={g}>{g}</SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                     </FormField>
                     <FormField label="Genotype" htmlFor="edit-genotype">
-                      <Select id="edit-genotype" {...form.register("genotype")}>
-                        <option value="">— Unknown —</option>
-                        {["AA", "AS", "SS", "AC", "SC"].map((g) => (
-                          <option key={g} value={g}>{g}</option>
-                        ))}
+                      <Select
+                        value={form.watch("genotype")}
+                        onValueChange={(value) => form.setValue("genotype", value as "AA" | "AS" | "SS" | "AC" | "SC" | undefined)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="— Unknown —" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">— Unknown —</SelectItem>
+                          {["AA", "AS", "SS", "AC", "SC"].map((g) => (
+                            <SelectItem key={g} value={g}>{g}</SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                     </FormField>
                   </div>

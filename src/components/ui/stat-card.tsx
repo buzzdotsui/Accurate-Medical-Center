@@ -27,7 +27,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "group relative flex flex-col bg-white border border-black/[0.04] p-5 rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5",
+        "group relative flex flex-col bg-white border border-black/4 p-5 rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5",
         className
       )}
       {...props}
@@ -37,7 +37,7 @@ export function StatCard({
           {title}
         </h3>
         {Icon && (
-          <div className="h-10 w-10 rounded-full bg-black/[0.03] flex items-center justify-center transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+          <div className="h-10 w-10 rounded-full bg-black/3 flex items-center justify-center transition-colors group-hover:bg-primary/10 group-hover:text-primary">
             <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
         )}

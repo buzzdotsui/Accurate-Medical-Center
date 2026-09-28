@@ -39,7 +39,7 @@ export function StaffProfileSheet({ staffId, onClose }: StaffProfileSheetProps) 
 
   return (
     <Sheet open={!!staffId} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="sm:max-w-md w-full bg-white/90 backdrop-blur-xl border-l border-black/[0.04] p-0 overflow-y-auto">
+      <SheetContent className="sm:max-w-md w-full bg-white/90 backdrop-blur-xl border-l border-black/4 p-0 overflow-y-auto">
         {isLoading ? (
           <div className="p-8 space-y-6">
             <Skeleton className="w-24 h-24 rounded-2xl" />
@@ -49,7 +49,7 @@ export function StaffProfileSheet({ staffId, onClose }: StaffProfileSheetProps) 
         ) : data ? (
           <div className="flex flex-col">
             {/* Header */}
-            <div className="bg-gradient-to-br from-primary/20 to-primary/5 px-8 pt-8 pb-6 flex flex-col items-center text-center">
+            <div className="bg-linear-to-br from-primary/20 to-primary/5 px-8 pt-8 pb-6 flex flex-col items-center text-center">
               {data.user.image ? (
                 <Image
                   src={data.user.image}
@@ -103,7 +103,7 @@ export function StaffProfileSheet({ staffId, onClose }: StaffProfileSheetProps) 
               {/* Work Details */}
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Work Details</h4>
-                <div className="bg-black/[0.02] rounded-xl border border-black/[0.04] divide-y divide-black/[0.04]">
+                <div className="bg-black/2 rounded-xl border border-black/4 divide-y divide-black/4">
                   <div className="flex items-center justify-between px-4 py-3 text-sm">
                     <span className="text-muted-foreground">Department</span>
                     <span className="font-medium">{data.department?.name || "—"}</span>
@@ -118,7 +118,7 @@ export function StaffProfileSheet({ staffId, onClose }: StaffProfileSheetProps) 
               {/* Credentials & Status */}
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Credentials & Status</h4>
-                <div className="bg-black/[0.02] rounded-xl border border-black/[0.04] divide-y divide-black/[0.04]">
+                <div className="bg-black/2 rounded-xl border border-black/4 divide-y divide-black/4">
                   <div className="flex items-center justify-between px-4 py-3 text-sm">
                     <span className="text-muted-foreground">License No.</span>
                     <span className="font-medium font-mono">{data.licenseNumber || "N/A"}</span>
